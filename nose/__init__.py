@@ -3,7 +3,7 @@ from nose.core import collector, main, run, run_exit, runmodule
 from nose.tools import with_setup
 
 __author__ = 'Jason Pellerin'
-__versioninfo__ = (1, 3, 8)
+__versioninfo__ = (1, 3, 9)
 __version__ = '.'.join(map(str, __versioninfo__))
 
 __all__ = [

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?><testsuite name="nosetests" tests="0" errors="0" failures="0" skip="0"><testcase classname="nose.failure.Failure" name="runTest" time="0.002"><<class 'type'> type="builtins.TypeError" message="'ImportError' object is not callable"><![CDATA[Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/unittest/case.py", line 60, in testPartExecutor
+    yield
+  File "/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/unittest/case.py", line 676, in run
+    self._callTestMethod(testMethod)
+  File "/Library/Frameworks/Python.framework/Versions/3.8/lib/python3.8/unittest/case.py", line 633, in _callTestMethod
+    method()
+  File "/Users/jayn/PycharmProjects/env/lib/python3.8/site-packages/nose/failure.py", line 40, in runTest
+    raise self.exc_val(None).with_traceback(self.tb)
+TypeError: 'ImportError' object is not callable
+]]></<class 'type'>></testcase></testsuite>
