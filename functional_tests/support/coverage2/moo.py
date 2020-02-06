@@ -1,0 +1,3 @@
+def moo():
+    print
+    'covered'
