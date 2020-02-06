@@ -6,10 +6,11 @@ py_vers_tag = '-%s.%s' % sys.version_info[:2]
 
 test_dirs = ['functional_tests', 'unit_tests', os.path.join('doc', 'doc_tests'), 'nose']
 
-if sys.version_info >= (3,):
+if sys.version_info >= (3, 6):
     try:
         import setuptools
     except ImportError:
+        import setuptools
         from distribute_setup import use_setuptools
 
         use_setuptools()
@@ -74,7 +75,11 @@ try:
         easy_install.write_script = wrap_write_script
 
 except ImportError:
+    import re
+    from setuptools.command.easy_install import easy_install
     from distutils.core import setup
+    from setup3lib import setup
+    from setuptools import find_packages
 
     addl_args = dict(
         packages=['nose', 'nose.ext', 'nose.plugins', 'nose.sphinx',
@@ -86,10 +91,11 @@ setup(
     name='nose-py3',
     version=VERSION,
     author='Jason Pellerin',
+    author_email='jpellerin+nose@gmail.com',
     maintainer='atsb',
-    description=('nose extends unittest to make testing easier'),
-    long_description= \
-        """nose extends the test loading and running features of unittest, making
+    description='nose extends unittest to make testing easier - python3 version',
+    long_description=
+    """nose extends the test loading and running features of unittest, making
         it easier to write, find and run tests.
     
         By default, nose will run tests in files or directories under the current
@@ -107,11 +113,11 @@ setup(
     
         If you have recently reported a bug marked as fixed, or have a craving for
         the very latest, you may want the development version instead:
-        https://github.com/nose-devs/nose/tarball/master#egg=nose-dev
+        https://github.com/atsb/nose-py3
         """,
     license='GNU LGPL',
     keywords='test unittest doctest automatic discovery',
-    url='http://readthedocs.org/docs/nose/',
+    url='https://github.com/atsb/nose-py3',
     data_files=[('man/man1', ['nosetests.1'])],
     package_data={'': ['*.txt',
                        'examples/*.py',
@@ -125,5 +131,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Testing'
     ],
+    python_requires='>=3.6',
     **addl_args
 )
