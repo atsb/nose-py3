@@ -11,7 +11,6 @@ reporting.
 import logging
 
 try:
-    # 2.7+
     from unittest.runner import _TextTestResult
 except ImportError:
     from unittest import _TextTestResult
@@ -46,7 +45,6 @@ class TextTestResult(_TextTestResult):
         _TextTestResult.__init__(self, stream, descriptions, verbosity)
 
     def addSkip(self, test, reason):
-        # 2.7 skip compat
         from nose.plugins.skip import SkipTest
         if SkipTest in self.errorClasses:
             storage, label, isfail = self.errorClasses[SkipTest]
@@ -62,12 +60,8 @@ class TextTestResult(_TextTestResult):
         try:
             exc_info = self._exc_info_to_string(err, test)
         except TypeError:
-            # 2.3 compat
             exc_info = self._exc_info_to_string(err)
         for cls, (storage, label, isfail) in self.errorClasses.items():
-            # if 'Skip' in cls.__name__ or 'Skip' in ec.__name__:
-            #    from nose.tools import set_trace
-            #    set_trace()
             if isclass(ec) and issubclass(ec, cls):
                 if isfail:
                     test.passed = False
@@ -144,7 +138,7 @@ class TextTestResult(_TextTestResult):
             write("OK")
         items = summary.items()
         if items:
-            items.sort()
+            sorted(items)
             write(" (")
             write(", ".join(["%s=%s" % (label, count) for
                              label, count in items]))
@@ -180,11 +174,9 @@ class TextTestResult(_TextTestResult):
             self.stream.write('E')
 
     def _exc_info_to_string(self, err, test=None):
-        # 2.7 skip compat
         from nose.plugins.skip import SkipTest
         if isclass(err[0]) and issubclass(err[0], SkipTest):
             return str(err[1])
-        # 2.3/2.4 -- 2.4 passes test, 2.3 does not
         try:
             return _TextTestResult._exc_info_to_string(self, err, test)
         except TypeError:

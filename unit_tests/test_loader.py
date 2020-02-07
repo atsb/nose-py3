@@ -345,8 +345,7 @@ class TestTestLoader(unittest.TestCase):
         assert filter(lambda t: isinstance(t, nose.case.Test), tests[0])
 
     def test_load_from_name_module_func(self):
-        print
-        "load from name module func"
+        print("load from name module func")
         l = self.l
         suite = l.loadTestsFromName('test_module:test_func')
         tests = [t for t in suite]

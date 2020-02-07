@@ -155,12 +155,10 @@ class ResultProxy(object):
             self.shouldStop = True
 
     def addSkip(self, test, reason):
-        # 2.7 compat shim
         from nose.plugins.skip import SkipTest
         self.assertMyTest(test)
         plugins = self.plugins
         if not isinstance(reason, Exception):
-            # for Python 3.2+
             reason = Exception(reason)
         plugins.addError(self.test, (SkipTest, reason, None))
         self.result.addSkip(self.test, reason)

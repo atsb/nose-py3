@@ -7,23 +7,7 @@ is enabled by default but may be disabled with the ``--no-skip`` option.
 """
 
 from nose.plugins.errorclass import ErrorClass, ErrorClassPlugin
-
-# on SkipTest:
-#  - unittest SkipTest is first preference, but it's only available
-#    for >= 2.7
-#  - unittest2 SkipTest is second preference for older pythons.  This
-#    mirrors logic for choosing SkipTest exception in testtools
-#  - if none of the above, provide custom class
-try:
-    from unittest.case import SkipTest
-except ImportError:
-    try:
-        from unittest2.case import SkipTest
-    except ImportError:
-        class SkipTest(Exception):
-            """Raise this exception to mark a test as skipped.
-            """
-            pass
+from unittest.case import SkipTest
 
 
 class Skip(ErrorClassPlugin):
