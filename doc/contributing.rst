@@ -9,7 +9,7 @@ Get the code!
 
 Start by getting a local working copy of nose from github::
 
-  git clone https://github.com/nose-devs/nose
+  git clone https://github.com/atsb/nose-py3
 
 If you plan to submit changes back to the core repository, you should set up a
 public fork of your own somewhere (`GitHub <http://github.com/>`__ is a good
@@ -25,18 +25,11 @@ nose's test suite, but you should, because tox makes it easy to run
 all tests on all supported python versions. You'll also need python
 2.4, 2.5, 2.6, 2.7, 3.1 and jython installed somewhere in your $PATH.
 
-Discuss
--------
-
-Join the `nose developer list
-<http://groups.google.com/group/nose-dev>`__ at google groups. It's
-low-traffic and mostly signal.
-
 What to work on?
 ----------------
 
 You can find a list of open issues at nose's `issue tracker
-<http://github.com/nose-devs/nose/issues>`__. If you'd like to
+<https://github.com/atsb/nose-py3/issues>`__. If you'd like to
 work on an issue, leave a comment on the issue detailing how you plan
 to fix it, or simply submit a pull request.
 

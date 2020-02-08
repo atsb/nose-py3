@@ -3,15 +3,6 @@ You can adapt this file completely to your liking, but it should at least
 contain the root `toctree` directive.
 
 
-Note to Users
-=============
-
-Nose has been in maintenance mode for the past several years and will likely
-cease without a new person/team to take over maintainership.  New projects
-should consider using `Nose2 <https://github.com/nose-devs/nose2>`_, `py.test
-<http://pytest.org/>`_, or just plain unittest/unittest2.
-
-
 Installation and quick start
 ============================
 
@@ -20,11 +11,11 @@ or using sudo.*
 
 Install nose using setuptools/distribute::
 
-  easy_install nose
+  easy_install nose-py3
 
 Or pip::
 
-  pip install nose
+  pip install nose-py3
 
 Or, if you don't have setuptools/distribute installed, use the download
 link at right to download the source package, and install it in the
@@ -64,10 +55,8 @@ or visit the :doc:`usage documentation <usage>`.
 Python3
 =======
 
-nose supports python3. Building from source on python3 requires
-`distribute <http://packages.python.org/distribute/>`_. If you don't
-have distribute installed, ``python3 setup.py install`` will install
-it via distribute's bootstrap script.
+nose supports python3 by default, the code is converted and will no longer work on
+Python2, simply build it.
 
 Additionally, if your project is using `2to3
 <http://docs.python.org/library/2to3.html>`_, ``python3 setup.py nosetests``
