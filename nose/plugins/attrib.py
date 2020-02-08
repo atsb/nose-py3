@@ -102,7 +102,6 @@ Examples using the ``-A`` and ``--eval-attr`` options:
 """
 import logging
 import sys
-
 from nose.plugins.base import Plugin
 from nose.util import tolist
 
@@ -118,7 +117,7 @@ def attr(*args, **kwargs):
     def wrap_ob(ob):
         for name in args:
             setattr(ob, name, True)
-        for name, value in kwargs.iteritems():
+        for name, value in kwargs.items():
             setattr(ob, name, value)
         return ob
 

@@ -99,7 +99,7 @@ class PluginProxy(object):
         meth = getattr(plugin, call, None)
         if meth is not None:
             if call == 'loadTestsFromModule' and \
-                    len(inspect.getargspec(meth)[0]) == 2:
+                    len(inspect.getfullargspec(meth)[0]) == 2:
                 orig_meth = meth
                 meth = lambda module, path, **kwargs: orig_meth(module)
             self.plugins.append((plugin, meth))

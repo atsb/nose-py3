@@ -5,8 +5,6 @@ import inspect
 import os
 import sys
 import traceback
-import types
-from filecmp import cmp
 
 from numpy import unicode
 
@@ -15,7 +13,7 @@ import nose.util
 __all__ = ['make_instancemethod', 'cmp_to_key', 'sort_list', 'ClassType',
            'TypeType', 'UNICODE_STRINGS', 'unbound_method', 'ismethod',
            'bytes_', 'is_base_exception', 'force_unicode', 'exc_to_unicode',
-           'format_exception']
+           'format_exception', 'isgenerator']
 
 # In Python 3.x, all strings are unicode (the call to 'unicode()' in the 2.x
 # source will be replaced with 'str()' when running 2to3, so this test will
@@ -58,15 +56,9 @@ def cmp_to_key(mycmp):
 
 # Python 2.3 also does not support list-sorting by key, so we need to convert
 # keys to cmp functions if we're running on old Python..
-if sys.version_info < (2, 4):
-    def sort_list(l, key, reverse=False):
-        if reverse:
-            return l.sort(lambda a, b: cmp(key(b), key(a)))
-        else:
-            return l.sort(lambda a, b: cmp(key(a), key(b)))
-else:
-    def sort_list(l, key, reverse=False):
-        return l.sort(key=key, reverse=reverse)
+def sort_list(l, key, reverse=False):
+    return l.sort(key=key, reverse=reverse)
+
 
 # In Python 3.x, all objects are "new style" objects descended from 'type', and
 # thus types.ClassType and types.TypeType don't exist anymore.  For
@@ -109,6 +101,10 @@ class UnboundMethod:
         return '<unbound method %s.%s>' % (self.__self__.cls.__name__,
                                            self._func.__name__)
 
+    @property
+    def func(self):
+        return self._func
+
 
 class UnboundSelf:
     def __init__(self, cls):
@@ -145,54 +141,21 @@ else:
     def bytes_(s, encoding=None):
         return str(s)
 
-if sys.version_info[:2] >= (2, 6):
-    def isgenerator(o):
-        if isinstance(o, UnboundMethod):
-            o = o._func
+
+def isgenerator(o):
+    if isinstance(o, UnboundMethod):
+        o = o.func
         return inspect.isgeneratorfunction(o) or inspect.isgenerator(o)
-else:
-    try:
-        from compiler.consts import CO_GENERATOR
-    except ImportError:
-        # IronPython doesn't have a complier module
-        CO_GENERATOR = 0x20
 
-
-    def isgenerator(func):
-        try:
-            return func.func_code.co_flags & CO_GENERATOR != 0
-        except AttributeError:
-            return False
 
 # Make a function to help check if an exception is derived from BaseException.
 # In Python 2.4, we just use Exception instead.
-if sys.version_info[:2] < (2, 5):
-    def is_base_exception(exc):
-        return isinstance(exc, Exception)
-else:
-    def is_base_exception(exc):
-        return isinstance(exc, BaseException)
+def is_base_exception(exc):
+    return isinstance(exc, BaseException)
 
-if sys.version_info[:2] < (3, 0):
-    def exc_to_unicode(ev, encoding='utf-8'):
-        if is_base_exception(ev):
-            if not hasattr(ev, '__unicode__'):
-                # 2.5-
-                if not hasattr(ev, 'message'):
-                    # 2.4
-                    msg = len(ev.args) and ev.args[0] or ''
-                else:
-                    msg = ev.message
-                msg = force_unicode(msg)
-                clsname = force_unicode(ev.__class__.__name__)
-                ev = u'%s: %s' % (clsname, msg)
-        elif not isinstance(ev, unicode):
-            ev = repr(ev)
 
-        return force_unicode(ev)
-else:
-    def exc_to_unicode(ev, encoding='utf-8'):
-        return str(ev)
+def exc_to_unicode(ev):
+    return str(ev)
 
 
 def format_exception(exc_info, encoding='UTF-8'):

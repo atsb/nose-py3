@@ -19,15 +19,7 @@ log = logging.getLogger('nose')
 ident_re = re.compile(r'^[A-Za-z_][A-Za-z0-9_.]*$')
 class_types = (ClassType, TypeType)
 skip_pattern = r"(?:\.svn)|(?:[^.]+\.py[co])|(?:.*~)|(?:.*\$py\.class)|(?:__pycache__)"
-
-try:
-    set()
-    set = set  # make from nose.util import set happy
-except NameError:
-    try:
-        from sets import Set as set
-    except ImportError:
-        pass
+set = set
 
 
 def ls_tree(dir_path="",
@@ -458,14 +450,14 @@ def try_run(obj, names):
                 # py.test compatibility
                 if isinstance(func, types.FunctionType):
                     args, varargs, varkw, defaults = \
-                        inspect.getargspec(func)
+                        inspect.getfullargspec(func)
                 else:
                     # Not a function. If it's callable, call it anyway
                     if hasattr(func, '__call__') and not inspect.ismethod(func):
                         func = func.__call__
                     try:
                         args, varargs, varkw, defaults = \
-                            inspect.getargspec(func)
+                            inspect.getfullargspec(func)
                         args.pop(0)  # pop the self off
                     except TypeError:
                         raise TypeError("Attribute %s of %r is not a python "

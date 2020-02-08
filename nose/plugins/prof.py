@@ -9,12 +9,7 @@ more details on the various output options.
 
 .. _hotshot documentation: http://docs.python.org/library/hotshot.html
 """
-
-try:
-    import hotshot
-    from hotshot import stats
-except ImportError:
-    hotshot, stats = None, None
+import cProfile
 import logging
 import os
 import sys
@@ -57,7 +52,7 @@ class Profile(Plugin):
                                "pstats.Stats for details")
 
     def available(cls):
-        return hotshot is not None
+        return cProfile is not None
 
     available = classmethod(available)
 
@@ -67,7 +62,7 @@ class Profile(Plugin):
         if not self.available():
             return
         self._create_pfile()
-        self.prof = hotshot.Profile(self.pfile)
+        self.prof = cProfile.Profile(self.pfile)
 
     def configure(self, options, conf):
         """Configure plugin.
@@ -104,9 +99,9 @@ class Profile(Plugin):
         """Output profiler report.
         """
         log.debug('printing profiler report')
-        self.prof.close()
-        prof_stats = stats.load(self.pfile)
-        prof_stats.sort_stats(self.sort)
+        self.prof.disable()
+        prof_stats = cProfile.Profile(self.pfile)
+        prof_stats.print_stats(self.sort)
 
         # 2.5 has completely different stream handling from 2.4 and earlier.
         # Before 2.5, stats objects have no stream attribute; in 2.5 and later
@@ -136,7 +131,7 @@ class Profile(Plugin):
         if not self.available():
             return
         try:
-            self.prof.close()
+            self.prof.disable()
         except AttributeError:
             # TODO: is this trying to catch just the case where not
             # hasattr(self.prof, "close")?  If so, the function call should be

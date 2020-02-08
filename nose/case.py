@@ -77,12 +77,12 @@ class Test(unittest.TestCase):
         """Extract exception info.
         """
         exc, exv, tb = sys.exc_info()
-        return (exc, exv, tb)
+        return exc, exv, tb
 
     def id(self):
         """Get a short(er) description of the test
         """
-        return self.test.id()
+        return self.test()
 
     def address(self):
         """Return a round-trip name for this test, a name that can be
@@ -90,14 +90,14 @@ class Test(unittest.TestCase):
         plugin configuration) result in the loading of this test.
         """
         if hasattr(self.test, 'address'):
-            return self.test.address()
+            return self.test()
         else:
             # not a nose case
             return test_address(self.test)
 
     def _context(self):
         try:
-            return self.test.context
+            return self.test
         except AttributeError:
             pass
         try:
@@ -167,15 +167,6 @@ class Test(unittest.TestCase):
                     test._TestCase__testMethodDoc.strip()
             except AttributeError:
                 pass
-        # 2.7 compat: shortDescription() always returns something
-        # which is a change from 2.6 and below, and breaks the
-        # testName plugin call.
-        try:
-            desc = self.test.shortDescription()
-        except Exception:
-            # this is probably caused by a problem in test.__str__() and is
-            # only triggered by python 3.1's unittest!
-            pass
         try:
             if desc == str(self.test):
                 return

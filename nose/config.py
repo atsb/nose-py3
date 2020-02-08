@@ -82,7 +82,7 @@ class ConfiguredDefaultsOptionParser(object):
         except AttributeError:
             filename = '<???>'
         try:
-            cfg.readfp(fh)
+            cfg.read_file(fh)
         except configparser.Error as exc:
             raise ConfigError("Error reading config file %r: %s" %
                               (filename, str(exc)))

@@ -401,7 +401,7 @@ class MultiProcessTestRunner(TextTestRunner):
                         try:
                             tasks.remove(addr)
                         except ValueError:
-                            log.warn('worker %s failed to remove from tasks: %s',
+                            log.warning('worker %s failed to remove from tasks: %s',
                                      iworker, addr)
                         total_tasks += len(newtask_addrs)
                         tasks.extend(newtask_addrs)
