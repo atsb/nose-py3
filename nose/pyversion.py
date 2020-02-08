@@ -57,7 +57,8 @@ def cmp_to_key(mycmp):
 # Python 2.3 also does not support list-sorting by key, so we need to convert
 # keys to cmp functions if we're running on old Python..
 def sort_list(l, key, reverse=False):
-    return l.sort(key=key, reverse=reverse)
+    sorted_list = sorted(l, key=key, reverse=reverse)
+    return sorted_list
 
 
 # In Python 3.x, all objects are "new style" objects descended from 'type', and
