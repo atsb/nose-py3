@@ -21,7 +21,7 @@ class TestErrorClassWithStringException(unittest.TestCase):
         warnings.filterwarnings(action='ignore', category=DeprecationWarning)
         try:
 
-            raise "oh no!"
+            raise Exception("oh no!")
         except:
             exc = sys.exc_info()
 

@@ -93,7 +93,7 @@ class TestTee(unittest.TestCase):
         l = Log(DEBUG)
         try:
             l.warn('Test')
-        except Exception, e:
+        except Exception as e:
             self.fail(
                 "Exception raised while writing to distutils.log: %s" % (e,))
 
@@ -158,8 +158,7 @@ class TestXMLOutputWithXMLAndPrefix(BaseTestXMLOutputWithXML):
         self.x.addSuccess(test, (None, None, None))
 
         result = self.get_xml_report()
-        print
-        result
+        print(result)
 
         if self.ET:
             tree = self.ET.fromstring(result)
@@ -209,8 +208,7 @@ class TestXMLOutputWithXML(BaseTestXMLOutputWithXML):
         self.x.addFailure(test, some_err)
 
         result = self.get_xml_report()
-        print
-        result
+        print(result)
 
         if self.ET:
             tree = self.ET.fromstring(result)
@@ -253,8 +251,7 @@ class TestXMLOutputWithXML(BaseTestXMLOutputWithXML):
         self.x.addFailure(test, some_err)
 
         result = self.get_xml_report()
-        print
-        result
+        print(result)
 
         if self.ET:
             tree = self.ET.fromstring(result)
@@ -278,8 +275,7 @@ class TestXMLOutputWithXML(BaseTestXMLOutputWithXML):
         self.x.addError(test, some_err)
 
         result = self.get_xml_report()
-        print
-        result
+        print(result)
 
         if self.ET:
             tree = self.ET.fromstring(result)
@@ -320,8 +316,7 @@ class TestXMLOutputWithXML(BaseTestXMLOutputWithXML):
             some_err = sys.exc_info()
         self.x.addError(test, some_err)
         result = self.get_xml_report()
-        print
-        repr(result)
+        print(repr(result))
         if self.ET:
             tree = self.ET.fromstring(result)
             tc = tree.find("testcase")
@@ -350,8 +345,7 @@ class TestXMLOutputWithXML(BaseTestXMLOutputWithXML):
         self.x.addError(test, some_err)
 
         result = self.get_xml_report()
-        print
-        result
+        print(result)
 
         if self.ET:
             tree = self.ET.fromstring(result)
@@ -370,8 +364,7 @@ class TestXMLOutputWithXML(BaseTestXMLOutputWithXML):
         self.x.addSuccess(test, (None, None, None))
 
         result = self.get_xml_report()
-        print
-        result
+        print(result)
 
         if self.ET:
             tree = self.ET.fromstring(result)
@@ -400,8 +393,7 @@ class TestXMLOutputWithXML(BaseTestXMLOutputWithXML):
         self.x.addSuccess(test, (None, None, None))
 
         result = self.get_xml_report()
-        print
-        result
+        print(result)
 
         if self.ET:
             tree = self.ET.fromstring(result)

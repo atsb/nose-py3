@@ -30,11 +30,7 @@ class TestCoveragePlugin(object):
 
     def test_cover_options_config_file(self):
         def get_sys_info(cov_inst):
-            # Older coverage uses sysinfo, while newer coverage uses sys_info.
-            if hasattr(cov_inst, 'sysinfo'):
-                return cov_inst.sysinfo()
-            else:
-                return cov_inst.sys_info()
+            return cov_inst.sys_info()
 
         def get_config_files(cov_info):
             cov_info = dict(cov_info)

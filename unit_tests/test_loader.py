@@ -192,14 +192,13 @@ def mock_listdir(path):
 
 
 def mock_isdir(path):
-    print
-    "is dir '%s'?" % path
+    print("is dir '%s'?" % path)
     paths = map(safepath, [
         '/a/dir/path', '/package',
         '/package/subpackage', '/sort/lib',
         '/sort/src', '/sort/a_test',
         '/sort/test', '/sort'])
-    paths = paths + map(os.path.abspath, paths)
+    paths = map(os.path.abspath, paths)
     if path in paths:
         return True
     return False
@@ -212,13 +211,12 @@ def mock_isfile(path):
 
 
 def mock_exists(path):
-    print
-    "exists '%s'?" % path
+    print("exists '%s'?" % path)
     paths = map(safepath, [
         '/package', '/package/__init__.py', '/package/subpackage',
         '/package/subpackage/__init__.py'
     ])
-    paths = paths + map(os.path.abspath, paths)
+    paths = map(os.path.abspath, paths)
     return path in paths
 
 

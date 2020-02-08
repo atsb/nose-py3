@@ -6,12 +6,12 @@ warnings.filterwarnings('ignore', category=DeprecationWarning,
 
 
 def test_string_exc():
-    raise "string exception"
+    raise Exception("string exception")
 
 
 class TestStringExceptionInSetup(unittest.TestCase):
     def setUp(self):
-        raise "string exception in setup"
+        raise Exception("string exception in setup")
 
     def testNothing(self):
         pass
@@ -19,7 +19,7 @@ class TestStringExceptionInSetup(unittest.TestCase):
 
 class TestStringExceptionInTeardown(unittest.TestCase):
     def tearDown(self):
-        raise "string exception in teardown"
+        raise Exception("string exception in teardown")
 
     def testNothing(self):
         pass
@@ -27,4 +27,4 @@ class TestStringExceptionInTeardown(unittest.TestCase):
 
 class TestStringExceptionInClass(unittest.TestCase):
     def testStringExc(self):
-        raise "string exception in test"
+        raise Exception("string exception in test")

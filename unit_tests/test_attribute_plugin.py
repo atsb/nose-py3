@@ -40,7 +40,7 @@ def test_mixed():
 def test_class_attrs():
     # @attr('slow', 'net', role='integration')
     class MyTest:
-        def setUp():
+        def setUp(self):
             pass
 
         def test_one(self):

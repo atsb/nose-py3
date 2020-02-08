@@ -94,10 +94,8 @@ class TestMultiProcessTestRunner(unittest.TestCase):
         r = multiprocess.MultiProcessTestRunner()
         l = TestLoader()
         tests = list(r.nextBatch(l.makeTest(Tg)))
-        print
-        tests
-        print[r.address(t)
-        for t in tests]
+        print(tests)
+        print([r.address(t) for t in tests])
         self.assertEqual(len(tests), 1)
 
     def test_next_batch_can_split_set(self):
@@ -124,8 +122,7 @@ class TestMultiProcessTestRunner(unittest.TestCase):
         r = multiprocess.MultiProcessTestRunner()
         l = TestLoader()
         tests = list(r.nextBatch(l.loadTestsFromModule(mod_with_fixt2)))
-        print
-        tests
+        print(tests)
         self.assertEqual(len(tests), 3)
 
 

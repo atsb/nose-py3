@@ -646,7 +646,7 @@ def all_config_files():
     """
     user = user_config_files()
     if os.path.exists('setup.cfg'):
-        return user + ['setup.cfg']
+        return user, ['setup.cfg']
     return user
 
 

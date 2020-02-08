@@ -1,5 +1,5 @@
 def setup():
-    raise "KABOOM"
+    raise Exception("KABOOM")
 
 
 def test_foo():

@@ -278,7 +278,7 @@ class TestAttribPlugin(unittest.TestCase):
         class TestP:
             foo = True
 
-            def h():
+            def h(self):
                 pass
 
         def i():
