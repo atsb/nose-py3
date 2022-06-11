@@ -1,7 +1,7 @@
 import os
 import sys
 
-VERSION = '1.4.0'
+VERSION = '1.4.1'
 py_vers_tag = '-%s.%s' % sys.version_info[:2]
 
 test_dirs = ['functional_tests', 'unit_tests', os.path.join('doc', 'doc_tests'), 'nose']
@@ -15,8 +15,7 @@ if sys.version_info >= (3, 6):
 
         use_setuptools()
 
-    extra = {'use_2to3': True,
-             'test_dirs': test_dirs,
+    extra = {'test_dirs': test_dirs,
              'test_build_dir': 'build/tests',
              'pyversion_patching': True,
              }
@@ -93,6 +92,13 @@ setup(
     author='Jason Pellerin',
     author_email='jpellerin+nose@gmail.com',
     maintainer='atsb',
+    install_requires=[
+        'clr',
+        'numpy', 
+        'coverage', 
+        'six', 
+        'sphinx'
+        ],
     description='nose extends unittest to make testing easier - python3 version',
     long_description=
     """nose extends the test loading and running features of unittest, making

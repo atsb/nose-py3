@@ -113,8 +113,7 @@ else:
         def run(self):
             """ensure tests are capable of being run, then
             run nose.main with a reconstructed argument list"""
-            if getattr(self.distribution, 'use_2to3', False):
-                # If we run 2to3 we can not do this inplace:
+            if getattr(self.distribution, False):
 
                 # Ensure metadata is up-to-date
                 build_py = self.get_finalized_command('build_py')
