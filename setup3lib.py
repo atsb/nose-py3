@@ -2,7 +2,7 @@ import sys
 
 from setuptools import setup as _setup
 
-py3_args = ['test_dirs', 'test_build_dir',
+py3_args = ['use_2to3', 'convert_2to3_doctests', 'use_2to3_fixers', 'test_dirs', 'test_build_dir',
             'doctest_exts', 'pyversion_patching']
 
 if sys.version_info < (3,):
@@ -75,6 +75,7 @@ else:
 
 
     class BuildTestsCommand(Command):
+        # Create mirror copy of tests, convert all .py files using 2to3
         user_options = []
 
         def initialize_options(self):
@@ -88,6 +89,7 @@ else:
             self.test_base = test_base
 
         def run(self):
+            use_2to3 = getattr(self.distribution, 'use_2to3', False)
             test_dirs = getattr(self.distribution, 'test_dirs', [])
             test_base = self.test_base
             bpy_cmd = self.get_finalized_command("build_py")
@@ -116,6 +118,9 @@ else:
                                 if fn.endswith(ext):
                                     doc_modified.append(dstfile)
                                     break
+            if use_2to3:
+                self.run_2to3(py_modified)
+                self.run_2to3(doc_modified, True)
             if self.distribution.pyversion_patching:
                 if patch is not None:
                     for file in modified:

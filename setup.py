@@ -97,7 +97,8 @@ setup(
         'numpy', 
         'coverage', 
         'six', 
-        'sphinx'
+        'sphinx',
+        '2to3'
         ],
     description='nose extends unittest to make testing easier - python3 version',
     long_description=
