@@ -15,6 +15,7 @@ You can remove other installed logging handlers with the
 ``--logging-clear-handlers`` option.
 """
 
+import itertools
 import logging
 import threading
 from logging import Handler
@@ -255,5 +256,9 @@ class LogCapture(Plugin):
         return map(safe_str, self.handler.buffer)
 
     def addCaptureToErr(self, ev, records):
-        return '\n'.join([safe_str(ev), ln('>> begin captured logging <<')]
-                         ).join(records).join([ln('>> end captured logging <<')])
+        return '\n'.join(itertools.chain(
+            [safe_str(ev), ln('>> begin captured logging <<')],
+            records,
+            [ln('>> end captured logging <<')],
+        ))  
+
