@@ -287,7 +287,7 @@ class PluginManager(object):
             self.addPlugin(plug)
 
     def sort(self):
-        return sort_list(self._plugins, lambda x: getattr(x, 'score', 1), reverse=True)
+        self._plugins = sort_list(self._plugins, lambda x: getattr(x, 'score', 1), reverse=True)
 
     def _get_plugins(self):
         return self._plugins
