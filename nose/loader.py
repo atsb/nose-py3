@@ -118,7 +118,7 @@ class TestLoader(unittest.TestLoader):
         if not cases and hasattr(testCaseClass, 'runTest'):
             cases = ['runTest']
         if self.sortTestMethodsUsing:
-            sort_list(cases, cmp_to_key(self.sortTestMethodsUsing))
+            cases = sort_list(cases, cmp_to_key(self.sortTestMethodsUsing))
         return cases
 
     def _haveVisited(self, path):
@@ -146,7 +146,7 @@ class TestLoader(unittest.TestLoader):
             paths_added = add_path(path, self.config)
 
         entries = os.listdir(path)
-        sort_list(entries, regex_last_key(self.config.testMatch))
+        entries = sort_list(entries, regex_last_key(self.config.testMatch))
         for entry in entries:
             # this hard-coded initial-dot test will be removed:
             # http://code.google.com/p/python-nose/issues/detail?id=82
@@ -330,8 +330,8 @@ class TestLoader(unittest.TestLoader):
                         test_classes.append(test)
                 elif isfunction(test) and self.selector.wantFunction(test):
                     test_funcs.append(test)
-            sort_list(test_classes, lambda x: x.__name__)
-            sort_list(test_funcs, func_lineno)
+            test_classes = sort_list(test_classes, lambda x: x.__name__)
+            test_funcs = sort_list(test_funcs, func_lineno)
             tests = map(lambda t: self.makeTest(t, parent=module),
                         test_classes + test_funcs)
 

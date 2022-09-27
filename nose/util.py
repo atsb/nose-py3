@@ -495,7 +495,7 @@ def regex_last_key(regex):
     >>> c = Config()
     >>> regex = c.testMatch
     >>> entries = ['.', '..', 'a_test', 'src', 'lib', 'test', 'foo.py']
-    >>> sort_list(entries, regex_last_key(regex))
+    >>> entries = sort_list(entries, regex_last_key(regex))
     >>> entries
     ['.', '..', 'foo.py', 'lib', 'src', 'a_test', 'test']
     """
