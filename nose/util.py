@@ -10,7 +10,7 @@ import sys
 import types
 import unittest
 
-from numpy import unicode
+from numpy.core import unicode
 
 from nose.pyversion import ClassType, TypeType, isgenerator
 

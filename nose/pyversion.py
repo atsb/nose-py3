@@ -6,7 +6,7 @@ import os
 import sys
 import traceback
 
-from numpy import unicode
+from numpy.core import unicode
 
 import nose.util
 

@@ -55,7 +55,7 @@ from xml.sax import saxutils
 
 from io import StringIO
 
-from numpy import unicode
+from numpy.core import unicode
 
 from nose.plugins.base import Plugin
 from nose.pyversion import force_unicode, format_exception
