@@ -276,8 +276,8 @@ class TestLoader(unittest.TestLoader):
         """
         # convert the unbound generator method
         # into a bound method so it can be called below
-        if hasattr(generator, 'im_class'):
-            cls = generator.im_class
+        if hasattr(generator, '__self__'):
+            cls = generator.__self__.__class__
         inst = cls()
         method = generator.__name__
         generator = getattr(inst, method)

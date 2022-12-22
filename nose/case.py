@@ -333,7 +333,7 @@ class MethodTestCase(TestBase):
         if isfunction(method):
             raise ValueError(
                 "Unbound methods must be wrapped using pyversion.unbound_method before passing to MethodTestCase")
-        self.cls = method.im_class
+        self.cls = method.__self__.__class__
         self.inst = self.cls()
         if self.test is None:
             method_name = self.method.__name__

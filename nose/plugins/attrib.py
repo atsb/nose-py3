@@ -125,7 +125,7 @@ def attr(*args, **kwargs):
 
 
 def get_method_attr(method, cls, attr_name, default=False):
-    """Look up an attribute on a method/ function. 
+    """Look up an attribute on a method/ function.
     If the attribute isn't found there, looking it up in the
     method's class, if any.
     """
@@ -140,7 +140,7 @@ def get_method_attr(method, cls, attr_name, default=False):
 
 class ContextHelper:
     """Object that can act as context dictionary for eval and looks up
-    names as attributes on a method/ function and its class. 
+    names as attributes on a method/ function and its class.
     """
 
     def __init__(self, method, cls):
@@ -283,7 +283,7 @@ class AttributeSelector(Plugin):
         """Accept the method if its attributes match.
         """
         try:
-            cls = method.im_class
+            cls = method.__self__.__class__
         except AttributeError:
             return False
         return self.validateAttrib(method, cls)

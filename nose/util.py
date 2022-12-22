@@ -408,7 +408,7 @@ def test_address(test):
         call = getattr(test, '__name__', None)
         return src(file), module, call
     if t == types.MethodType:
-        cls_adr = test_address(test.im_class)
+        cls_adr = test_address(test.__self__.__class__)
         return (src(cls_adr[0]), cls_adr[1],
                 "%s.%s" % (cls_adr[2], test.__name__))
     # handle unittest.TestCase instances
