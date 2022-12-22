@@ -330,10 +330,12 @@ class TestLoader(unittest.TestLoader):
                         test_classes.append(test)
                 elif isfunction(test) and self.selector.wantFunction(test):
                     test_funcs.append(test)
+
             test_classes = sort_list(test_classes, lambda x: x.__name__)
+            tests.extend(self.makeTest(t, parent=module) for t in test_classes)
+
             test_funcs = sort_list(test_funcs, func_lineno)
-            tests = map(lambda t: self.makeTest(t, parent=module),
-                        test_classes + test_funcs)
+            tests.extend(self.makeTest(t, parent=module) for t in test_funcs)
 
         # Now, descend into packages
         # FIXME can or should this be lazy?
