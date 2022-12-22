@@ -15,7 +15,7 @@ class Failure(unittest.TestCase):
     A Failure case is placed in a test suite to indicate the presence of a
     test that could not be loaded or executed. A common example is a test
     module that fails to import.
-    
+
     """
     __test__ = False  # do not collect
 
@@ -37,7 +37,7 @@ class Failure(unittest.TestCase):
     def runTest(self):
         if self.tb is not None:
             if is_base_exception(self.exc_val):
-                raise self.exc_val(None).with_traceback(self.tb)
+                raise self.exc_class(None).with_traceback(self.tb)
             raise self.exc_class(self.exc_val).with_traceback(self.tb)
         else:
             raise self.exc_class(self.exc_val)

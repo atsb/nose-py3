@@ -112,7 +112,7 @@ class TestLoader(unittest.TestLoader):
                 return False
             return sel.wantMethod(item)
 
-        cases = filter(wanted, dir(testCaseClass))
+        cases = list(filter(wanted, dir(testCaseClass)))
 
         # add runTest if nothing else picked
         if not cases and hasattr(testCaseClass, 'runTest'):
@@ -225,7 +225,7 @@ class TestLoader(unittest.TestLoader):
                 # Plugins can yield False to indicate that they were
                 # unable to load tests from a file, but it was not an
                 # error -- the file just had no tests to load.
-                tests = filter(None, tests)
+                tests = list(filter(None, tests))
                 return self.suiteClass(tests)
             else:
                 # Nothing was able to even try to load from this file

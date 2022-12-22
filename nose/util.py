@@ -12,12 +12,11 @@ import unittest
 
 from numpy.core import unicode
 
-from nose.pyversion import ClassType, TypeType, isgenerator
+from nose.pyversion import isgenerator
 
 log = logging.getLogger('nose')
 
 ident_re = re.compile(r'^[A-Za-z_][A-Za-z0-9_.]*$')
-class_types = (ClassType, TypeType)
 skip_pattern = r"(?:\.svn)|(?:[^.]+\.py[co])|(?:.*~)|(?:.*\$py\.class)|(?:__pycache__)"
 set = set
 
@@ -157,7 +156,7 @@ def isclass(obj):
     for objects that can't be subclasses of anything.
     """
     obj_type = type(obj)
-    return obj_type in class_types or issubclass(obj_type, type)
+    return obj_type is type or issubclass(obj_type, type)
 
 
 # backwards compat (issue #64)
@@ -398,7 +397,7 @@ def test_address(test):
         file = getattr(test, '__file__', None)
         module = getattr(test, '__name__', None)
         return src(file), module, call
-    if t == types.FunctionType or issubclass(t, type) or t == types.ClassType:
+    if t == types.FunctionType or t is type or issubclass(t, type):
         module = getattr(test, '__module__', None)
         if module is not None:
             m = sys.modules[module]
@@ -449,15 +448,16 @@ def try_run(obj, names):
             if type(obj) == types.ModuleType:
                 # py.test compatibility
                 if isinstance(func, types.FunctionType):
-                    args, varargs, varkw, defaults = \
-                        inspect.getfullargspec(func)
+                    spec = inspect.getfullargspec(func)
+                    args, varargs, varkw, defaults = spec[:4]
+
                 else:
                     # Not a function. If it's callable, call it anyway
                     if hasattr(func, '__call__') and not inspect.ismethod(func):
                         func = func.__call__
                     try:
-                        args, varargs, varkw, defaults = \
-                            inspect.getfullargspec(func)
+                        spec = inspect.getfullargspec(func)
+                        args, varargs, varkw, defaults = spec[:4]
                         args.pop(0)  # pop the self off
                     except TypeError:
                         raise TypeError("Attribute %s of %r is not a python "

@@ -9,7 +9,7 @@
 #
 # Modified for inclusion in nose to provide support for DocFileTest
 #
-# - all doctests removed from module (they fail under 2.3 and 2.5) 
+# - all doctests removed from module (they fail under 2.3 and 2.5)
 # - now handles the $py.class extension when ran under Jython
 
 r"""Module doctest -- a framework for running examples in docstrings.
@@ -905,8 +905,7 @@ class DocTestFinder:
         add them to `tests`.
         """
         if self._verbose:
-            print
-            'Finding tests in %s' % name
+            print('Finding tests in %s' % name)
 
         # If we've already processed this object, then ignore it.
         if id(obj) in seen:

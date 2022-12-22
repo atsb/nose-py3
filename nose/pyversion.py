@@ -10,8 +10,8 @@ from numpy.core import unicode
 
 import nose.util
 
-__all__ = ['make_instancemethod', 'cmp_to_key', 'sort_list', 'ClassType',
-           'TypeType', 'UNICODE_STRINGS', 'unbound_method', 'ismethod',
+__all__ = ['make_instancemethod', 'cmp_to_key', 'sort_list',
+           'UNICODE_STRINGS', 'unbound_method', 'ismethod',
            'bytes_', 'is_base_exception', 'force_unicode', 'exc_to_unicode',
            'format_exception', 'isgenerator']
 
@@ -59,13 +59,6 @@ def cmp_to_key(mycmp):
 def sort_list(l, key, reverse=False):
     sorted_list = sorted(l, key=key, reverse=reverse)
     return sorted_list
-
-
-# In Python 3.x, all objects are "new style" objects descended from 'type', and
-# thus types.ClassType and types.TypeType don't exist anymore.  For
-# compatibility, we make sure they still work.
-ClassType = type
-TypeType = type
 
 
 # The following emulates the behavior (we need) of an 'unbound method' under

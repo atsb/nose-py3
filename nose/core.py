@@ -224,32 +224,26 @@ class TestProgram(unittest.TestProgram):
         v = self.config.verbosity
         self.config.plugins.sort()
         for p in self.config.plugins:
-            print
-            "Plugin %s" % p.name
+            print("Plugin %s" % p.name)
             if v >= 2:
-                print
-                "  score: %s" % p.score
-                print
-                '\n'.join(textwrap.wrap(p.help().strip(),
-                                        initial_indent='  ',
-                                        subsequent_indent='  '))
+                print("  score: %s" % p.score)
+                print('\n'.join(textwrap.wrap(p.help().strip(),
+                                              initial_indent='  ',
+                                              subsequent_indent='  ')))
                 if v >= 3:
                     parser = DummyParser()
                     p.addOptions(parser)
                     if len(parser.options):
-                        print
-                        print
-                        "  Options:"
+                        print()
+                        print("  Options:")
                         for opts, help in parser.options:
-                            print
-                            '  %s' % (', '.join(opts))
+                            print('  %s' % (', '.join(opts)))
                             if help:
-                                print
-                                '\n'.join(
+                                print('\n'.join(
                                     textwrap.wrap(help.strip(),
                                                   initial_indent='    ',
-                                                  subsequent_indent='    '))
-                print
+                                                  subsequent_indent='    ')))
+                print()
 
     def usage(cls):
         import nose

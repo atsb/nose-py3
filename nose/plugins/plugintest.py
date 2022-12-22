@@ -330,7 +330,7 @@ def run(*arg, **kw):
             sys.stderr = stderr
             sys.stdout = stdout
     out = buffer.getvalue()
-    print
+    print()
     munge_nose_output_for_doctest(out)
 
 

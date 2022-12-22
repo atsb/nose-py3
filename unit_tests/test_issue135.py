@@ -5,10 +5,7 @@ import unittest
 
 from nose import main
 
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import BytesIO as StringIO
+from io import StringIO
 
 support = os.path.join(os.path.dirname(__file__), 'support')
 
