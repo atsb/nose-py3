@@ -27,6 +27,8 @@ import glob
 import os
 import sys
 
+import pkg_resources
+
 if __name__ == "__main__":
     this_dir = os.path.normpath(os.path.abspath(os.path.dirname(__file__)))
     lib_dirs = [this_dir]
@@ -42,21 +44,21 @@ if __name__ == "__main__":
         lib_dirs = glob.glob(os.path.join(this_dir, 'build', 'lib*'))
         test_dir = os.path.join(this_dir, 'build', 'tests')
         if not os.path.isdir(test_dir):
-            raise AssertionError(
+            raise Exception(
                 "Error: %s does not exist.  Use the setup.py 'build_tests' command to create it." % (
                     test_dir,))
-    try:
-        import pkg_resources
 
-        env = pkg_resources.Environment(search_path=lib_dirs)
-        distributions = env["nose"]
-        assert len(distributions) == 1, (
-            "Incorrect usage of selftest.py; please see DEVELOPERS.txt")
-        dist = distributions[0]
-        dist.activate()
-    except ImportError:
-        import pkg_resources
-        pass
+    env = pkg_resources.Environment(search_path=lib_dirs)
+
+    distributions = env["nose-py3"]
+    if not distributions:
+        raise Exception("No nose distibution has been built")
+    elif len(distributions) != 1:
+        raise Exception("More than one nose distribution found")
+
+    dist = distributions[0]
+    dist.activate()
+
     # Always make sure our chosen test dir is first on the path
     sys.path.insert(0, test_dir)
     import nose

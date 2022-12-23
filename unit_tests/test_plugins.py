@@ -52,7 +52,7 @@ class TestBuiltinPlugins(unittest.TestCase):
 
         plug.add_options(parser)
         o, d = parser.opts[0]
-        # print d
+        # print(d)
         assert o[0] == '--with-p'
         assert d['action'] == 'store_true'
         assert not d['default']
@@ -99,20 +99,16 @@ class TestDoctestPlugin(unittest.TestCase):
         dtp.add_options(parser, env)
         options, args = parser.parse_args(argv)
 
-        print
-        options
-        print
-        args
+        # print(options)
+        # print(args)
         self.assertEqual(options.doctestExtension, ['ext', 'txt'])
 
         env = {}
         parser = OptionParser()
         dtp.add_options(parser, env)
         options, args = parser.parse_args(argv)
-        print
-        options
-        print
-        args
+        # print(options)
+        # print(args)
         self.assertEqual(options.doctestExtension, ['txt'])
 
     def test_want_file(self):
@@ -175,15 +171,11 @@ class TestDoctestPlugin(unittest.TestCase):
         plug.configure(opt, conf)
         suite = plug.loadTestsFromModule(foo.bar.buz)
         for test in suite:
-            print
-            test.address()
-            file, mod, call = test.address()
+            # print(test.address(), file, mod, call = test.address())
             self.assertEqual(mod, 'foo.bar.buz')
             self.assertEqual(call, None)
             for case in test:
-                print
-                case.address()
-                file, mod, call = case.address()
+                # print(case.address(),file, mod, call = case.address())
                 self.assertEqual(mod, 'foo.bar.buz')
                 self.assertEqual(call, 'afunc')
 
@@ -204,7 +196,7 @@ class TestDoctestPlugin(unittest.TestCase):
             assert test.address(), "Test %s has no address"
 
     def test_collect_no_collect(self):
-        # bug http://nose.python-hosting.com/ticket/55 
+        # bug http://nose.python-hosting.com/ticket/55
         # we got "iteration over non-sequence" when no files match
         here = os.path.abspath(os.path.dirname(__file__))
         support = os.path.join(here, 'support')
@@ -350,9 +342,7 @@ class TestAttribPlugin(unittest.TestCase):
         # OR
         opt, args = parser.parse_args(['test', '-a', 'tags=a',
                                        '-a', 'tags=b'])
-        print
-        opt
-        plug.configure(opt, cnf)
+        # print(opt, plug.configure(opt, cnf))
 
         assert plug.wantFunction(f1) is None
         assert plug.wantFunction(f2) is None
@@ -361,9 +351,7 @@ class TestAttribPlugin(unittest.TestCase):
 
         # AND
         opt, args = parser.parse_args(['test', '-a', 'tags=a,tags=b'])
-        print
-        opt
-        plug.configure(opt, cnf)
+        # print(opt, plug.configure(opt, cnf))
 
         assert plug.wantFunction(f1) is None
         assert not plug.wantFunction(f2)

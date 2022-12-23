@@ -84,10 +84,8 @@ class TestResultProxy(unittest.TestCase):
         class TC(unittest.TestCase):
             def run(self, result):
                 unittest.TestCase.run(self, result)
-                print
-                "errors", result.errors
-                print
-                "failures", result.failures
+                print("errors", result.errors)
+                print("failures", result.failures)
 
             def runTest(self):
                 pass
@@ -117,13 +115,11 @@ class TestResultProxy(unittest.TestCase):
 
         class TC(unittest.TestCase):
             def test_error(self):
-                print
-                "So long"
+                print("So long")
                 raise TypeError("oops")
 
             def test_fail(self):
-                print
-                "Hello"
+                print("Hello")
                 self.fail()
 
             def test(self):

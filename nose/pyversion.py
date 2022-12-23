@@ -6,12 +6,12 @@ import os
 import sys
 import traceback
 
-from numpy import unicode
+from numpy.core import unicode
 
 import nose.util
 
-__all__ = ['make_instancemethod', 'cmp_to_key', 'sort_list', 'ClassType',
-           'TypeType', 'UNICODE_STRINGS', 'unbound_method', 'ismethod',
+__all__ = ['make_instancemethod', 'cmp_to_key', 'sort_list',
+           'UNICODE_STRINGS', 'unbound_method', 'ismethod',
            'bytes_', 'is_base_exception', 'force_unicode', 'exc_to_unicode',
            'format_exception', 'isgenerator']
 
@@ -61,13 +61,6 @@ def sort_list(l, key, reverse=False):
     return sorted_list
 
 
-# In Python 3.x, all objects are "new style" objects descended from 'type', and
-# thus types.ClassType and types.TypeType don't exist anymore.  For
-# compatibility, we make sure they still work.
-ClassType = type
-TypeType = type
-
-
 # The following emulates the behavior (we need) of an 'unbound method' under
 # Python 3.x (namely, the ability to have a class associated with a function
 # definition so that things can do stuff based on its associated class)
@@ -78,8 +71,6 @@ class UnboundMethod:
         self.__dict__ = func.__dict__.copy()
         self._func = func
         self.__self__ = UnboundSelf(cls)
-        if sys.version_info < (3, 0):
-            self.im_class = cls
         self.__doc__ = getattr(func, '__doc__', None)
 
     def address(self):

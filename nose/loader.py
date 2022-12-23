@@ -112,7 +112,7 @@ class TestLoader(unittest.TestLoader):
                 return False
             return sel.wantMethod(item)
 
-        cases = filter(wanted, dir(testCaseClass))
+        cases = list(filter(wanted, dir(testCaseClass)))
 
         # add runTest if nothing else picked
         if not cases and hasattr(testCaseClass, 'runTest'):
@@ -225,7 +225,7 @@ class TestLoader(unittest.TestLoader):
                 # Plugins can yield False to indicate that they were
                 # unable to load tests from a file, but it was not an
                 # error -- the file just had no tests to load.
-                tests = filter(None, tests)
+                tests = list(filter(None, tests))
                 return self.suiteClass(tests)
             else:
                 # Nothing was able to even try to load from this file
@@ -276,8 +276,8 @@ class TestLoader(unittest.TestLoader):
         """
         # convert the unbound generator method
         # into a bound method so it can be called below
-        if hasattr(generator, 'im_class'):
-            cls = generator.im_class
+        if hasattr(generator, '__self__'):
+            cls = generator.__self__.__class__
         inst = cls()
         method = generator.__name__
         generator = getattr(inst, method)
@@ -330,10 +330,12 @@ class TestLoader(unittest.TestLoader):
                         test_classes.append(test)
                 elif isfunction(test) and self.selector.wantFunction(test):
                     test_funcs.append(test)
+
             test_classes = sort_list(test_classes, lambda x: x.__name__)
+            tests.extend(self.makeTest(t, parent=module) for t in test_classes)
+
             test_funcs = sort_list(test_funcs, func_lineno)
-            tests = map(lambda t: self.makeTest(t, parent=module),
-                        test_classes + test_funcs)
+            tests.extend(self.makeTest(t, parent=module) for t in test_funcs)
 
         # Now, descend into packages
         # FIXME can or should this be lazy?

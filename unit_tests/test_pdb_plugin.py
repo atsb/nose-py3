@@ -2,7 +2,7 @@ import sys
 import unittest
 from optparse import OptionParser
 
-from StringIO import StringIO
+from io import StringIO
 
 from nose.config import Config
 from nose.plugins import debug
