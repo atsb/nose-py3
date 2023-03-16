@@ -165,7 +165,7 @@ class Coverage(Plugin):
             self.coverInstance.exclude('#pragma[: ]+[nN][oO] [cC][oO][vV][eE][rR]')
 
             log.debug("Coverage begin")
-            self.skipModules = sys.modules.keys()[:]
+            self.skipModules = list(sys.modules.keys())[:]
             if self.coverErase:
                 log.debug("Clearing previously collected coverage statistics")
                 self.coverInstance.combine()
