@@ -93,7 +93,6 @@ setup(
     author_email='jpellerin+nose@gmail.com',
     maintainer='atsb',
     install_requires=[
-        'clr',
         'numpy', 
         'coverage', 
         'six', 

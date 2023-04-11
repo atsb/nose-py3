@@ -1,4 +1,3 @@
-clr
 numpy
 coverage
 six
