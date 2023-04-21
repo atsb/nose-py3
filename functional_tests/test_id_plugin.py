@@ -4,7 +4,7 @@ import sys
 import tempfile
 import unittest
 
-from cPickle import load
+from pickle import load
 
 from nose.plugins import PluginTester
 from nose.plugins.builtin import Doctest

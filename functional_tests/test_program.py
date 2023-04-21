@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from cStringIO import StringIO
+from io import StringIO
 
 from nose import SkipTest
 from nose.config import Config

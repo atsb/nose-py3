@@ -116,7 +116,7 @@ class TestImporter(unittest.TestCase):
         path = os.path.join(self.dir,
                             'package2', 'test_pak', 'test_sub', 'test_mod.py')
         mod = imp.importFromPath(path, 'test_pak.test_sub.test_mod')
-        print
+        print("")
         mod, dir(mod)
         assert 'test_pak' in sys.modules, 'test_pak was not imported?'
         test_pak = sys.modules['test_pak']

@@ -14,7 +14,7 @@ class TestDoctestPlugin(PluginTester, unittest.TestCase):
     suitepath = os.path.join(support, 'dtt')
 
     def runTest(self):
-        print
+        print("")
         str(self.output)
 
         assert 'Doctest: some_mod ... ok' in self.output
@@ -30,7 +30,7 @@ class TestDoctestFiles(PluginTester, unittest.TestCase):
     suitepath = os.path.join(support, 'dtt', 'docs')
 
     def runTest(self):
-        print
+        print("")
         str(self.output)
 
         expect = [

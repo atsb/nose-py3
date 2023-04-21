@@ -2,7 +2,7 @@ import os
 import unittest
 import warnings
 
-from cStringIO import StringIO
+from io import StringIO
 
 from nose.result import _TextTestResult
 

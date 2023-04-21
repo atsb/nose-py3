@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 
-from cStringIO import StringIO
+from io import StringIO
 
 from nose.config import Config
 from nose.core import TestProgram

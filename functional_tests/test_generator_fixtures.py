@@ -42,24 +42,24 @@ check.teardown = inner_teardown
 
 class TestClass(object):
     def setup(self):
-        print
+        print("")
         "setup called in", self
         self.called = ['setup']
 
     def teardown(self):
-        print
+        print("")
         "teardown called in", self
         eq_(self.called, ['setup'])
         self.called.append('teardown')
 
     def test(self):
-        print
+        print("")
         "test called in", self
         for i in range(0, 5):
             yield self.check, i
 
     def check(self, i):
-        print
+        print("")
         "check called in", self
         expect = ['setup']
         # for x in range(0, i):

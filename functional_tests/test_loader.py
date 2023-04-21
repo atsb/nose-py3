@@ -3,7 +3,7 @@ import sys
 import unittest
 from difflib import ndiff
 
-from cStringIO import StringIO
+from io import StringIO
 
 from nose import loader
 from nose import suite
