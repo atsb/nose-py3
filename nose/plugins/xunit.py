@@ -77,13 +77,16 @@ def escape_cdata(cdata):
 
 
 def id_split(idval):
-    m = TEST_ID.match(idval)
-    if m:
-        name, fargs = m.groups()
-        head, tail = name.rsplit(".", 1)
-        return [head, tail + fargs]
+    if isinstance(idval, str):
+        m = TEST_ID.match(idval)
+        if m:
+            name, fargs = m.groups()
+            head, tail = name.rsplit(".", 1)
+            return [head, tail + fargs]
+        else:
+            return idval.rsplit(".", 1)
     else:
-        return idval.rsplit(".", 1)
+        return str(idval).rsplit(".", 1)
 
 
 def nice_classname(obj):
