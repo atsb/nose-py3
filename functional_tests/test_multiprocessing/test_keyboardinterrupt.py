@@ -5,7 +5,7 @@ from subprocess import Popen, PIPE
 from time import sleep
 
 import nose
-from nose.exc import SkipTest
+from nose.plugins.skip import SkipTest
 
 support = os.path.join(os.path.dirname(__file__), 'support')
 

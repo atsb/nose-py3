@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><testsuite name="nosetests" tests="3" errors="0" failures="1" skip="0"><testcase classname="&lt;unittest.result" name="TestResult run=1 errors=1 failures=0&gt;" time="0.001"><<class 'type'> type="builtins.TypeError" message="oops, wrong type"><![CDATA[Traceback (most recent call last):
+  File "/usr/lib/python3.11/unittest/case.py", line 57, in testPartExecutor
+    yield
+  File "/usr/lib/python3.11/unittest/case.py", line 623, in run
+    self._callTestMethod(testMethod)
+  File "/usr/lib/python3.11/unittest/case.py", line 579, in _callTestMethod
+    if method() is not None:
+       ^^^^^^^^
+  File "/home/ats/Development/nose-py3/functional_tests/support/xunit/test_xunit_as_suite.py", line 17, in test_error
+    raise TypeError("oops, wrong type")
+TypeError: oops, wrong type
+]]></<class 'type'>></testcase><testcase classname="&lt;unittest.result" name="TestResult run=1 errors=0 failures=1&gt;" time="0.000"><failure type="builtins.AssertionError" message="'this' != 'that'&#10;- this&#10;+ that&#10;"><![CDATA[Traceback (most recent call last):
+  File "/usr/lib/python3.11/unittest/case.py", line 57, in testPartExecutor
+    yield
+  File "/usr/lib/python3.11/unittest/case.py", line 623, in run
+    self._callTestMethod(testMethod)
+  File "/usr/lib/python3.11/unittest/case.py", line 579, in _callTestMethod
+    if method() is not None:
+       ^^^^^^^^
+  File "/home/ats/Development/nose-py3/functional_tests/support/xunit/test_xunit_as_suite.py", line 14, in test_fail
+    self.assertEqual("this", "that")
+  File "/usr/lib/python3.11/unittest/case.py", line 873, in assertEqual
+    assertion_func(first, second, msg=msg)
+  File "/usr/lib/python3.11/unittest/case.py", line 1253, in assertMultiLineEqual
+    self.fail(self._formatMessage(msg, standardMsg))
+  File "/usr/lib/python3.11/unittest/case.py", line 703, in fail
+    raise self.failureException(msg)
+AssertionError: 'this' != 'that'
+- this
++ that
+
+]]></failure></testcase><testcase classname="&lt;unittest.result" name="TestResult run=1 errors=1 failures=0&gt;" time="0.000"><<class 'type'> type="builtins.Exception" message="日本"><![CDATA[Traceback (most recent call last):
+  File "/usr/lib/python3.11/unittest/case.py", line 57, in testPartExecutor
+    yield
+  File "/usr/lib/python3.11/unittest/case.py", line 623, in run
+    self._callTestMethod(testMethod)
+  File "/usr/lib/python3.11/unittest/case.py", line 579, in _callTestMethod
+    if method() is not None:
+       ^^^^^^^^
+  File "/home/ats/Development/nose-py3/functional_tests/support/xunit/test_xunit_as_suite.py", line 20, in test_non_ascii_error
+    raise Exception(u"日本")
+Exception: 日本
+]]></<class 'type'>></testcase><testcase classname="&lt;unittest.result" name="TestResult run=1 errors=0 failures=0&gt;" time="0.000"><system-out><![CDATA[test-generated output
+test-generated output
+]]></system-out></testcase><testcase classname="&lt;unittest.result" name="TestResult run=1 errors=0 failures=0&gt;" time="0.000"><<class 'type'> type="unittest.case.SkipTest" message="skipit"><![CDATA[Exception: skipit
+]]></<class 'type'>></testcase><testcase classname="&lt;unittest.result" name="TestResult run=1 errors=0 failures=0&gt;" time="0.000"></testcase></testsuite>

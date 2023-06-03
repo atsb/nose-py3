@@ -5,7 +5,7 @@ import sys
 import unittest
 
 from nose.config import Config
-from nose.exc import SkipTest
+from nose.plugins.skip import SkipTest
 from nose.plugins.xunit import Xunit, id_split, Tee
 from nose.pyversion import UNICODE_STRINGS
 from nose.tools import eq_

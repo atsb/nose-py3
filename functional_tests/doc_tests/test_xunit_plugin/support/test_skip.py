@@ -1,4 +1,4 @@
-from nose.exc import SkipTest
+from nose.plugins.skip import SkipTest
 
 
 def test_ok():

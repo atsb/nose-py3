@@ -2,7 +2,7 @@
 import sys
 import unittest
 
-from nose.exc import SkipTest
+from nose.plugins.skip import SkipTest
 
 
 class TestForXunit(unittest.TestCase):

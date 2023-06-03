@@ -3,7 +3,7 @@ import os
 import shutil
 import unittest
 
-from nose.exc import SkipTest
+from nose.plugins.skip import SkipTest
 from nose.plugins import PluginTester
 from nose.plugins.cover import Coverage
 

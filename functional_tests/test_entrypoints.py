@@ -1,6 +1,6 @@
 import os
 
-from nose.exc import SkipTest
+from nose.plugins.skip import SkipTest
 
 try:
     from pkg_resources import EntryPoint

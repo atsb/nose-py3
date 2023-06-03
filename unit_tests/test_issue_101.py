@@ -2,7 +2,7 @@ import sys
 import unittest
 import warnings
 
-from nose.exc import SkipTest
+from nose.plugins.skip import SkipTest
 from nose.plugins.errorclass import ErrorClass, ErrorClassPlugin
 
 
