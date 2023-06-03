@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import codecs
 import os
-import sys
 import unittest
 
 from nose.plugins import PluginTester
@@ -23,8 +22,7 @@ class TestXUnitPlugin(PluginTester, unittest.TestCase):
     suitepath = os.path.join(support, 'xunit')
 
     def runTest(self):
-        print
-        str(self.output)
+        print(str(self.output))
 
         assert "ERROR: test_error" in self.output
         assert "FAIL: test_fail" in self.output
@@ -34,19 +32,14 @@ class TestXUnitPlugin(PluginTester, unittest.TestCase):
         f = codecs.open(xml_results_filename, 'r', encoding='utf8')
         result = f.read()
         f.close()
-        print
-        result.encode('utf8', 'replace')
+        print(result.encode('utf8', 'replace'))
 
         assert '<?xml version="1.0" encoding="UTF-8"?>' in result
         assert '<testsuite name="nosetests" tests="6" errors="2" failures="1" skip="1">' in result
         assert '<testcase classname="test_xunit_as_suite.TestForXunit" name="test_error" time="' in result
         # TODO(Kumar) think of better x-platform code here that
         # does not confuse 2to3
-        if sys.version_info[0:2] >= (3, 0):
-            assert ('<error type="%s.Exception" message="日本">' % (Exception.__module__,)) in result
-        else:
-            assert ('<error type="%s.Exception" message="日本">' % (Exception.__module__,)).decode(
-                'utf8') in result
+        assert ('<error type="%s.Exception" message="日本">' % (Exception.__module__,)) in result
         assert '</testcase>' in result
         assert '</testsuite>' in result
 
@@ -58,13 +51,11 @@ class TestIssue134(PluginTester, unittest.TestCase):
     suitepath = os.path.join(support, 'issue134')
 
     def runTest(self):
-        print
-        str(self.output)
+        print(str(self.output))
         f = open(xml_results_filename, 'r')
         result = f.read()
         f.close()
-        print
-        result
+        print(result)
         assert 'raise IOError(42, "test")' in result
         assert 'tests="1" errors="1" failures="0" skip="0"' in result
 
@@ -76,13 +67,11 @@ class TestIssue279(PluginTester, unittest.TestCase):
     suitepath = os.path.join(support, 'issue279')
 
     def runTest(self):
-        print
-        str(self.output)
+        print(str(self.output))
         f = open(xml_results_filename, 'r')
         result = f.read()
         f.close()
-        print
-        result
+        print(result)
         assert 'tests="1" errors="1" failures="0" skip="0"' in result
         assert "Exception: I would prefer not to" in result
 
@@ -94,13 +83,11 @@ class TestIssue680(PluginTester, unittest.TestCase):
     suitepath = os.path.join(support, 'issue680')
 
     def runTest(self):
-        print
-        str(self.output)
+        print(str(self.output))
         f = open(xml_results_filename, 'rb')
         result = f.read().decode('utf-8')
         f.close()
-        print
-        result
+        print(result)
         assert 'tests="1" errors="0" failures="0" skip="0"' in result
 
 
@@ -111,13 +98,11 @@ class TestIssue700(PluginTester, unittest.TestCase):
     suitepath = os.path.join(support, 'issue700')
 
     def runTest(self):
-        print
-        str(self.output)
+        print(str(self.output))
         f = open(xml_results_filename, 'r')
         result = f.read()
         f.close()
-        print
-        result
+        print(result)
         assert 'tests="1" errors="0" failures="0" skip="0"' in result
         assert 'line1\n' in result
         assert 'line2\n' in result
@@ -131,12 +116,10 @@ class TestIssue859(PluginTester, unittest.TestCase):
     suitepath = os.path.join(support, 'issue859')
 
     def runTest(self):
-        print
-        str(self.output)
+        print(str(self.output))
         f = open(xml_results_filename, 'r')
         result = f.read()
         f.close()
-        print
-        result
+        print(result)
         assert 'tests="1" errors="0" failures="0" skip="0"' in result
         assert 'testsuite name="TestIssue859"' in result

@@ -1,5 +1,6 @@
 from nose.core import collector, main, run, run_exit, runmodule
-from nose.exc import SkipTest, DeprecatedTest
+from nose.plugins.deprecated import DeprecatedTest
+from nose.plugins.skip import SkipTest
 from nose.tools import with_setup
 
 __author__ = 'Adam Bilbrough'

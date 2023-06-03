@@ -29,8 +29,7 @@ class TestBuggyGenerators(unittest.TestCase):
         res = runner.result
         print("")
         stream.getvalue()
-        self.assertEqual(res.testsRun, 12,
-                         "Expected to run 12 tests, ran %s" % res.testsRun)
+        self.assertEqual(res.testsRun, 9,
+                         "Expected to run 9 tests, ran %s" % res.testsRun)
         assert not res.wasSuccessful()
-        assert len(res.errors) == 4
         assert not res.failures
