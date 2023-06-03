@@ -89,9 +89,9 @@ except ImportError:
 setup(
     name='nose-py3',
     version=VERSION,
-    author='Jason Pellerin',
-    author_email='jpellerin+nose@gmail.com',
-    maintainer='atsb',
+    author='Adam Bilbrough',
+    author_email='',
+    maintainer='Adam Bilbrough',
     install_requires=[
         'numpy', 
         'coverage', 

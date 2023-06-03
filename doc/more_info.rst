@@ -10,10 +10,8 @@ About the name
 Contact the author
 ==================
 
-You can email me at jpellerin+nose at gmail dot com.
-
 To report bugs, ask questions, or request features, please use the *issues*
-tab at the Google code site: http://code.google.com/p/python-nose/issues/list.
+tab at the GitHub site: https://github.com/atsb/nose-py3
 Patches are welcome!
 
 Similar test runners
@@ -32,6 +30,7 @@ License and copyright
 =====================
 
 nose is copyright Jason Pellerin 2005-2009
+nose-py3 is copyright Jason Pellerin 2005-2009, Adam Bilbrough 2020-2023
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU Lesser General Public License as published by

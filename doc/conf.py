@@ -52,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'nose'
-copyright = u'2009, Jason Pellerin'
+copyright = u'2009, Jason Pellerin, 2020 - 2023, Adam Bilbrough'
 maintainer = u'2020 - 2023, Adam Bilbrough'
 
 # The version info for the project you're documenting, acts as replacement for
