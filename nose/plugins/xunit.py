@@ -58,6 +58,7 @@ from io import StringIO
 from numpy.core import unicode
 
 from nose.plugins.base import Plugin
+from nose.plugins.skip import SkipTest
 from nose.pyversion import force_unicode, format_exception
 
 # Invalid XML characters, control characters 0-31 sans \t, \n and \r
@@ -307,17 +308,24 @@ class Xunit(Plugin):
         """
         taken = self._timeTaken()
 
+        if issubclass(err[0], SkipTest):
+            test_type = 'skipped'
+            self.stats['skipped'] += 1
+        else:
+            test_type = 'error'
+            self.stats['errors'] += 1
+
         tb = format_exception(err, self.encoding)
         id = test.id()
 
         self.errorlist.append(
             u'<testcase classname=%(cls)s name=%(name)s time="%(taken).3f">'
-            u'<%(type)s type=%(errtype)s message=%(message)s><![CDATA[%(tb)s]]>'
-            u'</%(type)s>%(systemout)s%(systemerr)s</testcase>' %
+            u'<%(test_type)s type=%(errtype)s message=%(message)s><![CDATA[%(tb)s]]>'
+            u'</%(test_type)s>%(systemout)s%(systemerr)s</testcase>' %
             {'cls': self._getCls(id),
              'name': self._quoteattr(id_split(id)[-1]),
              'taken': taken,
-             'type': type,
+             'test_type': test_type,
              'errtype': self._quoteattr(nice_classname(err[0])),
              'message': self._quoteattr(exc_message(err)),
              'tb': escape_cdata(tb),
