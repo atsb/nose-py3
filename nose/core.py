@@ -12,7 +12,7 @@ from nose.config import Config, all_config_files
 from nose.loader import defaultTestLoader
 from nose.plugins.manager import PluginManager, DefaultPluginManager, \
     RestrictedPluginManager
-from nose.result import TextTestResult
+from nose.result import TextTestResult, NoseTextTestResult
 from nose.suite import FinalizingSuiteWrapper
 from nose.util import isclass, tolist
 
@@ -37,10 +37,10 @@ class TextTestRunner(unittest.TextTestRunner):
         unittest.TextTestRunner.__init__(self, stream, descriptions, verbosity)
 
     def _makeResult(self):
-        return TextTestResult(self.stream,
-                              self.descriptions,
-                              self.verbosity,
-                              self.config)
+        return NoseTextTestResult(self.stream,
+                                  self.descriptions,
+                                  self.verbosity,
+                                  self.config)
 
     def run(self, test):
         """Overrides to provide plugin hooks and defer all output to

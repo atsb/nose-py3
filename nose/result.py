@@ -28,7 +28,7 @@ def _exception_detail(exc):
         return '<unprintable %s object>' % type(exc).__name__
 
 
-class TextTestResult(TextTestResult):
+class NoseTextTestResult(TextTestResult):
     """Text test result that extends unittest's default test result
     support for a configurable set of errorClasses (eg, Skip,
     Deprecated, TODO) that extend the errors/failures/success triad.
