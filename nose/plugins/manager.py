@@ -396,7 +396,7 @@ class BuiltinPluginManager(PluginManager):
 
 
 try:
-    import pkg_resources
+    import importlib.metadata
 
 
     class DefaultPluginManager(BuiltinPluginManager, EntryPointPluginManager):

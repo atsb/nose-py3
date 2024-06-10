@@ -27,7 +27,20 @@ import glob
 import os
 import sys
 
-import pkg_resources
+import importlib.metadata
+
+
+# replacement for old pkg_resources
+def importlib_env(search_paths):
+    distributions = {}
+    for path in search_paths:
+        try:
+            for distribution in importlib.metadata.distributions(path=path):
+                distributions[distribution.metadata['Name']] = distribution
+        except Exception as e:
+            print(f"Error processing path {path}: {e}")
+    return distributions
+
 
 if __name__ == "__main__":
     this_dir = os.path.normpath(os.path.abspath(os.path.dirname(__file__)))
@@ -48,7 +61,7 @@ if __name__ == "__main__":
                 "Error: %s does not exist.  Use the setup.py 'build_tests' command to create it." % (
                     test_dir,))
 
-    env = pkg_resources.Environment(search_path=lib_dirs)
+    env = importlib_env(lib_dirs)
 
     distributions = env["nose-py3"]
     if not distributions:
