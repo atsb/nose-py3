@@ -1,4 +1,5 @@
 import os
+import types
 import unittest
 
 import nose
@@ -8,6 +9,11 @@ from nose import util
 from nose.pyversion import unbound_method
 
 np = os.path.normpath
+
+
+# replacement with new function wrapper
+def new_module(name):
+    return types.ModuleType(name)
 
 
 class TestUtils(unittest.TestCase):
@@ -166,7 +172,6 @@ class TestUtils(unittest.TestCase):
 
     def test_try_run(self):
         try_run = util.try_run
-        import imp
 
         def bar():
             pass
@@ -186,7 +191,7 @@ class TestUtils(unittest.TestCase):
             def method(self):
                 pass
 
-        foo = imp.new_module('foo')
+        foo = new_module('foo')
         foo.bar = bar
         foo.bar_m = bar_m
         foo.i_bar = Bar()

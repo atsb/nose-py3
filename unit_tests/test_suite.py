@@ -1,5 +1,5 @@
-import imp
 import sys
+import types
 import unittest
 
 from mock import ResultProxyFactory, ResultProxy
@@ -8,6 +8,11 @@ from nose import case
 from nose.config import Config
 from nose.suite import LazySuite, ContextSuite, ContextSuiteFactory, \
     ContextList
+
+
+# replacement with new function wrapper
+def new_module(name):
+    return types.ModuleType(name)
 
 
 class TestLazySuite(unittest.TestCase):
@@ -162,9 +167,9 @@ class TestContextSuite(unittest.TestCase):
         assert context.was_torndown
 
     def test_context_fixtures_for_ancestors(self):
-        top = imp.new_module('top')
-        top.bot = imp.new_module('top.bot')
-        top.bot.end = imp.new_module('top.bot.end')
+        top = new_module('top')
+        top.bot = new_module('top.bot')
+        top.bot.end = new_module('top.bot.end')
 
         sys.modules['top'] = top
         sys.modules['top.bot'] = top.bot
@@ -274,9 +279,9 @@ class TestContextSuite(unittest.TestCase):
 class TestContextSuiteFactory(unittest.TestCase):
 
     def test_ancestry(self):
-        top = imp.new_module('top')
-        top.bot = imp.new_module('top.bot')
-        top.bot.end = imp.new_module('top.bot.end')
+        top = new_module('top')
+        top.bot = new_module('top.bot')
+        top.bot.end = new_module('top.bot.end')
 
         sys.modules['top'] = top
         sys.modules['top.bot'] = top.bot

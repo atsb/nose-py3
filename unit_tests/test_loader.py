@@ -1,11 +1,16 @@
-import imp
 import os
 import sys
+import types
 import unittest
 
 import nose.case
 from nose import util, loader, selector  # so we can set mocks
 from nose.loader import TestLoader as Loader
+
+
+# replacement with new function wrapper
+def new_module(name):
+    return types.ModuleType(name)
 
 
 def safepath(p):
@@ -20,22 +25,22 @@ def mods():
     # test loading
     #
     M = {}
-    M['test_module'] = imp.new_module('test_module')
-    M['module'] = imp.new_module('module')
-    M['package'] = imp.new_module('package')
+    M['test_module'] = new_module('test_module')
+    M['module'] = new_module('module')
+    M['package'] = new_module('package')
     M['package'].__path__ = [safepath('/package')]
     M['package'].__file__ = safepath('/package/__init__.py')
-    M['package.subpackage'] = imp.new_module('package.subpackage')
+    M['package.subpackage'] = new_module('package.subpackage')
     M['package'].subpackage = M['package.subpackage']
     M['package.subpackage'].__path__ = [safepath('/package/subpackage')]
     M['package.subpackage'].__file__ = safepath(
         '/package/subpackage/__init__.py')
-    M['test_module_with_generators'] = imp.new_module(
+    M['test_module_with_generators'] = new_module(
         'test_module_with_generators')
-    M['test_module_with_metaclass_tests'] = imp.new_module(
+    M['test_module_with_metaclass_tests'] = new_module(
         'test_module_with_metaclass_tests')
-    M['test_transplant'] = imp.new_module('test_transplant')
-    M['test_module_transplant_generator'] = imp.new_module(
+    M['test_transplant'] = new_module('test_transplant')
+    M['test_module_transplant_generator'] = new_module(
         'test_module_transplant_generator')
 
     # a unittest testcase subclass
