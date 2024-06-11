@@ -35,9 +35,9 @@ else:
 
 
     def pyversion_patch(filename):
-        '''Find the best pyversion-fixup patch for a given filename and apply
+        """Find the best pyversion-fixup patch for a given filename and apply
            it.
-        '''
+        """
         dir, file = os.path.split(filename)
         best_ver = (0,)
         patchfile = None
@@ -127,7 +127,8 @@ else:
                         pyversion_patch(file)
                 else:
                     log.warn(
-                        "Warning: pyversion_patching specified in setup config but patch module not found.  Patching will not be performed.")
+                        "Warning: pyversion_patching specified in setup config but patch module not found.  Patching "
+                        "will not be performed.")
 
             dir_util.mkpath(lib_base)
             self.reinitialize_command('egg_info', egg_base=lib_base)
