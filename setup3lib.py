@@ -19,10 +19,10 @@ else:
     import re
     import logging
     from setuptools import Distribution as _Distribution
-    from distutils.core import Command
-    from distutils import dir_util, file_util, log
+    from setuptools import Command
+    from setuptools._distutils import dir_util, file_util, log
     import setuptools.command.test
-    from pkg_resources import normalize_path
+    from importlib.metadata import normalize_path
 
     try:
         import patch

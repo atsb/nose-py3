@@ -34,7 +34,7 @@ try:
                 'nosetests = nose:run_exit',
                 'nosetests%s = nose:run_exit' % py_vers_tag,
             ],
-            'distutils.commands': [
+            'setuptools.commands': [
                 ' nosetests = nose.commands:nosetests',
             ],
         },
@@ -76,7 +76,7 @@ try:
 except ImportError:
     import re
     from setuptools.command.easy_install import easy_install
-    from distutils.core import setup
+    from setuptools import setup
     from setup3lib import setup
     from setuptools import find_packages
 
