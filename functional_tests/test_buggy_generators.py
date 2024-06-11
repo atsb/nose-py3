@@ -3,7 +3,7 @@ import unittest
 from io import StringIO
 from nose.core import TestProgram
 from nose.config import Config
-from nose.result import _TextTestResult
+from nose.result import TextTestResult
 
 here = os.path.dirname(__file__)
 support = os.path.join(here, 'support')
@@ -11,7 +11,7 @@ support = os.path.join(here, 'support')
 
 class TestRunner(unittest.TextTestRunner):
     def _makeResult(self):
-        self.result = _TextTestResult(
+        self.result = TextTestResult(
             self.stream, self.descriptions, self.verbosity)
         return self.result
 

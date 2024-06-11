@@ -1,12 +1,12 @@
 import os
 import sys
 
-VERSION = '1.6.3'
+VERSION = '1.6.4'
 py_vers_tag = '-%s.%s' % sys.version_info[:2]
 
 test_dirs = ['functional_tests', 'unit_tests', os.path.join('doc', 'doc_tests'), 'nose']
 
-if sys.version_info >= (3, 6):
+if sys.version_info >= (3, 9):
     try:
         import setuptools
     except ImportError:
@@ -34,7 +34,7 @@ try:
                 'nosetests = nose:run_exit',
                 'nosetests%s = nose:run_exit' % py_vers_tag,
             ],
-            'distutils.commands': [
+            'setuptools.commands': [
                 ' nosetests = nose.commands:nosetests',
             ],
         },
@@ -76,7 +76,7 @@ try:
 except ImportError:
     import re
     from setuptools.command.easy_install import easy_install
-    from distutils.core import setup
+    from setuptools import setup
     from setup3lib import setup
     from setuptools import find_packages
 
@@ -97,7 +97,8 @@ setup(
         'coverage', 
         'six', 
         'sphinx',
-        '2to3'
+        'setuptools',
+        'logging'
         ],
     description='nose extends unittest to make testing easier - python3 version',
     long_description=
@@ -137,6 +138,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Testing'
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.9',
     **addl_args
 )

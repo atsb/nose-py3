@@ -1,10 +1,15 @@
-import imp
 import sys
+import types
 import unittest
 
 from nose.loader import TestLoader
 from nose.plugins import multiprocess
 from nose.suite import ContextSuite
+
+
+# replacement with new function wrapper
+def new_module(name):
+    return types.ModuleType(name)
 
 
 class T_fixt:
@@ -40,7 +45,7 @@ class TestMultiProcessTestRunner(unittest.TestCase):
         self.assertEqual(len(tests), 3)
 
     def test_next_batch_with_module_fixt(self):
-        mod_with_fixt = imp.new_module('mod_with_fixt')
+        mod_with_fixt = new_module('mod_with_fixt')
         sys.modules['mod_with_fixt'] = mod_with_fixt
 
         def teardown():
@@ -61,7 +66,7 @@ class TestMultiProcessTestRunner(unittest.TestCase):
         self.assertEqual(len(tests), 1)
 
     def test_next_batch_with_module(self):
-        mod_no_fixt = imp.new_module('mod_no_fixt')
+        mod_no_fixt = new_module('mod_no_fixt')
         sys.modules['mod_no_fixt'] = mod_no_fixt
 
         class Test2(T):
@@ -99,8 +104,7 @@ class TestMultiProcessTestRunner(unittest.TestCase):
         self.assertEqual(len(tests), 1)
 
     def test_next_batch_can_split_set(self):
-
-        mod_with_fixt2 = imp.new_module('mod_with_fixt2')
+        mod_with_fixt2 = new_module('mod_with_fixt2')
         sys.modules['mod_with_fixt2'] = mod_with_fixt2
 
         def setup():

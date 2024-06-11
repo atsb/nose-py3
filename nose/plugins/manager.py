@@ -59,9 +59,6 @@ from nose.failure import Failure
 from nose.plugins.base import IPluginInterface
 from nose.pyversion import sort_list
 
-import pickle
-from io import StringIO
-
 __all__ = ['DefaultPluginManager', 'PluginManager', 'EntryPointPluginManager',
            'BuiltinPluginManager', 'RestrictedPluginManager']
 
@@ -357,13 +354,13 @@ class EntryPointPluginManager(PluginManager):
     def loadPlugins(self):
         """Load plugins by iterating the `nose.plugins` entry point.
         """
-        from pkg_resources import iter_entry_points
+        from importlib.metadata import entry_points
         loaded = {}
         for entry_point, adapt in self.entry_points:
-            for ep in iter_entry_points(entry_point):
+            for ep in entry_points(group=entry_point):
                 if ep.name in loaded:
                     continue
-                loaded[ep.name] = True
+                loaded[ep.name] = ep.load()
                 log.debug('%s load plugin %s', self.__class__.__name__, ep)
                 try:
                     plugcls = ep.load()
@@ -399,7 +396,7 @@ class BuiltinPluginManager(PluginManager):
 
 
 try:
-    import pkg_resources
+    import importlib.metadata
 
 
     class DefaultPluginManager(BuiltinPluginManager, EntryPointPluginManager):

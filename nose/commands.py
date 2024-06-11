@@ -113,31 +113,21 @@ else:
         def run(self):
             """ensure tests are capable of being run, then
             run nose.main with a reconstructed argument list"""
-            if getattr(self.distribution, 'use_2to3', False):
-                # If we run 2to3 we can not do this inplace:
+            # Ensure metadata is up-to-date
+            build_py = self.get_finalized_command('build_py')
+            build_py.inplace = 0
+            build_py.run()
+            bpy_cmd = self.get_finalized_command("build_py")
+            build_path = bpy_cmd.build_lib
 
-                # Ensure metadata is up-to-date
-                build_py = self.get_finalized_command('build_py')
-                build_py.inplace = 0
-                build_py.run()
-                bpy_cmd = self.get_finalized_command("build_py")
-                build_path = bpy_cmd.build_lib
+            # Build extensions
+            egg_info = self.get_finalized_command('egg_info')
+            egg_info.egg_base = build_path
+            egg_info.run()
 
-                # Build extensions
-                egg_info = self.get_finalized_command('egg_info')
-                egg_info.egg_base = build_path
-                egg_info.run()
-
-                build_ext = self.get_finalized_command('build_ext')
-                build_ext.inplace = 0
-                build_ext.run()
-            else:
-                self.run_command('egg_info')
-
-                # Build extensions in-place
-                build_ext = self.get_finalized_command('build_ext')
-                build_ext.inplace = 1
-                build_ext.run()
+            build_ext = self.get_finalized_command('build_ext')
+            build_ext.inplace = 0
+            build_ext.run()
 
             if self.distribution.install_requires:
                 self.distribution.fetch_build_eggs(

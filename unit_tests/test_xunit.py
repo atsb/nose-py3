@@ -86,16 +86,16 @@ class TestTee(unittest.TestCase):
 
     def test_tee_works_with_distutils_log(self):
         try:
-            from distutils.log import Log, DEBUG
+            from setuptools.log import Log, DEBUG
         except ImportError:
-            raise SkipTest("distutils.log not available; skipping")
+            raise SkipTest("setuptools.log not available; skipping")
 
         l = Log(DEBUG)
         try:
             l.warn('Test')
         except Exception as e:
             self.fail(
-                "Exception raised while writing to distutils.log: %s" % (e,))
+                "Exception raised while writing to setuptools.log: %s" % (e,))
 
 
 class TestXMLOutputWithXML(unittest.TestCase):

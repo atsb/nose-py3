@@ -7,11 +7,12 @@ the builtin importer.
 import logging
 import os
 import sys
-from imp import find_module, load_module, acquire_lock, release_lock
-
+from importlib.util import find_spec, spec_from_file_location, module_from_spec
+from threading import Lock
 from nose.config import Config
 
 log = logging.getLogger(__name__)
+_import_lock = Lock()
 
 try:
     _samefile = os.path.samefile
@@ -19,6 +20,41 @@ except AttributeError:
     def _samefile(src, dst):
         return (os.path.normcase(os.path.realpath(src)) ==
                 os.path.normcase(os.path.realpath(dst)))
+
+"""
+Below are the new standalone importlib variant functions
+to replace the deprecated and removed 'imp' import
+
+The names are kept the same for ease of use.
+"""
+
+
+def find_module(part, path=None):
+    spec = find_spec(part, path)
+    if spec is None:
+        raise ImportError(f"Error: The Module {part} is not found")
+
+    filename = spec.origin
+    desc = (".py", "U", 1)
+
+    fh = open(filename, 'r') if spec.origin else None
+
+    return fh, filename, desc
+
+
+def load_module(module_name, fh, filename, desc):
+    if fh:
+        fh.close()
+
+    spec = spec_from_file_location(module_name, filename)
+    if spec is None:
+        raise ImportError(f"Error: Can not load the module {module_name}")
+
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    sys.modules[module_name] = module
+
+    return module
 
 
 class Importer(object):
@@ -74,7 +110,7 @@ class Importer(object):
             else:
                 part_fqname = "%s.%s" % (part_fqname, part)
             try:
-                acquire_lock()
+                _import_lock.acquire()
                 log.debug("find module part %s (%s) in %s",
                           part, part_fqname, path)
                 fh, filename, desc = find_module(part, path)
@@ -96,7 +132,7 @@ class Importer(object):
             finally:
                 if fh:
                     fh.close()
-                release_lock()
+                _import_lock.release()
             if parent:
                 setattr(parent, part, mod)
             if hasattr(mod, '__path__'):

@@ -15,9 +15,6 @@ __all__ = ['make_instancemethod', 'cmp_to_key', 'sort_list',
            'bytes_', 'is_base_exception', 'force_unicode', 'exc_to_unicode',
            'format_exception', 'isgenerator']
 
-# In Python 3.x, all strings are unicode (the call to 'unicode()' in the 2.x
-# source will be replaced with 'str()' when running 2to3, so this test will
-# then become true)
 UNICODE_STRINGS = (type(unicode()) == type(str()))
 
 

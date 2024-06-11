@@ -1,13 +1,18 @@
-import imp
 import sys
+import types
 
 from nose import proxy
 from nose.plugins.manager import NoPlugins
 from nose.util import odict
 
 
+# replacement with new function wrapper
+def new_module(name):
+    return types.ModuleType(name)
+
+
 def mod(name):
-    m = imp.new_module(name)
+    m = new_module(name)
     sys.modules[name] = m
     return m
 
@@ -103,7 +108,7 @@ class Bucket(object):
         self.__dict__['d'].update(kw)
 
     def __getattr__(self, attr):
-        if 'd' not in self.__dict__
+        if 'd' not in self.__dict__:
             return None
         return self.__dict__['d'].get(attr)
 

@@ -21,7 +21,7 @@ Refactor
  
 Output capture handling
 -----------------------
- - Monkeypatch in a new _TextTestResult instead of all of the current chicanery
+ - Monkeypatch in a new TextTestResult instead of all of the current chicanery
 
  
 Assert introspection

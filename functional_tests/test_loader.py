@@ -11,7 +11,7 @@ from nose.config import Config
 from nose.plugins.allmodules import AllModules
 from nose.plugins.manager import PluginManager
 from nose.plugins.skip import Skip
-from nose.result import _TextTestResult
+from nose.result import TextTestResult
 
 try:
     # 2.7+
@@ -245,7 +245,7 @@ class TestNoseTestLoader(unittest.TestCase):
 
     def test_fixture_context_multiple_names_some_common_ancestors(self):
         stream = _WritelnDecorator(StringIO())
-        res = _TextTestResult(stream, 0, 2)
+        res = TextTestResult(stream, 0, 2)
         wd = os.path.join(support, 'ltfn')
         l = loader.TestLoader(workingDir=wd)
         suite = l.loadTestsFromNames(
@@ -279,7 +279,7 @@ class TestNoseTestLoader(unittest.TestCase):
 
     def test_fixture_context_multiple_names_no_common_ancestors(self):
         stream = _WritelnDecorator(StringIO())
-        res = _TextTestResult(stream, 0, 2)
+        res = TextTestResult(stream, 0, 2)
         wd = os.path.join(support, 'ltfn')
         l = loader.TestLoader(workingDir=wd)
         suite = l.loadTestsFromNames(
@@ -361,7 +361,7 @@ class TestNoseTestLoader(unittest.TestCase):
         l = loader.TestLoader(workingDir=ctx)
         suite = l.loadTestsFromName('no_such_module.py')
 
-        res = _TextTestResult(
+        res = TextTestResult(
             stream=_WritelnDecorator(sys.stdout),
             descriptions=0, verbosity=1)
         suite(res)
@@ -379,7 +379,7 @@ class TestNoseTestLoader(unittest.TestCase):
         l = loader.TestLoader(workingDir=ctx)
         suite = l.loadTestsFromName('no_such_module')
 
-        res = _TextTestResult(
+        res = TextTestResult(
             stream=_WritelnDecorator(sys.stdout),
             descriptions=0, verbosity=1)
         suite(res)
@@ -397,7 +397,7 @@ class TestNoseTestLoader(unittest.TestCase):
         l = loader.TestLoader(workingDir=ctx)
         suite = l.loadTestsFromName('fred!')
 
-        res = _TextTestResult(
+        res = TextTestResult(
             stream=_WritelnDecorator(sys.stdout),
             descriptions=0, verbosity=1)
         suite(res)
@@ -416,7 +416,7 @@ class TestNoseTestLoader(unittest.TestCase):
         gen = os.path.join(support, 'gen')
         l = loader.TestLoader(workingDir=gen)
         suite = l.loadTestsFromName('test')
-        res = _TextTestResult(
+        res = TextTestResult(
             stream=_WritelnDecorator(sys.stdout),
             descriptions=0, verbosity=1)
         suite(res)
@@ -429,7 +429,7 @@ class TestNoseTestLoader(unittest.TestCase):
         wdir = os.path.join(support, 'issue269')
         l = loader.TestLoader(workingDir=wdir)
         suite = l.loadTestsFromName('test_bad_class')
-        res = _TextTestResult(
+        res = TextTestResult(
             stream=_WritelnDecorator(sys.stdout),
             descriptions=0, verbosity=1)
         suite(res)

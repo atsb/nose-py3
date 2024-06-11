@@ -5,7 +5,7 @@ from io import StringIO
 
 from nose.config import Config
 from nose.plugins.deprecated import Deprecated, DeprecatedTest
-from nose.result import _TextTestResult
+from nose.result import TextTestResult
 
 try:
     # 2.7+
@@ -24,7 +24,7 @@ class TestDeprecatedPlugin(unittest.TestCase):
 
     def test_prepare_patches_result(self):
         stream = _WritelnDecorator(StringIO())
-        res = _TextTestResult(stream, 0, 1)
+        res = TextTestResult(stream, 0, 1)
         sk = Deprecated()
         sk.prepareTestResult(res)
         res._orig_addError
@@ -77,7 +77,7 @@ class TestDeprecatedPlugin(unittest.TestCase):
                 raise DeprecatedTest('deprecated me')
 
         stream = _WritelnDecorator(StringIO())
-        res = _TextTestResult(stream, 0, 1)
+        res = TextTestResult(stream, 0, 1)
         sk = Deprecated()
         sk.prepareTestResult(res)
 
@@ -98,7 +98,7 @@ class TestDeprecatedPlugin(unittest.TestCase):
                 raise DeprecatedTest('deprecated me too')
 
         stream = _WritelnDecorator(StringIO())
-        res = _TextTestResult(stream, 0, verbosity=2)
+        res = TextTestResult(stream, 0, verbosity=2)
         sk = Deprecated()
         sk.prepareTestResult(res)
         test = TC('test')
