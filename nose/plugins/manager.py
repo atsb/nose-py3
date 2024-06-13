@@ -146,7 +146,7 @@ class PluginProxy(object):
                         yield r
             except (KeyboardInterrupt, SystemExit):
                 raise
-            except:
+            except Exception:
                 exc = sys.exc_info()
                 yield Failure(*exc)
                 continue

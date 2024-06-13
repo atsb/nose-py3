@@ -334,7 +334,7 @@ def _ellipsis_match(want, got):
 
 
 def _comment_line(line):
-    "Return a commented form of the given line"
+    """Return a commented form of the given line"""
     line = line.rstrip()
     if line:
         return '# ' + line
@@ -2300,7 +2300,7 @@ def debug_script(src, pm=False, globs=None):
         if pm:
             try:
                 exec(open(srcfilename, globs, globs).read())
-            except:
+            except Exception:
                 print(sys.exc_info()[1])
                 pdb.post_mortem(sys.exc_info()[2])
         else:

@@ -4,7 +4,7 @@ from nose.plugins.skip import SkipTest
 from nose.tools import with_setup
 
 __author__ = 'Adam Bilbrough'
-__versioninfo__ = (1, 6, 4)
+__versioninfo__ = (1, 6, 5)
 __version__ = '.'.join(map(str, __versioninfo__))
 
 __all__ = [

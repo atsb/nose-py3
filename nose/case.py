@@ -134,7 +134,7 @@ class Test(unittest.TestCase):
                 self.runTest(result)
             except KeyboardInterrupt:
                 raise
-            except:
+            except Exception:
                 err = sys.exc_info()
                 result.addError(self, err)
         finally:
