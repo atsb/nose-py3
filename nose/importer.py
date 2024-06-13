@@ -7,12 +7,10 @@ the builtin importer.
 import logging
 import os
 import sys
-from importlib.util import find_spec, spec_from_file_location, module_from_spec
-from threading import Lock
+
 from nose.config import Config
 
 log = logging.getLogger(__name__)
-_import_lock = Lock()
 
 try:
     _samefile = os.path.samefile
@@ -28,33 +26,47 @@ to replace the deprecated and removed 'imp' import
 The names are kept the same for ease of use.
 """
 
+if sys.version_info < (3, 11):
+    from imp import (
+        find_module, load_module, acquire_lock, release_lock, )
 
-def find_module(part, path=None):
-    spec = find_spec(part, path)
-    if spec is None:
-        raise ImportError(f"Error: The Module {part} is not found")
+else:
+    # some magic to make importlib.util look a bit like good ol' imp
 
-    filename = spec.origin
-    desc = (".py", "U", 1)
+    from importlib.util import (
+        find_spec, spec_from_file_location, module_from_spec, )
+    from threading import Lock
 
-    fh = open(filename, 'r') if spec.origin else None
+    _import_lock = Lock()
+    acquire_lock = _import_lock.aquire
+    release_lock = _import_lock.release
 
-    return fh, filename, desc
+    def find_module(part, path=None):
+        spec = find_spec(part, path)
+        if spec is None:
+            raise ImportError(f"Error: The Module {part} is not found")
+
+        filename = spec.origin
+        desc = (".py", "U", 1)
+
+        fh = open(filename, 'r') if spec.origin else None
+
+        return fh, filename, desc
 
 
-def load_module(module_name, fh, filename, desc):
-    if fh:
-        fh.close()
+    def load_module(module_name, fh, filename, desc):
+        if fh:
+            fh.close()
 
-    spec = spec_from_file_location(module_name, filename)
-    if spec is None:
-        raise ImportError(f"Error: Can not load the module {module_name}")
+        spec = spec_from_file_location(module_name, filename)
+        if spec is None:
+            raise ImportError(f"Error: Can not load the module {module_name}")
 
-    module = module_from_spec(spec)
-    spec.loader.exec_module(module)
-    sys.modules[module_name] = module
+        module = module_from_spec(spec)
+        spec.loader.exec_module(module)
+        sys.modules[module_name] = module
 
-    return module
+        return module
 
 
 class Importer(object):
@@ -110,7 +122,7 @@ class Importer(object):
             else:
                 part_fqname = "%s.%s" % (part_fqname, part)
             try:
-                _import_lock.acquire()
+                acquire_lock()
                 log.debug("find module part %s (%s) in %s",
                           part, part_fqname, path)
                 fh, filename, desc = find_module(part, path)
@@ -132,7 +144,7 @@ class Importer(object):
             finally:
                 if fh:
                     fh.close()
-                _import_lock.release()
+                release_lock()
             if parent:
                 setattr(parent, part, mod)
             if hasattr(mod, '__path__'):
