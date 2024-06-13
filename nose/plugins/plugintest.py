@@ -74,7 +74,7 @@ class MultiProcessFile(object):
         self.__queue.put((pid, data))
 
     def __iter__(self):
-        "getattr doesn't work for iter()"
+        """getattr doesn't work for iter()"""
         self.buffer()
         return self.__buffer
 

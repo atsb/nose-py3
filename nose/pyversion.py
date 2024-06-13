@@ -33,7 +33,7 @@ def make_instancemethod(function, instance):
 # functions.  However, part of the unittest.TestLoader API involves a
 # user-provideable cmp function, so we need some way to convert that.
 def cmp_to_key(mycmp):
-    'Convert a cmp= function into a key= function'
+    """Convert a cmp= function into a key= function"""
 
     class Key(object):
         def __init__(self, obj):

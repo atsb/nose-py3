@@ -304,7 +304,7 @@ class MultiProcessTestRunner(TextTestRunner):
                     case.setUp()
                 except (KeyboardInterrupt, SystemExit):
                     raise
-                except:
+                except Exception:
                     log.debug("%s setup failed", sys.exc_info())
                     result.addError(case, sys.exc_info())
                 else:

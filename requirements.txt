@@ -3,4 +3,3 @@ coverage
 six
 sphinx
 setuptools
-logging

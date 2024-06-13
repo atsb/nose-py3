@@ -75,7 +75,7 @@ def stop_reactor():
     global _twisted_thread
 
     def stop_reactor():
-        '''Helper for calling stop from withing the thread.'''
+        """Helper for calling stop from withing the thread."""
         reactor.stop()
 
     reactor.callFromThread(stop_reactor)

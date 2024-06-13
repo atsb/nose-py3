@@ -1,7 +1,7 @@
 import os
 import sys
 
-VERSION = '1.6.4'
+VERSION = '1.6.5'
 py_vers_tag = '-%s.%s' % sys.version_info[:2]
 
 test_dirs = ['functional_tests', 'unit_tests', os.path.join('doc', 'doc_tests'), 'nose']
@@ -97,8 +97,7 @@ setup(
         'coverage', 
         'six', 
         'sphinx',
-        'setuptools',
-        'logging'
+        'setuptools'
         ],
     description='nose extends unittest to make testing easier - python3 version',
     long_description=
