@@ -344,16 +344,15 @@ class ZeroNinePlugin:
         return getattr(self.plugin, val)
 
 
-def _iter_entry_points(ep_name):
-    if sys.version_info < (3, 11):
-        # pkg_resources is deprecated from 3.11 onwards
-        from pkg_resources import iter_entry_points
-        yield from iter_entry_points(ep_name)
+if sys.version_info < (3, 11):
+    # pkg_resources is deprecated from 3.11 onwards
+    from pkg_resources import iter_entry_points
 
-    else:
-        # this API is unstable prior to 3.11, so do not use it
-        from importlib.metadata import entry_points
-        yield from entry_points(group=ep_name)
+else:
+    # this API is unstable prior to 3.11, so do not use it
+    from importlib.metadata import entry_points as _entry_points
+    def iter_entry_points(group):
+        return _entry_points(group=group)
 
 
 class EntryPointPluginManager(PluginManager):
@@ -369,7 +368,7 @@ class EntryPointPluginManager(PluginManager):
         loaded = {}
 
         for entry_point, adapt in self.entry_points:
-            for ep in _iter_entry_points(entry_point):
+            for ep in iter_entry_points(entry_point):
                 if ep.name in loaded:
                     continue
                 else:
