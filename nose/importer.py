@@ -41,10 +41,11 @@ else:
     acquire_lock = _import_lock.acquire
     release_lock = _import_lock.release
 
+
     def find_module(part, path=None):
         spec = find_spec(part, path)
         if spec is None:
-            raise ImportError(f"Error: The Module {part} is not found")
+            raise ImportError(f"Error: The Module {part} is not found at {path}")
 
         filename = spec.origin
         desc = (".py", "U", 1)
