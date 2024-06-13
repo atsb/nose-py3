@@ -131,7 +131,12 @@ class Importer(object):
                 acquire_lock()
                 log.debug("find module part %s (%s) in %s",
                           part, part_fqname, path)
-                fh, filename, desc = find_module(part_fqname, path)
+
+                if sys.version_info < (3, 11):
+                    fh, filename, desc = find_module(part, path)
+                else:
+                    fh, filename, desc = find_module(part_fqname, path)
+
                 old = sys.modules.get(part_fqname)
                 if old is not None:
                     # test modules frequently have name overlap; make sure
