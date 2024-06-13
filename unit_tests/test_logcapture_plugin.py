@@ -260,10 +260,9 @@ class TestLogCapturePlugin(object):
         except:
             err = sys.exc_info()
         (ec, ev, tb) = c.formatError(test, err)
-        print
-        ev
+        print(ev)
         if UNICODE_STRINGS:
-            assert msg in ev
+            assert msg in ev.decode('utf-8')
         else:
             assert msg.encode('utf-8') in ev
 

@@ -30,7 +30,7 @@ The plugin managers provided with nose are:
 :class:`RestrictedPluginManager`
     This manager is for use in test runs where some plugin calls are
     not available, such as runs started with ``python setup.py test``,
-    where the test runner is the default unittest :class:`TextTestRunner`. It
+    where the test runner is the default unittest :class:`NoseTextTestRunner`. It
     is a subclass of :class:`DefaultPluginManager`.
 
 Writing a plugin manager

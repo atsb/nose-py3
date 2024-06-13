@@ -36,7 +36,7 @@ class T:
 class TestMultiProcessTestRunner(unittest.TestCase):
 
     def test_next_batch_with_classes(self):
-        r = multiprocess.MultiProcessTestRunner()
+        r = multiprocess.NoseMultiProcessTestRunner()
         l = TestLoader()
         tests = list(r.nextBatch(ContextSuite(
             tests=[l.makeTest(T_fixt), l.makeTest(T)])))
@@ -58,7 +58,7 @@ class TestMultiProcessTestRunner(unittest.TestCase):
         mod_with_fixt.teardown = teardown
         Test.__module__ = 'mod_with_fixt'
 
-        r = multiprocess.MultiProcessTestRunner()
+        r = multiprocess.NoseMultiProcessTestRunner()
         l = TestLoader()
         tests = list(r.nextBatch(l.loadTestsFromModule(mod_with_fixt)))
         print
@@ -80,7 +80,7 @@ class TestMultiProcessTestRunner(unittest.TestCase):
         mod_no_fixt.Test_fixt = Test_fixt
         Test_fixt.__module__ = 'mod_no_fixt'
 
-        r = multiprocess.MultiProcessTestRunner()
+        r = multiprocess.NoseMultiProcessTestRunner()
         l = TestLoader()
         tests = list(r.nextBatch(l.loadTestsFromModule(mod_no_fixt)))
         print
@@ -96,7 +96,7 @@ class TestMultiProcessTestRunner(unittest.TestCase):
             def check(self, val):
                 pass
 
-        r = multiprocess.MultiProcessTestRunner()
+        r = multiprocess.NoseMultiProcessTestRunner()
         l = TestLoader()
         tests = list(r.nextBatch(l.makeTest(Tg)))
         print(tests)
@@ -123,7 +123,7 @@ class TestMultiProcessTestRunner(unittest.TestCase):
         Test.__module__ = 'mod_with_fixt2'
         Test_fixt.__module__ = 'mod_with_fixt2'
 
-        r = multiprocess.MultiProcessTestRunner()
+        r = multiprocess.NoseMultiProcessTestRunner()
         l = TestLoader()
         tests = list(r.nextBatch(l.loadTestsFromModule(mod_with_fixt2)))
         print(tests)

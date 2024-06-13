@@ -320,7 +320,7 @@ class IPluginInterface(object):
         :param result: test result object
         
         .. Note:: When tests are run under a test runner other than
-           :class:`nose.core.TextTestRunner`, such as
+           :class:`nose.core.NoseTextTestRunner`, such as
            via ``python setup.py test``, this method may be called
            **before** the default report output is sent.
         """
@@ -622,7 +622,7 @@ class IPluginInterface(object):
         return a test runner. To allow other plugins to process the
         test runner, return None. Only valid when using nose.TestProgram.
 
-        :param runner: :class:`nose.core.TextTestRunner` 
+        :param runner: :class:`nose.core.NoseTextTestRunner`
              (or other runner) instance
         """
         pass

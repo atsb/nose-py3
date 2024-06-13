@@ -15,7 +15,7 @@ considered as failures for the whole test run.
 
 from nose.plugins.base import Plugin
 from nose.pyversion import make_instancemethod
-from nose.result import TextTestResult
+from nose.result import TextTestResult, NoseTextTestResult
 from nose.util import isclass
 
 
@@ -96,21 +96,21 @@ def add_error_patch(result):
     that recognizes the errorClasses attribute and deals with
     errorclasses correctly.
     """
-    return make_instancemethod(TextTestResult.addError, result)
+    return make_instancemethod(NoseTextTestResult.addError, result)
 
 
 def print_errors_patch(result):
     """Create a new printErrors method that prints errorClasses items
     as well.
     """
-    return make_instancemethod(TextTestResult.printErrors, result)
+    return make_instancemethod(NoseTextTestResult.printErrors, result)
 
 
 def print_label_patch(result):
     """Create a new printLabel method that prints errorClasses items
     as well.
     """
-    return make_instancemethod(TextTestResult.printLabel, result)
+    return make_instancemethod(NoseTextTestResult.printLabel, result)
 
 
 def wassuccessful_patch(result):
@@ -118,14 +118,14 @@ def wassuccessful_patch(result):
     exceptions that were put into other slots than error or failure
     but that still count as not success.
     """
-    return make_instancemethod(TextTestResult.wasSuccessful, result)
+    return make_instancemethod(NoseTextTestResult.wasSuccessful, result)
 
 
 def add_skip_patch(result):
     """Create a new addSkip method to patch into a result instance
     that delegates to addError.
     """
-    return make_instancemethod(TextTestResult.addSkip, result)
+    return make_instancemethod(NoseTextTestResult.addSkip, result)
 
 
 if __name__ == '__main__':

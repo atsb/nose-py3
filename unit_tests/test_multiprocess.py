@@ -58,7 +58,7 @@ def test_mp_process_args_pickleable():
     config = Config()
     config.multiprocess_workers = 2
     config.multiprocess_timeout = 5
-    runner = multiprocess.MultiProcessTestRunner(
+    runner = multiprocess.NoseMultiProcessTestRunner(
         stream=_WritelnDecorator(sys.stdout),
         verbosity=10,
         loaderClass=TestLoader,

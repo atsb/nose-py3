@@ -20,10 +20,10 @@ log = logging.getLogger('nose.core')
 compat_24 = sys.version_info >= (2, 4)
 
 __all__ = ['TestProgram', 'main', 'run', 'run_exit', 'runmodule', 'collector',
-           'TextTestRunner']
+           'NoseTextTestRunner']
 
 
-class TextTestRunner(unittest.TextTestRunner):
+class NoseTextTestRunner(unittest.TextTestRunner):
     """Test runner that uses nose's TextTestResult to enable errorClasses,
     as well as providing hooks for plugins to override or replace the test
     output stream, results, and the test case itself.
@@ -197,9 +197,9 @@ class TestProgram(unittest.TestProgram):
         """
         log.debug("runTests called")
         if self.testRunner is None:
-            self.testRunner = TextTestRunner(stream=self.config.stream,
-                                             verbosity=self.config.verbosity,
-                                             config=self.config)
+            self.testRunner = NoseTextTestRunner(stream=self.config.stream,
+                                                 verbosity=self.config.verbosity,
+                                                 config=self.config)
         plug_runner = self.config.plugins.prepareTestRunner(self.testRunner)
         if plug_runner is not None:
             self.testRunner = plug_runner

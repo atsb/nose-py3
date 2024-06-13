@@ -93,28 +93,26 @@ New Features in 1.1.0
 
 """
 
-import logging
 import os
 import pickle
 import signal
 import sys
 import time
 import unittest
+from io import StringIO
+from queue import Empty
+from warnings import warn
+
+import logging
 
 import nose.case
 from nose import failure
 from nose import loader
-from nose.core import TextTestRunner
+from nose.core import NoseTextTestRunner
 from nose.plugins.base import Plugin
 from nose.pyversion import bytes_
 from nose.suite import ContextSuite
 from nose.util import test_address
-
-
-from unittest.runner import *
-from queue import Empty
-from warnings import warn
-from io import StringIO
 
 # this is a list of plugin classes that will be checked for and created inside 
 # each worker process
@@ -256,32 +254,32 @@ class MultiProcess(Plugin):
             self.status['active'] = True
 
     def prepareTestLoader(self, loader):
-        """Remember loader class so MultiProcessTestRunner can instantiate
+        """Remember loader class so NoseMultiProcessTestRunner can instantiate
         the right loader.
         """
         self.loaderClass = loader.__class__
 
     def prepareTestRunner(self, runner):
-        """Replace test runner with MultiProcessTestRunner.
+        """Replace test runner with NoseMultiProcessTestRunner.
         """
         # replace with our runner class
-        return MultiProcessTestRunner(stream=runner.stream,
-                                      verbosity=self.config.verbosity,
-                                      config=self.config,
-                                      loaderClass=self.loaderClass)
+        return NoseMultiProcessTestRunner(stream=runner.stream,
+                                          verbosity=self.config.verbosity,
+                                          config=self.config,
+                                          loaderClass=self.loaderClass)
 
 
 def signalhandler(sig, frame):
     raise TimedOutException()
 
 
-class MultiProcessTestRunner(TextTestRunner):
+class NoseMultiProcessTestRunner(NoseTextTestRunner):
     waitkilltime = 5.0  # max time to wait to terminate a process that does not
 
     # respond to SIGILL
     def __init__(self, **kw):
         self.loaderClass = kw.pop('loaderClass', loader.defaultTestLoader)
-        super(MultiProcessTestRunner, self).__init__(**kw)
+        super(NoseMultiProcessTestRunner, self).__init__(**kw)
 
     def collect(self, test, testQueue, tasks, to_teardown, result):
         # dispatch and collect results
@@ -402,7 +400,7 @@ class MultiProcessTestRunner(TextTestRunner):
                             tasks.remove(addr)
                         except ValueError:
                             log.warning('worker %s failed to remove from tasks: %s',
-                                     iworker, addr)
+                                        iworker, addr)
                         total_tasks += len(newtask_addrs)
                         tasks.extend(newtask_addrs)
                     except KeyError:
@@ -539,7 +537,7 @@ class MultiProcessTestRunner(TextTestRunner):
             # name to be returned
             case.test.descriptor = None
             arg = case.test.arg
-        test_addr = MultiProcessTestRunner.address(case)
+        test_addr = NoseMultiProcessTestRunner.address(case)
         testQueue.put((test_addr, arg), block=False)
         if arg is not None:
             test_addr += str(arg)
