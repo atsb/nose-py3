@@ -43,9 +43,12 @@ else:
 
 
     def find_module(part, path=None):
+
+        # note: this seems to be a mismatch in types, find_spec takes
+        # a single package name, not a list of path strings
         spec = find_spec(part, path)
         if spec is None:
-            raise ImportError(f"Error: The Module {part} is not found at {path}")
+            raise ImportError(f"Error: The Module {part} is not found")
 
         filename = spec.origin
         desc = (".py", "U", 1)
@@ -89,8 +92,10 @@ class Importer(object):
         # find the base dir of the package
         path_parts = os.path.normpath(os.path.abspath(path)).split(os.sep)
         name_parts = fqname.split('.')
+
         if path_parts[-1] == '__init__.py':
             path_parts.pop()
+
         path_parts = path_parts[:-(len(name_parts))]
         dir_path = os.sep.join(path_parts)
         # then import fqname starting from that dir
@@ -126,7 +131,7 @@ class Importer(object):
                 acquire_lock()
                 log.debug("find module part %s (%s) in %s",
                           part, part_fqname, path)
-                fh, filename, desc = find_module(part, path)
+                fh, filename, desc = find_module(part_fqname, path)
                 old = sys.modules.get(part_fqname)
                 if old is not None:
                     # test modules frequently have name overlap; make sure
