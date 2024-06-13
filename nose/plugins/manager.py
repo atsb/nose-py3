@@ -344,6 +344,18 @@ class ZeroNinePlugin:
         return getattr(self.plugin, val)
 
 
+def _iter_entry_points(ep_name):
+    if sys.version_info < (3, 11):
+        # pkg_resources is deprecated from 3.11 onwards
+        from pkg_resources import iter_entry_points
+        yield from iter_entry_points(ep_name)
+
+    else:
+        # this API is unstable prior to 3.11, so do not use it
+        from importlib.metadata import entry_points
+        yield from entry_points(group=ep_name)
+
+
 class EntryPointPluginManager(PluginManager):
     """Plugin manager that loads plugins from the `nose.plugins` and
     `nose.plugins.0.10` entry points.
@@ -354,13 +366,15 @@ class EntryPointPluginManager(PluginManager):
     def loadPlugins(self):
         """Load plugins by iterating the `nose.plugins` entry point.
         """
-        from importlib.metadata import entry_points
         loaded = {}
+
         for entry_point, adapt in self.entry_points:
-            for ep in entry_points(group=entry_point):
+            for ep in _iter_entry_points(entry_point):
                 if ep.name in loaded:
                     continue
-                loaded[ep.name] = ep.load()
+                else:
+                    loaded[ep.name] = True
+
                 log.debug('%s load plugin %s', self.__class__.__name__, ep)
                 try:
                     plugcls = ep.load()
@@ -373,6 +387,7 @@ class EntryPointPluginManager(PluginManager):
                     warn("Unable to load plugin %s: %s" % (ep, e),
                          RuntimeWarning)
                     continue
+
                 if adapt:
                     plug = adapt(plugcls())
                 else:
