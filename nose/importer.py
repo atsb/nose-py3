@@ -38,7 +38,7 @@ else:
     from threading import Lock
 
     _import_lock = Lock()
-    acquire_lock = _import_lock.aquire
+    acquire_lock = _import_lock.acquire
     release_lock = _import_lock.release
 
     def find_module(part, path=None):
