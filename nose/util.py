@@ -652,7 +652,7 @@ def transplant_class(cls, module):
 
 def safe_str(val, encoding='utf-8'):
     if isinstance(val, bytes):
-        return val.decode(encoding)
+        return val.decode(encoding, errors='replace')
     elif isinstance(val, Exception):
         return ' '.join([safe_str(arg, encoding)
                          for arg in val])
