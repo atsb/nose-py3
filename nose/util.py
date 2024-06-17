@@ -10,8 +10,6 @@ import sys
 import types
 import unittest
 
-from numpy.core import unicode
-
 from nose.pyversion import isgenerator
 
 log = logging.getLogger('nose')
@@ -653,13 +651,14 @@ def transplant_class(cls, module):
 
 
 def safe_str(val, encoding='utf-8'):
-    try:
-        return str(val)
-    except UnicodeEncodeError:
-        if isinstance(val, Exception):
-            return ' '.join([safe_str(arg, encoding)
-                             for arg in val])
-        return unicode(val).encode(encoding)
+    if isinstance(val, Exception):
+        return ' '.join([safe_str(arg, encoding)
+                         for arg in val])
+    else:
+        try:
+            return str(val)
+        except UnicodeEncodeError:
+            return repr(val)
 
 
 def is_executable(file):

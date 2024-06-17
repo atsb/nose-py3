@@ -116,10 +116,6 @@ from filecmp import cmp
 from six import string_types
 from io import StringIO
 
-# Don't whine about the deprecated is_private function in this
-# module's tests.
-from numpy.core import unicode
-
 warnings.filterwarnings("ignore", "is_private", DeprecationWarning,
                         __name__, 0)
 
@@ -237,7 +233,7 @@ def _normalize_module(module, depth=2):
     """
     if inspect.ismodule(module):
         return module
-    elif isinstance(module, (str, unicode)):
+    elif isinstance(module, str):
         return __import__(module, globals(), locals(), ["*"])
     elif module is None:
         return sys.modules[sys._getframe(depth).f_globals['__name__']]
