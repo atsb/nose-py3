@@ -55,8 +55,6 @@ from xml.sax import saxutils
 
 from io import StringIO
 
-from numpy.core import unicode
-
 from nose.plugins.base import Plugin
 from nose.plugins.skip import SkipTest
 from nose.pyversion import force_unicode, format_exception
@@ -121,15 +119,7 @@ def exc_message(exc_info):
         # str exception
         result = exc_info[0]
     else:
-        try:
-            result = str(exc)
-        except UnicodeEncodeError:
-            try:
-                result = unicode(exc)
-            except UnicodeError:
-                # Fallback to args as neither str nor
-                # unicode(Exception(u'\xe6')) work in Python < 2.6
-                result = exc.args[0]
+        result = str(exc)
     result = force_unicode(result)
     return xml_safe(result)
 

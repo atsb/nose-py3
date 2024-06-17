@@ -93,7 +93,6 @@ setup(
     author_email='',
     maintainer='Adam Bilbrough',
     install_requires=[
-        'numpy',
         'coverage',
         'six',
         'sphinx',

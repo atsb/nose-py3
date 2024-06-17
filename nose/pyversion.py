@@ -6,8 +6,6 @@ import os
 import sys
 import traceback
 
-from numpy.core import unicode
-
 import nose.util
 
 __all__ = ['make_instancemethod', 'cmp_to_key', 'sort_list',
@@ -15,7 +13,7 @@ __all__ = ['make_instancemethod', 'cmp_to_key', 'sort_list',
            'bytes_', 'is_base_exception', 'force_unicode', 'exc_to_unicode',
            'format_exception', 'isgenerator']
 
-UNICODE_STRINGS = (type(unicode()) == type(str()))
+UNICODE_STRINGS = True
 
 
 def force_unicode(s):
