@@ -651,13 +651,13 @@ def transplant_class(cls, module):
 
 
 def safe_str(val, encoding='utf-8'):
-    if isinstance(val, Exception):
-        return ' '.join([safe_str(arg, encoding)
-                         for arg in val])
-    else:
-        try:
-            return str(val)
-        except UnicodeEncodeError:
+    try:
+        return str(val)
+    except UnicodeEncodeError:
+        if isinstance(val, Exception):
+            return ' '.join([safe_str(arg, encoding)
+                             for arg in val])
+        else:
             return repr(val)
 
 
