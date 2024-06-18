@@ -655,7 +655,7 @@ def safe_str(val, encoding='utf-8'):
         return val.decode(encoding, errors='replace')
     elif isinstance(val, Exception):
         return ' '.join([safe_str(arg, encoding)
-                         for arg in val])
+                         for arg in val.args])
     else:
         try:
             return str(val)
