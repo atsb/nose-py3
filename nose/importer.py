@@ -67,8 +67,8 @@ else:
             raise ImportError(f"Error: Can not load the module {module_name}")
 
         module = module_from_spec(spec)
-        spec.loader.exec_module(module)
         sys.modules[module_name] = module
+        spec.loader.exec_module(module)
 
         return module
 
