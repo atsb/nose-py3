@@ -37,7 +37,7 @@ class Failure(unittest.TestCase):
     def runTest(self):
         if self.tb is not None:
             if is_base_exception(self.exc_val):
-                raise self.exc_class(None).with_traceback(self.tb)
+                raise self.exc_val.with_traceback(self.tb)
             raise self.exc_class(self.exc_val).with_traceback(self.tb)
         else:
             raise self.exc_class(self.exc_val)
