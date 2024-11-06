@@ -690,6 +690,17 @@ class IPluginInterface(object):
         """
         pass
 
+    def addDuration(self, test, duration):
+        """Called when a test finished to run, regardless of its outcome.
+
+        :param test: the test case
+        :type test: :class:`nose.case.Test`
+        :param duration: the time represented in seconds, and it includes the
+                         execution of cleanup functions.
+        :type duration: float
+        """
+        pass
+
     def testName(self, test):
         """Return a short test name. Called by `nose.case.Test.__str__`.
 
