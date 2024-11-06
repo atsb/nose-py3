@@ -4,7 +4,6 @@ import re
 import shutil
 import sys
 
-import setuptools.command.test
 from setuptools import Command
 from setuptools import Distribution as _Distribution
 from setuptools import setup as _setup
@@ -114,16 +113,8 @@ class BuildTestsCommand(Command):
         self.run_command('egg_info')
 
 
-class TestCommand(setuptools.command.test.test):
-    # Override 'test' command to make sure 'build_tests' gets run first.
-    def run(self):
-        self.run_command('build_tests')
-        setuptools.command.test.test.run(self)
-
-
 def setup(*args, **kwargs):
     kwargs.setdefault('distclass', Distribution)
     cmdclass = kwargs.setdefault('cmdclass', {})
     cmdclass.setdefault('build_tests', BuildTestsCommand)
-    cmdclass.setdefault('test', TestCommand)
     return _setup(*args, **kwargs)
