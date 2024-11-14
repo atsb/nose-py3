@@ -34,7 +34,8 @@ else:
     # some magic to make importlib.util look a bit like good ol' imp
 
     from importlib.util import (
-        find_spec, spec_from_file_location, module_from_spec, )
+        spec_from_file_location, module_from_spec, )
+    from importlib.machinery import PathFinder
     from threading import Lock
 
     _import_lock = Lock()
@@ -43,10 +44,7 @@ else:
 
 
     def find_module(part, path=None):
-
-        # note: this seems to be a mismatch in types, find_spec takes
-        # a single package name, not a list of path strings
-        spec = find_spec(part, path)
+        spec = PathFinder.find_spec(part, path)
         if spec is None:
             raise ImportError(f"Error: The Module {part} is not found")
 
