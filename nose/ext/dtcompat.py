@@ -712,7 +712,7 @@ class DocTestParser:
     _INDENT_RE = re.compile('^([ ]*)(?=\S)', re.MULTILINE)
 
     def _min_indent(self, s):
-        "Return the minimum indentation of any non-blank line in `s`"
+        """Return the minimum indentation of any non-blank line in `s`"""
         indents = [len(indent) for indent in self._INDENT_RE.findall(s)]
         if len(indents) > 0:
             return min(indents)
@@ -2276,7 +2276,7 @@ def debug_src(src, pm=False, globs=None):
 
 
 def debug_script(src, pm=False, globs=None):
-    "Debug a test script.  `src` is the script, as a string."
+    """Debug a test script.  `src` is the script, as a string."""
     import pdb
 
     # Note that tempfile.NameTemporaryFile() cannot be used.  As the

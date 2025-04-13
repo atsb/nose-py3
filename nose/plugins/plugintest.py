@@ -215,7 +215,7 @@ class AccessDecorator(object):
 
 
 def blankline_separated_blocks(text):
-    "a bunch of === characters is also considered a blank line"
+    """a bunch of === characters is also considered a blank line"""
     block = []
     for line in text.splitlines(True):
         block.append(line)

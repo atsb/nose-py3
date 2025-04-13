@@ -15,7 +15,7 @@ considered as failures for the whole test run.
 
 from nose.plugins.base import Plugin
 from nose.pyversion import make_instancemethod
-from nose.result import TextTestResult, NoseTextTestResult
+from nose.result import NoseTextTestResult
 from nose.util import isclass
 
 
@@ -24,16 +24,16 @@ class MetaErrorClass(type):
     set up in a declarative manner.
     """
 
-    def __init__(self, name, bases, attr):
+    def __init__(cls, name, bases, attr):
         errorClasses = []
         for name, detail in attr.items():
             if isinstance(detail, ErrorClass):
                 attr.pop(name)
-                for cls in detail:
+                for classes in detail:
                     errorClasses.append(
-                        (cls, (name, detail.label, detail.isfailure)))
-        super(MetaErrorClass, self).__init__(name, bases, attr)
-        self.errorClasses = tuple(errorClasses)
+                        (classes, (name, detail.label, detail.isfailure)))
+        super(MetaErrorClass, cls).__init__(name, bases, attr)
+        cls.errorClasses = tuple(errorClasses)
 
 
 class ErrorClass(object):

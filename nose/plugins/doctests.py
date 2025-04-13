@@ -49,30 +49,20 @@ test.
 """
 from __future__ import generators
 
+import builtins as builtin_mod
 import logging
 import os
+import sys
 import unittest
 from inspect import getmodule
 
+import nose.ext.dtcompat as doctest
 from nose.plugins.base import Plugin
 from nose.suite import ContextList
 from nose.util import anyp, getpackage, test_address, resolve_name, \
     src, tolist, isproperty
 
-from io import StringIO
-import sys
-import builtins as builtin_mod
-
 log = logging.getLogger(__name__)
-
-try:
-    import doctest
-
-    doctest.DocTestCase
-    # system version of doctest is acceptable, but needs a monkeypatch
-except (ImportError, AttributeError):
-    # system version is too old
-    import nose.ext.dtcompat as doctest
 
 #
 # Doctest and coverage don't get along, so we need to create
@@ -431,15 +421,15 @@ class DocFileCase(doctest.DocFileCase):
     address for the doc file case.
     """
 
-    def __init__(self, test, optionflags=0, setUp=None, tearDown=None,
+    def __init__(self, test, optionflags=0, set_up=None, tear_down=None,
                  checker=None, result_var='_'):
         self._result_var = result_var
         super(DocFileCase, self).__init__(
-            test, optionflags=optionflags, setUp=setUp, tearDown=tearDown,
+            test, optionflags=optionflags, setUp=set_up, tearDown=tear_down,
             checker=None)
 
     def address(self):
-        return (self._dt_test.filename, None, None)
+        return self._dt_test.filename, None, None
 
     def setUp(self):
         if self._result_var is not None:
@@ -451,7 +441,7 @@ class DocFileCase(doctest.DocFileCase):
         if value is None:
             return
         setattr(builtin_mod, self._result_var, value)
-        print
+        print()
         repr(value)
 
     def tearDown(self):

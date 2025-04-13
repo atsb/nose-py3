@@ -23,8 +23,6 @@ from logging import Handler
 from nose.plugins.base import Plugin
 from nose.util import anyp, ln, safe_str
 
-from io import StringIO
-
 log = logging.getLogger(__name__)
 
 
