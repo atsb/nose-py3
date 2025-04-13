@@ -93,17 +93,17 @@ New Features in 1.1.0
 
 """
 
+import logging
 import os
 import pickle
 import signal
 import sys
 import time
+import traceback
 import unittest
 from io import StringIO
 from queue import Empty
 from warnings import warn
-
-import logging
 
 import nose.case
 from nose import failure
@@ -690,18 +690,63 @@ def __runner(ix, testQueue, resultQueue, currentaddr, currentstart,
         return result
 
     def batch(result):
-        failures = [(TestLet(c), err) for c, err in result.failures]
-        errors = [(TestLet(c), err) for c, err in result.errors]
+
+        def get_test_id(case):
+            try:
+                test_id = case.id()
+                if not isinstance(test_id, str):
+                    test_id = str(test_id)
+                return test_id
+            except AttributeError:
+                try:
+                    addr_tuple = test_address(case)
+                    return ":".join(filter(None, addr_tuple))
+                except Exception:
+                    return str(case)
+            except Exception as e:
+                return f"Error_generating_ID:_{str(case)}_{e}"
+
+        def ensure_string_err(err):
+            if isinstance(err, str):
+                return err
+            try:
+                if isinstance(err, tuple) and len(err) == 3:
+                    exc_type, exc_value, exc_tb = err
+                    tb_presence = "\n(Traceback obj detected)" if exc_tb is not None else ""
+                    formatted = "".join(traceback.format_exception_only(exc_type, exc_value)).strip()
+                    return formatted + tb_presence + "\n(Error originally tuple)"
+                elif isinstance(err, Exception):
+                    return f"Exception: {type(err).__name__}: {err}"
+                else:
+                    return f"Unknown Error Type (converted): {repr(err)}"
+            except Exception as e:
+                return "Error during ensure_string_err: %s\nOriginal error repr: %r" % (e, err)
+
+        failures = [(get_test_id(c), ensure_string_err(err)) for c, err in result.failures]
+        errors = [(get_test_id(c), ensure_string_err(err)) for c, err in result.errors]
+
         errorClasses = {}
         for key, (storage, label, isfail) in result.errorClasses.items():
-            errorClasses[key] = ([(TestLet(c), err) for c, err in storage],
-                                 label, isfail)
+            try:
+                formatted_storage = [(get_test_id(c), ensure_string_err(err)) for c, err in storage]
+            except Exception as e:
+                formatted_storage = [("Error processing case in errorClass", "Details: %s" % e)]
+            errorClasses[key] = (formatted_storage, label, isfail)
+
+        output_val = ""
+        if hasattr(result, 'stream') and hasattr(result.stream, 'getvalue'):
+            try:
+                output_val = result.stream.getvalue()
+            except Exception as e:
+                output_val = "Error getting stream value: %s" % e
+
         return (
-            result.stream.getvalue(),
+            output_val,
             result.testsRun,
             failures,
             errors,
-            errorClasses)
+            errorClasses
+        )
 
     for test_addr, arg in iter(get, 'STOP'):
         if shouldStop.is_set():
@@ -715,48 +760,58 @@ def __runner(ix, testQueue, resultQueue, currentaddr, currentstart,
         test.tasks = []
         test.arg = arg
         log.debug("Worker %s Test is %s (%s)", ix, test_addr, test)
+
+        original_test_addr = test_addr
+        current_test_id_for_reporting = test_addr
+        if arg is not None:
+             current_test_id_for_reporting += str(arg)
+
         try:
-            if arg is not None:
-                test_addr = test_addr + str(arg)
-            currentaddr.value = bytes_(test_addr)
+            currentaddr.value = current_test_id_for_reporting.encode('ascii', errors='replace')
             currentstart.value = time.time()
             test(result)
             currentaddr.value = bytes_('')
-            resultQueue.put((ix, test_addr, test.tasks, batch(result)))
-        except KeyboardInterrupt as e:  # TimedOutException:
+            resultQueue.put((ix, current_test_id_for_reporting, test.tasks, batch(result)))
+
+        except KeyboardInterrupt as e:
             timeout = isinstance(e, TimedOutException)
             if timeout:
                 keyboardCaught.set()
-            if len(currentaddr.value):
-                if timeout:
-                    msg = 'Worker %s timed out, failing current test %s'
-                else:
-                    msg = 'Worker %s keyboard interrupt, failing current test %s'
-                log.exception(msg, ix, test_addr)
-                currentaddr.value = bytes_('')
-                failure.Failure(*sys.exc_info())(result)
-                resultQueue.put((ix, test_addr, test.tasks, batch(result)))
+
+            current_test_id = current_test_id_for_reporting
+            if timeout:
+                msg = 'Worker %s timed out, failing current test %s'
             else:
-                if timeout:
-                    msg = 'Worker %s test %s timed out'
-                else:
-                    msg = 'Worker %s test %s keyboard interrupt'
-                log.debug(msg, ix, test_addr)
-                resultQueue.put((ix, test_addr, test.tasks, batch(result)))
+                msg = 'Worker %s keyboard interrupt, failing current test %s'
+            log.info(msg, ix, current_test_id)
+            current_exc_info = sys.exc_info()
+            formatted_tb = "".join(traceback.format_exception(*current_exc_info))
+            minimal_error_list = [(current_test_id, formatted_tb)]
+            minimal_batch_result = ('', 0, [], minimal_error_list, {})
+            resultQueue.put((ix, current_test_id, [], minimal_batch_result))
+
+            currentaddr.value = bytes_('')
             if not timeout:
                 raise
+
         except SystemExit:
             currentaddr.value = bytes_('')
-            log.exception('Worker %s system exit', ix)
+            log.exception('Worker %s system exit during test %s', ix, current_test_id_for_reporting)
             raise
-        except:
+
+        except Exception as e:
+            current_test_id = current_test_id_for_reporting
             currentaddr.value = bytes_('')
-            log.exception("Worker %s error running test or returning "
-                          "results", ix)
-            failure.Failure(*sys.exc_info())(result)
-            resultQueue.put((ix, test_addr, test.tasks, batch(result)))
+            log.exception("Worker %s error running test or returning results for %s", ix, current_test_id)
+            current_exc_info = sys.exc_info()
+            formatted_tb = "".join(traceback.format_exception(*current_exc_info))
+            minimal_error_list = [(current_test_id, formatted_tb)]
+            minimal_batch_result = ('', 0, [], minimal_error_list, {})
+            resultQueue.put((ix, current_test_id, [], minimal_batch_result))
+
         if config.multiprocess_restartworker:
             break
+
     log.debug("Worker %s ending", ix)
 
 

@@ -12,9 +12,7 @@ if sys.version_info >= (3, 12):
     except ImportError:
         import setuptools
         from distribute_setup import use_setuptools
-
         use_setuptools()
-
     extra = {'test_dirs': test_dirs,
              'test_build_dir': 'build/tests',
              'pyversion_patching': True,
@@ -25,7 +23,6 @@ else:
 try:
     from setup3lib import setup
     from setuptools import find_packages
-
     addl_args = dict(
         zip_safe=False,
         packages=find_packages(),
@@ -42,18 +39,13 @@ try:
     )
     addl_args.update(extra)
 
-    # This is required by multiprocess plugin; on Windows, if
-    # the launch script is not import-safe, spawned processes
-    # will re-run it, resulting in an infinite loop.
     if sys.platform == 'win32':
         import re
         from setuptools.command.easy_install import easy_install
 
-
         def wrap_write_script(self, script_name, contents, *arg, **kwarg):
             if script_name.endswith('.exe'):
                 return self._write_script(script_name, contents, *arg, **kwarg)
-
             bad_text = re.compile(
                 "\n"
                 "sys.exit\(\n"
@@ -69,7 +61,6 @@ try:
             contents = bad_text.sub(good_text, contents)
             return self._write_script(script_name, contents, *arg, **kwarg)
 
-
         easy_install._write_script = easy_install.write_script
         easy_install.write_script = wrap_write_script
 
@@ -79,12 +70,16 @@ except ImportError:
     from setuptools import setup
     from setup3lib import setup
     from setuptools import find_packages
-
     addl_args = dict(
         packages=['nose', 'nose.ext', 'nose.plugins', 'nose.sphinx',
                   'nose.tools'],
         scripts=['bin/nosetests'],
     )
+
+test_deps = [
+    'coverage',
+    'sphinx',
+]
 
 setup(
     name='nose-py3',
@@ -93,15 +88,14 @@ setup(
     author_email='',
     maintainer='Adam Bilbrough',
     install_requires=[
-        'coverage',
         'six',
-        'sphinx',
-        'setuptools',
-        'twisted'
-        ],
+    ],
+    extras_require={
+        'test': test_deps,
+    },
+    tests_require=test_deps,
     description='nose extends unittest to make testing easier - python3 version',
-    long_description=
-    """nose extends the test loading and running features of unittest, making
+    long_description="""nose extends the test loading and running features of unittest, making
         it easier to write, find and run tests.
 
         By default, nose will run tests in files or directories under the current

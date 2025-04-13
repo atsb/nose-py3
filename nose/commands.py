@@ -132,7 +132,9 @@ else:
             if self.distribution.install_requires:
                 self.distribution.fetch_build_eggs(
                     self.distribution.install_requires)
-            if self.distribution.tests_require:
+            if hasattr(self.distribution, 'tests_require') and self.distribution.tests_require:
+                print("Note: Found and attempting to process legacy 'tests_require'. "
+                      "Consider using 'extras_require={\"test\": ...}' instead.")
                 self.distribution.fetch_build_eggs(
                     self.distribution.tests_require)
 

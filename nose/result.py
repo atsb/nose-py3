@@ -72,12 +72,18 @@ class NoseTextTestResult(TextTestResult):
         test.passed = False
         self.printLabel('ERROR')
 
-    # override to bypass changes in 2.7
     def getDescription(self, test):
-        if self.descriptions:
-            return test.shortDescription() or str(test)
-        else:
-            return str(test)
+        if self.descriptions and hasattr(test, 'shortDescription'):
+            try:
+                desc = test.shortDescription()
+                if desc:
+                    return desc
+            except Exception:
+                log.warning("Error calling shortDescription for %r", test,
+                            exc_info=True)
+                pass
+
+        return str(test)
 
     def printLabel(self, label, err=None):
         # Might get patched into a streamless result
