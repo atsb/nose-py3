@@ -87,9 +87,6 @@ setup(
     author='Adam Bilbrough',
     author_email='',
     maintainer='Adam Bilbrough',
-    install_requires=[
-        'six',
-    ],
     extras_require={
         'test': test_deps,
     },

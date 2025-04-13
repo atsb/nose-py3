@@ -5,7 +5,6 @@ import re
 import sys
 from optparse import OptionParser
 from warnings import warn, filterwarnings
-from six import string_types
 import configparser
 
 from nose.plugins.manager import NoPlugins
@@ -93,7 +92,7 @@ class ConfiguredDefaultsOptionParser(object):
             config_files.readline
         except AttributeError:
             filename_or_filenames = config_files
-            if isinstance(filename_or_filenames, string_types):
+            if isinstance(filename_or_filenames, str):
                 filenames = [filename_or_filenames]
             else:
                 filenames = filename_or_filenames
