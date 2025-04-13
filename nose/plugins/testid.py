@@ -261,37 +261,49 @@ class TestId(Plugin):
 
     def startTest(self, test):
         """Maybe output an id # before the test name.
-
-        Example output::
-
-          #1 test.test ... ok
-          #2 test.test_two ... ok
-
+           Handles cases where test.address() returns unexpected types.
         """
-        adr = test.address()
-        log.debug('start test %s (%s)', adr, adr in self.tests)
-        if adr in self.tests:
-            if adr in self._seen:
-                self.write('   ')
+        try:
+            adr = test.address()
+
+            if not isinstance(adr, tuple):
+                log.warning(f"Skipping ID assignment for test '{test}': "
+                            f"test.address() returned type {type(adr)} instead of tuple.")
+                return
+
+            log.debug('start test %s (%s)', adr, adr in self.tests)
+
+            if adr in self.tests:
+                test_id = self.tests[adr]
+                if adr in self._seen:
+                    self.write('   ')
+                else:
+                    self.write('#%s ' % test_id)
+                    self._seen[adr] = 1
+
             else:
-                self.write('#%s ' % self.tests[adr])
+                test_id = self.id
+                self.tests[adr] = test_id
+                self.write('#%s ' % test_id)
+                self.id += 1
                 self._seen[adr] = 1
-            return
-        self.tests[adr] = self.id
-        self.write('#%s ' % self.id)
-        self.id += 1
+
+        except Exception as e:
+            log.error(f"Error processing startTest for test {test}: {e}", exc_info=True)
 
     def afterTest(self, test):
-        # None means test never ran, False means failed/err
         if test.passed is False:
             try:
-                key = str(self.tests[test.address()])
+                adr = test.address()
+                if isinstance(adr, tuple) and adr in self.tests:
+                    key = str(self.tests[adr])
+                    if key not in self.failed:
+                        self.failed.append(key)
+
             except KeyError:
-                # never saw this test -- startTest didn't run
-                pass
-            else:
-                if key not in self.failed:
-                    self.failed.append(key)
+                log.warning(f"KeyError looking up test address in afterTest for: {test.address()}")
+            except Exception as e:
+                log.error(f"Error processing afterTest for test {test}: {e}", exc_info=True)
 
     def tr(self, name):
         log.debug("tr '%s'", name)
