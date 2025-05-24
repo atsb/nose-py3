@@ -100,12 +100,13 @@ Examples using the ``-A`` and ``--eval-attr`` options:
   Evaluates a complex Python expression and runs the test if True
 
 """
+
 import logging
 import sys
 from nose.plugins.base import Plugin
 from nose.util import tolist
 
-log = logging.getLogger('nose.plugins.attrib')
+log = logging.getLogger("nose.plugins.attrib")
 compat_24 = sys.version_info >= (2, 4)
 
 
@@ -152,8 +153,7 @@ class ContextHelper:
 
 
 class AttributeSelector(Plugin):
-    """Selects test cases to be run based on their attributes.
-    """
+    """Selects test cases to be run based on their attributes."""
 
     def __init__(self):
         Plugin.__init__(self)
@@ -161,20 +161,28 @@ class AttributeSelector(Plugin):
 
     def options(self, parser, env):
         """Register command line options"""
-        parser.add_option("-a", "--attr",
-                          dest="attr", action="append",
-                          default=env.get('NOSE_ATTR'),
-                          metavar="ATTR",
-                          help="Run only tests that have attributes "
-                               "specified by ATTR [NOSE_ATTR]")
+        parser.add_option(
+            "-a",
+            "--attr",
+            dest="attr",
+            action="append",
+            default=env.get("NOSE_ATTR"),
+            metavar="ATTR",
+            help="Run only tests that have attributes " "specified by ATTR [NOSE_ATTR]",
+        )
         # disable in < 2.4: eval can't take needed args
         if compat_24:
-            parser.add_option("-A", "--eval-attr",
-                              dest="eval_attr", metavar="EXPR", action="append",
-                              default=env.get('NOSE_EVAL_ATTR'),
-                              help="Run only tests for whose attributes "
-                                   "the Python expression EXPR evaluates "
-                                   "to True [NOSE_EVAL_ATTR]")
+            parser.add_option(
+                "-A",
+                "--eval-attr",
+                dest="eval_attr",
+                metavar="EXPR",
+                action="append",
+                default=env.get("NOSE_EVAL_ATTR"),
+                help="Run only tests for whose attributes "
+                "the Python expression EXPR evaluates "
+                "to True [NOSE_EVAL_ATTR]",
+            )
 
     def configure(self, options, config):
         """Configure the plugin and system, based on selected options.
@@ -257,14 +265,12 @@ class AttributeSelector(Plugin):
                         break
                 elif type(attr) in (list, tuple):
                     # value must be found in the list attribute
-                    if not str(value).lower() in [str(x).lower()
-                                                  for x in attr]:
+                    if not str(value).lower() in [str(x).lower() for x in attr]:
                         match = False
                         break
                 else:
                     # value must match, convert to string and compare
-                    if (value != attr
-                            and str(value).lower() != str(attr).lower()):
+                    if value != attr and str(value).lower() != str(attr).lower():
                         match = False
                         break
             any = any or match
@@ -275,13 +281,11 @@ class AttributeSelector(Plugin):
         return False
 
     def wantFunction(self, function):
-        """Accept the function if its attributes match.
-        """
+        """Accept the function if its attributes match."""
         return self.validateAttrib(function)
 
     def wantMethod(self, method):
-        """Accept the method if its attributes match.
-        """
+        """Accept the method if its attributes match."""
         try:
             cls = method.__self__.__class__
         except AttributeError:

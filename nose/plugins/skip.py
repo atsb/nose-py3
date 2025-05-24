@@ -18,20 +18,22 @@ class Skip(ErrorClassPlugin):
     will be output, and the exception will not be counted as an error
     or failure.
     """
+
     enabled = True
-    skipped = ErrorClass(SkipTest,
-                         label='SKIP',
-                         isfailure=False)
+    skipped = ErrorClass(SkipTest, label="SKIP", isfailure=False)
 
     def options(self, parser, env):
         """
         Add my options to command line.
         """
-        env_opt = 'NOSE_WITHOUT_SKIP'
-        parser.add_option('--no-skip', action='store_true',
-                          dest='noSkip', default=env.get(env_opt, False),
-                          help="Disable special handling of SkipTest "
-                               "exceptions.")
+        env_opt = "NOSE_WITHOUT_SKIP"
+        parser.add_option(
+            "--no-skip",
+            action="store_true",
+            dest="noSkip",
+            default=env.get(env_opt, False),
+            help="Disable special handling of SkipTest " "exceptions.",
+        )
 
     def configure(self, options, conf):
         """
@@ -40,6 +42,6 @@ class Skip(ErrorClassPlugin):
         if not self.can_configure:
             return
         self.conf = conf
-        disable = getattr(options, 'noSkip', False)
+        disable = getattr(options, "noSkip", False)
         if disable:
             self.enabled = False

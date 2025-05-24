@@ -2,8 +2,16 @@
 
 import time
 
-__all__ = ['make_decorator', 'raises', 'set_trace', 'timed', 'with_setup',
-           'TimeExpired', 'istest', 'nottest']
+__all__ = [
+    "make_decorator",
+    "raises",
+    "set_trace",
+    "timed",
+    "with_setup",
+    "TimeExpired",
+    "istest",
+    "nottest",
+]
 
 
 class TimeExpired(AssertionError):
@@ -18,14 +26,14 @@ def make_decorator(func):
     """
 
     def decorate(newfunc):
-        if hasattr(func, 'compat_func_name'):
+        if hasattr(func, "compat_func_name"):
             name = func.compat_func_name
         else:
             name = func.__name__
         newfunc.__dict__ = func.__dict__
         newfunc.__doc__ = func.__doc__
         newfunc.__module__ = func.__module__
-        if not hasattr(newfunc, 'compat_co_firstlineno'):
+        if not hasattr(newfunc, "compat_co_firstlineno"):
             newfunc.compat_co_firstlineno = func.__code__.co_firstlineno
         try:
             newfunc.__name__ = name
@@ -53,7 +61,7 @@ def raises(*exceptions):
     If you want to test many assertions about exceptions in a single test,
     you may want to use `assert_raises` instead.
     """
-    valid = ' or '.join([e.__name__ for e in exceptions])
+    valid = " or ".join([e.__name__ for e in exceptions])
 
     def decorate(func):
         name = func.__name__
@@ -66,7 +74,7 @@ def raises(*exceptions):
             except:
                 raise
             else:
-                message = "%s() did not raise %s" % (name, valid)
+                message = "{}() did not raise {}".format(name, valid)
                 raise AssertionError(message)
 
         newfunc = make_decorator(func)(newfunc)
@@ -82,6 +90,7 @@ def set_trace():
     """
     import pdb
     import sys
+
     stdout = sys.stdout
     sys.stdout = sys.__stdout__
     pdb.Pdb().set_trace(sys._getframe().f_back)
@@ -125,7 +134,7 @@ def with_setup(setup=None, teardown=None):
 
     def decorate(func, setup=setup, teardown=teardown):
         if setup:
-            if hasattr(func, 'setup'):
+            if hasattr(func, "setup"):
                 _old_s = func.setup
 
                 def _s():
@@ -136,7 +145,7 @@ def with_setup(setup=None, teardown=None):
             else:
                 func.setup = setup
         if teardown:
-            if hasattr(func, 'teardown'):
+            if hasattr(func, "teardown"):
                 _old_t = func.teardown
 
                 def _t():
@@ -152,14 +161,12 @@ def with_setup(setup=None, teardown=None):
 
 
 def istest(func):
-    """Decorator to mark a function or method as a test
-    """
+    """Decorator to mark a function or method as a test"""
     func.__test__ = True
     return func
 
 
 def nottest(func):
-    """Decorator to mark a function or method as *not* a test
-    """
+    """Decorator to mark a function or method as *not* a test"""
     func.__test__ = False
     return func

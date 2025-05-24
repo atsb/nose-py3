@@ -15,6 +15,7 @@ have a single stable interface for all test types, and also to
 manipulate the test object itself by setting the `test` attribute of
 the nose.case.Test that they receive.
 """
+
 import logging
 
 from nose.config import Config
@@ -39,7 +40,7 @@ def proxied_attribute(local_attr, proxied_attr, doc):
     return property(fget, fset, fdel, doc)
 
 
-class ResultProxyFactory(object):
+class ResultProxyFactory:
     """Factory for result proxies. Generates a ResultProxy bound to each test
     and the result passed to the test.
     """
@@ -69,7 +70,7 @@ class ResultProxyFactory(object):
         return ResultProxy(result, test, config=self.config)
 
 
-class ResultProxy(object):
+class ResultProxy:
     """Proxy to TestResults (or other results handler).
 
     One ResultProxy is created for each nose.case.Test. The result
@@ -105,12 +106,17 @@ class ResultProxy(object):
         # The test I was called with must be my .test or my
         # .test's .test. or my .test.test's .case
 
-        case = getattr(self.test, 'test', None)
-        assert (test is self.test
-                or test is case
-                or test is getattr(case, '_nose_case', None)), (
-                "ResultProxy for %r (%s) was called with test %r (%s)"
-                % (self.test, id(self.test), test, id(test)))
+        case = getattr(self.test, "test", None)
+        assert (
+            test is self.test
+            or test is case
+            or test is getattr(case, "_nose_case", None)
+        ), "ResultProxy for {!r} ({}) was called with test {!r} ({})".format(
+            self.test,
+            id(self.test),
+            test,
+            id(test),
+        )
 
     def afterTest(self, test):
         self.assertMyTest(test)
@@ -156,6 +162,7 @@ class ResultProxy(object):
 
     def addSkip(self, test, reason):
         from nose.plugins.skip import SkipTest
+
         self.assertMyTest(test)
         plugins = self.plugins
         if not isinstance(reason, Exception):
@@ -187,11 +194,9 @@ class ResultProxy(object):
         self.result.addDuration(self.test, duration)
 
     # proxied attributes
-    shouldStop = proxied_attribute('result', 'shouldStop',
-                                   """Should the test run stop?""")
-    errors = proxied_attribute('result', 'errors',
-                               """Tests that raised an exception""")
-    failures = proxied_attribute('result', 'failures',
-                                 """Tests that failed""")
-    testsRun = proxied_attribute('result', 'testsRun',
-                                 """Number of tests run""")
+    shouldStop = proxied_attribute(
+        "result", "shouldStop", """Should the test run stop?"""
+    )
+    errors = proxied_attribute("result", "errors", """Tests that raised an exception""")
+    failures = proxied_attribute("result", "failures", """Tests that failed""")
+    testsRun = proxied_attribute("result", "testsRun", """Number of tests run""")

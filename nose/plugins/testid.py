@@ -28,7 +28,7 @@ You can also pass multiple id numbers::
   % nosetests -v --with-id 2 3
   #2 tests.test_b ... ok
   #3 tests.test_c ... ok
-  
+
 Since most shells consider '#' a special character, you can leave it out when
 specifying a test id.
 
@@ -47,7 +47,7 @@ last time. Activate this mode with the ``--failed`` switch::
  #2 test.test_b ... ERROR
  #3 test.test_c ... FAILED
  #4 test.test_d ... ok
- 
+
 On the second run, only tests #2 and #3 will run::
 
  % nosetests -v --failed
@@ -75,7 +75,7 @@ First::
  #3 test.test_c ... ok
 
 Second::
- 
+
  % nosetests -v --failed
  #1 test.test_a ... ok
  #2 test.test_b ... ok
@@ -90,8 +90,9 @@ Second::
   you have failing tests. Otherwise, your first run using ``--failed`` will
   (perhaps surprisingly) run *all* tests, because there won't be an id file
   containing the record of failed tests from your previous run.
-  
+
 """
+
 __test__ = False
 
 import logging
@@ -110,28 +111,35 @@ class TestId(Plugin):
     Activate to add a test id (like #1) to each test name output. Activate
     with --failed to rerun failing tests only.
     """
-    name = 'id'
+
+    name = "id"
     idfile = None
     collecting = True
     loopOnFailed = False
 
     def options(self, parser, env):
-        """Register commandline options.
-        """
+        """Register commandline options."""
         Plugin.options(self, parser, env)
-        parser.add_option('--id-file', action='store', dest='testIdFile',
-                          default='.noseids', metavar="FILE",
-                          help="Store test ids found in test runs in this "
-                               "file. Default is the file .noseids in the "
-                               "working directory.")
-        parser.add_option('--failed', action='store_true',
-                          dest='failed', default=False,
-                          help="Run the tests that failed in the last "
-                               "test run.")
+        parser.add_option(
+            "--id-file",
+            action="store",
+            dest="testIdFile",
+            default=".noseids",
+            metavar="FILE",
+            help="Store test ids found in test runs in this "
+            "file. Default is the file .noseids in the "
+            "working directory.",
+        )
+        parser.add_option(
+            "--failed",
+            action="store_true",
+            dest="failed",
+            default=False,
+            help="Run the tests that failed in the last " "test run.",
+        )
 
     def configure(self, options, conf):
-        """Configure plugin.
-        """
+        """Configure plugin."""
         Plugin.configure(self, options, conf)
         if options.failed:
             self.enabled = True
@@ -153,35 +161,31 @@ class TestId(Plugin):
         self._write_hashes = conf.verbosity >= 2
 
     def finalize(self, result):
-        """Save new ids file, if needed.
-        """
+        """Save new ids file, if needed."""
         if result.wasSuccessful():
             self.failed = []
         if self.collecting:
             ids = dict(list(zip(list(self.tests.values()), list(self.tests.keys()))))
         else:
             ids = self.ids
-        fh = open(self.idfile, 'wb')
-        dump({'ids': ids,
-              'failed': self.failed,
-              'source_names': self.source_names}, fh)
+        fh = open(self.idfile, "wb")
+        dump({"ids": ids, "failed": self.failed, "source_names": self.source_names}, fh)
         fh.close()
-        log.debug('Saved test ids: %s, failed %s to %s',
-                  ids, self.failed, self.idfile)
+        log.debug("Saved test ids: %s, failed %s to %s", ids, self.failed, self.idfile)
 
     def loadTestsFromNames(self, names, module=None):
         """Translate ids in the list of requested names into their
         test addresses, if they are found in my dict of tests.
         """
-        log.debug('ltfn %s %s', names, module)
+        log.debug("ltfn %s %s", names, module)
         try:
-            fh = open(self.idfile, 'rb')
+            fh = open(self.idfile, "rb")
             try:
                 data = load(fh)
-                if 'ids' in data:
-                    self.ids = data['ids']
-                    self.failed = data['failed']
-                    self.source_names = data['source_names']
+                if "ids" in data:
+                    self.ids = data["ids"]
+                    self.failed = data["failed"]
+                    self.source_names = data["source_names"]
                 else:
                     # old ids field
                     self.ids = data
@@ -189,22 +193,28 @@ class TestId(Plugin):
                     self.source_names = names
                 if self.ids:
                     self.id = max(self.ids) + 1
-                    self.tests = dict(list(zip(list(self.ids.values()), list(self.ids.keys()))))
+                    self.tests = dict(
+                        list(zip(list(self.ids.values()), list(self.ids.keys())))
+                    )
                 else:
                     self.id = 1
                 log.debug(
-                    'Loaded test ids %s tests %s failed %s sources %s from %s',
-                    self.ids, self.tests, self.failed, self.source_names,
-                    self.idfile)
+                    "Loaded test ids %s tests %s failed %s sources %s from %s",
+                    self.ids,
+                    self.tests,
+                    self.failed,
+                    self.source_names,
+                    self.idfile,
+                )
             except ValueError as e:
                 # load() may throw a ValueError when reading the ids file, if it
                 # was generated with a newer version of Python than we are currently
                 # running.
-                log.debug('Error loading %s : %s', self.idfile, str(e))
+                log.debug("Error loading %s : %s", self.idfile, str(e))
             finally:
                 fh.close()
-        except IOError:
-            log.debug('IO error reading %s', self.idfile)
+        except OSError:
+            log.debug("IO error reading %s", self.idfile)
 
         if self.loopOnFailed and self.failed:
             self.collecting = False
@@ -227,8 +237,7 @@ class TestId(Plugin):
             new_set = set(new_source)
             old_set = set(self.source_names)
             log.debug("old: %s new: %s", old_set, new_set)
-            really_new = [s for s in new_source
-                          if not s in old_set]
+            really_new = [s for s in new_source if not s in old_set]
             if really_new:
                 # remember new sources
                 self.source_names.extend(really_new)
@@ -239,8 +248,9 @@ class TestId(Plugin):
         else:
             # no new names to translate and add to id set
             self.collecting = False
-        log.debug("translated: %s new sources %s names %s",
-                  translated, really_new, names)
+        log.debug(
+            "translated: %s new sources %s names %s", translated, really_new, names
+        )
         return (None, translated + really_new or names)
 
     def makeName(self, addr):
@@ -251,40 +261,41 @@ class TestId(Plugin):
         else:
             head = module
         if call is not None:
-            return "%s:%s" % (head, call)
+            return "{}:{}".format(head, call)
         return head
 
     def setOutputStream(self, stream):
-        """Get handle on output stream so the plugin can print id #s
-        """
+        """Get handle on output stream so the plugin can print id #s"""
         self.stream = stream
 
     def startTest(self, test):
         """Maybe output an id # before the test name.
-           Handles cases where test.address() returns unexpected types.
+        Handles cases where test.address() returns unexpected types.
         """
         try:
             adr = test.address()
 
             if not isinstance(adr, tuple):
-                log.warning(f"Skipping ID assignment for test '{test}': "
-                            f"test.address() returned type {type(adr)} instead of tuple.")
+                log.warning(
+                    f"Skipping ID assignment for test '{test}': "
+                    f"test.address() returned type {type(adr)} instead of tuple."
+                )
                 return
 
-            log.debug('start test %s (%s)', adr, adr in self.tests)
+            log.debug("start test %s (%s)", adr, adr in self.tests)
 
             if adr in self.tests:
                 test_id = self.tests[adr]
                 if adr in self._seen:
-                    self.write('   ')
+                    self.write("   ")
                 else:
-                    self.write('#%s ' % test_id)
+                    self.write("#%s " % test_id)
                     self._seen[adr] = 1
 
             else:
                 test_id = self.id
                 self.tests[adr] = test_id
-                self.write('#%s ' % test_id)
+                self.write("#%s " % test_id)
                 self.id += 1
                 self._seen[adr] = 1
 
@@ -301,14 +312,18 @@ class TestId(Plugin):
                         self.failed.append(key)
 
             except KeyError:
-                log.warning(f"KeyError looking up test address in afterTest for: {test.address()}")
+                log.warning(
+                    f"KeyError looking up test address in afterTest for: {test.address()}"
+                )
             except Exception as e:
-                log.error(f"Error processing afterTest for test {test}: {e}", exc_info=True)
+                log.error(
+                    f"Error processing afterTest for test {test}: {e}", exc_info=True
+                )
 
     def tr(self, name):
         log.debug("tr '%s'", name)
         try:
-            key = int(name.replace('#', ''))
+            key = int(name.replace("#", ""))
         except ValueError:
             return name
         log.debug("Got key %s", key)

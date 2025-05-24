@@ -8,7 +8,7 @@ _multiprocess_shared_ = 1
 
 
 def _log(val):
-    ff = open(flag, 'a+')
+    ff = open(flag, 'a+', encoding='utf-8')
     ff.write(val)
     ff.write("\n")
     ff.close()
@@ -17,10 +17,8 @@ def _log(val):
 def _clear():
     if os.path.isfile(flag):
         os.unlink(flag)
-
-
 def logged():
-    flag_file = open(flag, 'r')
+    flag_file = open(flag, 'r', encoding='utf-8')
     try:
         lines = [line for line in flag_file]
     finally:

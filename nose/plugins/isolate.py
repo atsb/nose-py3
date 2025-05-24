@@ -7,7 +7,7 @@ import and execution of each test module::
 
     def setup(module):
         module._mods = sys.modules.copy()
-    
+
     def teardown(module):
         to_del = [ m for m in sys.modules.keys() if m not in
                    module._mods ]
@@ -40,7 +40,7 @@ import sys
 
 from nose.plugins import Plugin
 
-log = logging.getLogger('nose.plugins.isolation')
+log = logging.getLogger("nose.plugins.isolation")
 
 
 class IsolationPlugin(Plugin):
@@ -52,18 +52,17 @@ class IsolationPlugin(Plugin):
     plugin should not be used with the coverage plugin, or in any other case
     where module reloading may produce undesirable side-effects.
     """
+
     score = 10  # I want to be last
-    name = 'isolation'
+    name = "isolation"
 
     def configure(self, options, conf):
-        """Configure plugin.
-        """
+        """Configure plugin."""
         Plugin.configure(self, options, conf)
         self._mod_stack = []
 
     def beforeContext(self):
-        """Copy sys.modules onto my mod stack
-        """
+        """Copy sys.modules onto my mod stack"""
         mods = sys.modules.copy()
         self._mod_stack.append(mods)
 
@@ -74,7 +73,7 @@ class IsolationPlugin(Plugin):
         mods = self._mod_stack.pop()
         to_del = [m for m in sys.modules.keys() if m not in mods]
         if to_del:
-            log.debug('removing sys modules entries: %s', to_del)
+            log.debug("removing sys modules entries: %s", to_del)
             for mod in to_del:
                 del sys.modules[mod]
         sys.modules.update(mods)
@@ -99,6 +98,5 @@ class IsolationPlugin(Plugin):
         return (loader.suiteClass(lazy), [])
 
     def prepareTestLoader(self, loader):
-        """Get handle on test loader so we can use it in loadTestsFromNames.
-        """
+        """Get handle on test loader so we can use it in loadTestsFromNames."""
         self.loader = loader

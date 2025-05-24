@@ -17,7 +17,7 @@ except ImportError:
 from nose.config import Config
 from nose.util import isclass, ln as _ln  # backwards compat
 
-log = logging.getLogger('nose.result')
+log = logging.getLogger("nose.result")
 
 
 def _exception_detail(exc):
@@ -25,7 +25,7 @@ def _exception_detail(exc):
     try:
         return str(exc)
     except:
-        return '<unprintable %s object>' % type(exc).__name__
+        return "<unprintable %s object>" % type(exc).__name__
 
 
 class NoseTextTestResult(TextTestResult):
@@ -34,8 +34,7 @@ class NoseTextTestResult(TextTestResult):
     Deprecated, TODO) that extend the errors/failures/success triad.
     """
 
-    def __init__(self, stream, descriptions, verbosity, config=None,
-                 errorClasses=None):
+    def __init__(self, stream, descriptions, verbosity, config=None, errorClasses=None):
         if errorClasses is None:
             errorClasses = {}
         self.errorClasses = errorClasses
@@ -46,6 +45,7 @@ class NoseTextTestResult(TextTestResult):
 
     def addSkip(self, test, reason):
         from nose.plugins.skip import SkipTest
+
         if SkipTest in self.errorClasses:
             storage, label, isfail = self.errorClasses[SkipTest]
             storage.append((test, reason))
@@ -70,24 +70,25 @@ class NoseTextTestResult(TextTestResult):
                 return
         self.errors.append((test, exc_info))
         test.passed = False
-        self.printLabel('ERROR')
+        self.printLabel("ERROR")
 
     def getDescription(self, test):
-        if self.descriptions and hasattr(test, 'shortDescription'):
+        if self.descriptions and hasattr(test, "shortDescription"):
             try:
                 desc = test.shortDescription()
                 if desc:
                     return desc
             except Exception:
-                log.warning("Error calling shortDescription for %r", test,
-                            exc_info=True)
+                log.warning(
+                    "Error calling shortDescription for %r", test, exc_info=True
+                )
                 pass
 
         return str(test)
 
     def printLabel(self, label, err=None):
         # Might get patched into a streamless result
-        stream = getattr(self, 'stream', None)
+        stream = getattr(self, "stream", None)
         if stream is not None:
             if self.showAll:
                 message = [label]
@@ -100,15 +101,14 @@ class NoseTextTestResult(TextTestResult):
                 stream.write(label[:1])
 
     def printErrors(self):
-        """Overrides to print all errorClasses errors as well.
-        """
+        """Overrides to print all errorClasses errors as well."""
         TextTestResult.printErrors(self)
         for cls in self.errorClasses.keys():
             storage, label, isfail = self.errorClasses[cls]
             if isfail:
                 self.printErrorList(label, storage)
         # Might get patched into a result with no config
-        if hasattr(self, 'config'):
+        if hasattr(self, "config"):
             self.config.plugins.report(self.stream)
 
     def printSummary(self, start, stop):
@@ -122,7 +122,7 @@ class NoseTextTestResult(TextTestResult):
         plural = run != 1 and "s" or ""
 
         writeln(self.separator2)
-        writeln("Ran %s test%s in %.3fs" % (run, plural, taken))
+        writeln("Ran {} test{} in {:.3f}s".format(run, plural, taken))
         writeln()
 
         summary = {}
@@ -134,9 +134,9 @@ class NoseTextTestResult(TextTestResult):
                 continue
             summary[label] = count
         if len(self.failures):
-            summary['failures'] = len(self.failures)
+            summary["failures"] = len(self.failures)
         if len(self.errors):
-            summary['errors'] = len(self.errors)
+            summary["errors"] = len(self.errors)
 
         if not self.wasSuccessful():
             write("FAILED")
@@ -146,8 +146,7 @@ class NoseTextTestResult(TextTestResult):
         if items:
             sorted(items)
             write(" (")
-            write(", ".join(["%s=%s" % (label, count) for
-                             label, count in items]))
+            write(", ".join(["{}={}".format(label, count) for label, count in items]))
             writeln(")")
         else:
             writeln()
@@ -175,12 +174,13 @@ class NoseTextTestResult(TextTestResult):
             exc_info = self._exc_info_to_string(err)
         self.errors.append((test, exc_info))
         if self.showAll:
-            self.stream.write('ERROR')
+            self.stream.write("ERROR")
         elif self.dots:
-            self.stream.write('E')
+            self.stream.write("E")
 
     def _exc_info_to_string(self, err, test=None):
         from nose.plugins.skip import SkipTest
+
         if isclass(err[0]) and issubclass(err[0], SkipTest):
             return str(err[1])
         try:
@@ -192,7 +192,10 @@ class NoseTextTestResult(TextTestResult):
 
 def ln(*arg, **kw):
     from warnings import warn
-    warn("ln() has moved to nose.util from nose.result and will be removed "
-         "from nose.result in a future release. Please update your imports ",
-         DeprecationWarning)
+
+    warn(
+        "ln() has moved to nose.util from nose.result and will be removed "
+        "from nose.result in a future release. Please update your imports ",
+        DeprecationWarning,
+    )
     return _ln(*arg, **kw)

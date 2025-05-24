@@ -114,7 +114,7 @@ from nose.pyversion import bytes_
 from nose.suite import ContextSuite
 from nose.util import test_address
 
-# this is a list of plugin classes that will be checked for and created inside 
+# this is a list of plugin classes that will be checked for and created inside
 # each worker process
 _instantiate_plugins = None
 
@@ -136,6 +136,7 @@ def _import_mp():
     global Process, Queue, Pool, Event, Value, Array
     try:
         from multiprocessing import Manager, Process
+
         # prevent the server process created in the manager which holds Python
         # objects and allows other processes to manipulate them using proxies
         # to interrupt on SIGINT (keyboardinterrupt) so that the communication
@@ -146,12 +147,13 @@ def _import_mp():
         # reset it back so main process will receive a KeyboardInterrupt
         # exception on ctrl+c
         signal.signal(signal.SIGINT, old)
-        Queue, Pool, Event, Value, Array = (
-            m.Queue, m.Pool, m.Event, m.Value, m.Array
-        )
+        Queue, Pool, Event, Value, Array = (m.Queue, m.Pool, m.Event, m.Value, m.Array)
     except ImportError:
-        warn("multiprocessing module is not available, multiprocess plugin "
-             "cannot be used", RuntimeWarning)
+        warn(
+            "multiprocessing module is not available, multiprocess plugin "
+            "cannot be used",
+            RuntimeWarning,
+        )
 
 
 class TestLet:
@@ -177,6 +179,7 @@ class MultiProcess(Plugin):
     """
     Run tests in multiple processes. Requires processing module.
     """
+
     score = 1000
     status = {}
 
@@ -184,43 +187,52 @@ class MultiProcess(Plugin):
         """
         Register command-line options.
         """
-        parser.add_option("--processes", action="store",
-                          default=env.get('NOSE_PROCESSES', 0),
-                          dest="multiprocess_workers",
-                          metavar="NUM",
-                          help="Spread test run among this many processes. "
-                               "Set a number equal to the number of processors "
-                               "or cores in your machine for best results. "
-                               "Pass a negative number to have the number of "
-                               "processes automatically set to the number of "
-                               "cores. Passing 0 means to disable parallel "
-                               "testing. Default is 0 unless NOSE_PROCESSES is "
-                               "set. "
-                               "[NOSE_PROCESSES]")
-        parser.add_option("--process-timeout", action="store",
-                          default=env.get('NOSE_PROCESS_TIMEOUT', 10),
-                          dest="multiprocess_timeout",
-                          metavar="SECONDS",
-                          help="Set timeout for return of results from each "
-                               "test runner process. Default is 10. "
-                               "[NOSE_PROCESS_TIMEOUT]")
-        parser.add_option("--process-restartworker", action="store_true",
-                          default=env.get('NOSE_PROCESS_RESTARTWORKER', False),
-                          dest="multiprocess_restartworker",
-                          help="If set, will restart each worker process once"
-                               " their tests are done, this helps control memory "
-                               "leaks from killing the system. "
-                               "[NOSE_PROCESS_RESTARTWORKER]")
+        parser.add_option(
+            "--processes",
+            action="store",
+            default=env.get("NOSE_PROCESSES", 0),
+            dest="multiprocess_workers",
+            metavar="NUM",
+            help="Spread test run among this many processes. "
+            "Set a number equal to the number of processors "
+            "or cores in your machine for best results. "
+            "Pass a negative number to have the number of "
+            "processes automatically set to the number of "
+            "cores. Passing 0 means to disable parallel "
+            "testing. Default is 0 unless NOSE_PROCESSES is "
+            "set. "
+            "[NOSE_PROCESSES]",
+        )
+        parser.add_option(
+            "--process-timeout",
+            action="store",
+            default=env.get("NOSE_PROCESS_TIMEOUT", 10),
+            dest="multiprocess_timeout",
+            metavar="SECONDS",
+            help="Set timeout for return of results from each "
+            "test runner process. Default is 10. "
+            "[NOSE_PROCESS_TIMEOUT]",
+        )
+        parser.add_option(
+            "--process-restartworker",
+            action="store_true",
+            default=env.get("NOSE_PROCESS_RESTARTWORKER", False),
+            dest="multiprocess_restartworker",
+            help="If set, will restart each worker process once"
+            " their tests are done, this helps control memory "
+            "leaks from killing the system. "
+            "[NOSE_PROCESS_RESTARTWORKER]",
+        )
 
     def configure(self, options, config):
         """
         Configure plugin.
         """
         try:
-            self.status.pop('active')
+            self.status.pop("active")
         except KeyError:
             pass
-        if not hasattr(options, 'multiprocess_workers'):
+        if not hasattr(options, "multiprocess_workers"):
             self.enabled = False
             return
         # don't start inside of a worker process
@@ -241,6 +253,7 @@ class MultiProcess(Plugin):
             if workers < 0:
                 try:
                     import multiprocessing
+
                     workers = multiprocessing.cpu_count()
                 except NotImplementedError:
                     self.enabled = False
@@ -251,7 +264,7 @@ class MultiProcess(Plugin):
             self.config.multiprocess_timeout = t
             r = int(options.multiprocess_restartworker)
             self.config.multiprocess_restartworker = r
-            self.status['active'] = True
+            self.status["active"] = True
 
     def prepareTestLoader(self, loader):
         """Remember loader class so NoseMultiProcessTestRunner can instantiate
@@ -260,13 +273,14 @@ class MultiProcess(Plugin):
         self.loaderClass = loader.__class__
 
     def prepareTestRunner(self, runner):
-        """Replace test runner with NoseMultiProcessTestRunner.
-        """
+        """Replace test runner with NoseMultiProcessTestRunner."""
         # replace with our runner class
-        return NoseMultiProcessTestRunner(stream=runner.stream,
-                                          verbosity=self.config.verbosity,
-                                          config=self.config,
-                                          loaderClass=self.loaderClass)
+        return NoseMultiProcessTestRunner(
+            stream=runner.stream,
+            verbosity=self.config.verbosity,
+            config=self.config,
+            loaderClass=self.loaderClass,
+        )
 
 
 def signalhandler(sig, frame):
@@ -278,16 +292,17 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
 
     # respond to SIGILL
     def __init__(self, **kw):
-        self.loaderClass = kw.pop('loaderClass', loader.defaultTestLoader)
-        super(NoseMultiProcessTestRunner, self).__init__(**kw)
+        self.loaderClass = kw.pop("loaderClass", loader.defaultTestLoader)
+        super().__init__(**kw)
 
     def collect(self, test, testQueue, tasks, to_teardown, result):
         # dispatch and collect results
         # put indexes only on queue because tests aren't picklable
         for case in self.nextBatch(test):
             log.debug("Next batch %s (%s)", case, type(case))
-            if (isinstance(case, nose.case.Test) and
-                    isinstance(case.test, failure.Failure)):
+            if isinstance(case, nose.case.Test) and isinstance(
+                case.test, failure.Failure
+            ):
                 log.debug("Case is a Failure")
                 case(result)  # run here to capture the failure
                 continue
@@ -311,30 +326,34 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
                         ancestors = case.factory.context.get(case, [])
                         for an in ancestors[:2]:
                             # log.debug('reset ancestor %s', an)
-                            if getattr(an, '_multiprocess_shared_', False):
+                            if getattr(an, "_multiprocess_shared_", False):
                                 an._multiprocess_can_split_ = True
                             # an._multiprocess_shared_=False
                     self.collect(case, testQueue, tasks, to_teardown, result)
 
             else:
                 test_addr = self.addtask(testQueue, tasks, case)
-                log.debug("Queued test %s (%s) to %s",
-                          len(tasks), test_addr, testQueue)
+                log.debug("Queued test %s (%s) to %s", len(tasks), test_addr, testQueue)
 
     def startProcess(self, iworker, testQueue, resultQueue, shouldStop, result):
-        currentaddr = Value('c', bytes_(''))
-        currentstart = Value('d', time.time())
+        currentaddr = Value("c", bytes_(""))
+        currentstart = Value("d", time.time())
         keyboardCaught = Event()
-        p = Process(target=runner,
-                    args=(iworker, testQueue,
-                          resultQueue,
-                          currentaddr,
-                          currentstart,
-                          keyboardCaught,
-                          shouldStop,
-                          self.loaderClass,
-                          result.__class__,
-                          pickle.dumps(self.config)))
+        p = Process(
+            target=runner,
+            args=(
+                iworker,
+                testQueue,
+                resultQueue,
+                currentaddr,
+                currentstart,
+                keyboardCaught,
+                shouldStop,
+                self.loaderClass,
+                result.__class__,
+                pickle.dumps(self.config),
+            ),
+        )
         p.currentaddr = currentaddr
         p.currentstart = currentstart
         p.keyboardCaught = keyboardCaught
@@ -388,19 +407,31 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
 
         try:
             while tasks:
-                log.debug("Waiting for results (%s/%s tasks), next timeout=%.3fs",
-                          len(completed), total_tasks, nexttimeout)
+                log.debug(
+                    "Waiting for results (%s/%s tasks), next timeout=%.3fs",
+                    len(completed),
+                    total_tasks,
+                    nexttimeout,
+                )
                 try:
                     iworker, addr, newtask_addrs, batch_result = resultQueue.get(
-                        timeout=nexttimeout)
-                    log.debug('Results received for worker %d, %s, new tasks: %d',
-                              iworker, addr, len(newtask_addrs))
+                        timeout=nexttimeout
+                    )
+                    log.debug(
+                        "Results received for worker %d, %s, new tasks: %d",
+                        iworker,
+                        addr,
+                        len(newtask_addrs),
+                    )
                     try:
                         try:
                             tasks.remove(addr)
                         except ValueError:
-                            log.warning('worker %s failed to remove from tasks: %s',
-                                        iworker, addr)
+                            log.warning(
+                                "worker %s failed to remove from tasks: %s",
+                                iworker,
+                                addr,
+                            )
                         total_tasks += len(newtask_addrs)
                         tasks.extend(newtask_addrs)
                     except KeyError:
@@ -409,43 +440,55 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
                     else:
                         completed.append([addr, batch_result])
                     self.consolidate(result, batch_result)
-                    if (self.config.stopOnError
-                            and not result.wasSuccessful()):
+                    if self.config.stopOnError and not result.wasSuccessful():
                         # set the stop condition
                         shouldStop.set()
                         break
                     if self.config.multiprocess_restartworker:
-                        log.debug('joining worker %s', iworker)
+                        log.debug("joining worker %s", iworker)
                         # wait for working, but not that important if worker
                         # cannot be joined in fact, for workers that add to
                         # testQueue, they will not terminate until all their
                         # items are read
                         workers[iworker].join(timeout=1)
                         if not shouldStop.is_set() and not testQueue.empty():
-                            log.debug('starting new process on worker %s', iworker)
-                            workers[iworker] = self.startProcess(iworker, testQueue, resultQueue, shouldStop,
-                                                                 result)
+                            log.debug("starting new process on worker %s", iworker)
+                            workers[iworker] = self.startProcess(
+                                iworker, testQueue, resultQueue, shouldStop, result
+                            )
                 except Empty:
-                    log.debug("Timed out with %s tasks pending "
-                              "(empty testQueue=%r): %s",
-                              len(tasks), testQueue.empty(), str(tasks))
+                    log.debug(
+                        "Timed out with %s tasks pending " "(empty testQueue=%r): %s",
+                        len(tasks),
+                        testQueue.empty(),
+                        str(tasks),
+                    )
                     any_alive = False
                     for iworker, w in enumerate(workers):
                         if w.is_alive():
-                            worker_addr = bytes_(w.currentaddr.value, 'ascii')
+                            worker_addr = bytes_(w.currentaddr.value, "ascii")
                             timeprocessing = time.time() - w.currentstart.value
-                            if (len(worker_addr) == 0
-                                    and timeprocessing > self.config.multiprocess_timeout - 0.1):
-                                log.debug('worker %d has finished its work item, '
-                                          'but is not exiting? do we wait for it?',
-                                          iworker)
+                            if (
+                                len(worker_addr) == 0
+                                and timeprocessing
+                                > self.config.multiprocess_timeout - 0.1
+                            ):
+                                log.debug(
+                                    "worker %d has finished its work item, "
+                                    "but is not exiting? do we wait for it?",
+                                    iworker,
+                                )
                             else:
                                 any_alive = True
-                            if (len(worker_addr) > 0
-                                    and timeprocessing > self.config.multiprocess_timeout - 0.1):
-                                log.debug('timed out worker %s: %s',
-                                          iworker, worker_addr)
-                                w.currentaddr.value = bytes_('')
+                            if (
+                                len(worker_addr) > 0
+                                and timeprocessing
+                                > self.config.multiprocess_timeout - 0.1
+                            ):
+                                log.debug(
+                                    "timed out worker %s: %s", iworker, worker_addr
+                                )
+                                w.currentaddr.value = bytes_("")
                                 # If the process is in C++ code, sending a SIGILL
                                 # might not send a python KeybordInterrupt exception
                                 # therefore, send multiple signals until an
@@ -462,9 +505,13 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
                                         # terminated process might send a result,
                                         # which has to be specially handled or
                                         # else processes might get orphaned.
-                                        workers[iworker] = w = self.startProcess(iworker, testQueue,
-                                                                                 resultQueue, shouldStop,
-                                                                                 result)
+                                        workers[iworker] = w = self.startProcess(
+                                            iworker,
+                                            testQueue,
+                                            resultQueue,
+                                            shouldStop,
+                                            result,
+                                        )
                                         break
                                     os.kill(w.pid, signal.SIGILL)
                                     time.sleep(0.1)
@@ -476,12 +523,14 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
                     if w.is_alive() and len(w.currentaddr.value) > 0:
                         timeprocessing = time.time() - w.currentstart.value
                         if timeprocessing <= self.config.multiprocess_timeout:
-                            nexttimeout = min(nexttimeout,
-                                              self.config.multiprocess_timeout - timeprocessing)
+                            nexttimeout = min(
+                                nexttimeout,
+                                self.config.multiprocess_timeout - timeprocessing,
+                            )
             log.debug("Completed %s tasks (%s remain)", len(completed), len(tasks))
 
         except (KeyboardInterrupt, SystemExit) as e:
-            log.info('parent received ctrl-c when waiting for test results')
+            log.info("parent received ctrl-c when waiting for test results")
             thrownError = e
             # resultQueue.get(False)
 
@@ -508,17 +557,17 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
                 log.debug("Tell all workers to stop")
                 for w in workers:
                     if w.is_alive():
-                        testQueue.put('STOP', block=False)
+                        testQueue.put("STOP", block=False)
 
             # wait for the workers to end
             for iworker, worker in enumerate(workers):
                 if worker.is_alive():
-                    log.debug('joining worker %s', iworker)
+                    log.debug("joining worker %s", iworker)
                     worker.join()
                     if worker.is_alive():
-                        log.debug('failed to join worker %s', iworker)
+                        log.debug("failed to join worker %s", iworker)
         except (KeyboardInterrupt, SystemExit):
-            log.info('parent received ctrl-c when shutting down: stop all processes')
+            log.info("parent received ctrl-c when shutting down: stop all processes")
             for worker in workers:
                 if worker.is_alive():
                     worker.terminate()
@@ -532,7 +581,7 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
 
     def addtask(testQueue, tasks, case):
         arg = None
-        if isinstance(case, nose.case.Test) and hasattr(case.test, 'arg'):
+        if isinstance(case, nose.case.Test) and hasattr(case.test, "arg"):
             # this removes the top level descriptor and allows real function
             # name to be returned
             case.test.descriptor = None
@@ -548,9 +597,9 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
     addtask = staticmethod(addtask)
 
     def address(case):
-        if hasattr(case, 'address'):
+        if hasattr(case, "address"):
             file, mod, call = case.address()
-        elif hasattr(case, 'context'):
+        elif hasattr(case, "context"):
             file, mod, call = test_address(case.context)
         else:
             raise Exception("Unable to convert %s to address" % case)
@@ -564,26 +613,27 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
             # strip __init__.py(c) from end of file part
             # if present, having it there confuses loader
             dirname, basename = os.path.split(file)
-            if basename.startswith('__init__'):
+            if basename.startswith("__init__"):
                 file = dirname
             parts.append(file)
         if call is not None:
             parts.append(call)
-        return ':'.join(map(str, parts))
+        return ":".join(map(str, parts))
 
     address = staticmethod(address)
 
     def nextBatch(self, test):
         # allows tests or suites to mark themselves as not safe
         # for multiprocess execution
-        if hasattr(test, 'context'):
-            if not getattr(test.context, '_multiprocess_', True):
+        if hasattr(test, "context"):
+            if not getattr(test.context, "_multiprocess_", True):
                 return
 
-        if ((isinstance(test, ContextSuite)
-             and test.hasFixtures(self.checkCanSplit))
-                or not getattr(test, 'can_split', True)
-                or not isinstance(test, unittest.TestSuite)):
+        if (
+            (isinstance(test, ContextSuite) and test.hasFixtures(self.checkCanSplit))
+            or not getattr(test, "can_split", True)
+            or not isinstance(test, unittest.TestSuite)
+        ):
             # regular test case, or a suite with context fixtures
 
             # special case: when run like nosetests path/to/module.py
@@ -592,9 +642,10 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
             # item, not the top-level suite
             if isinstance(test, ContextSuite):
                 contained = list(test)
-                if (len(contained) == 1
-                        and getattr(contained[0],
-                                    'context', None) == test.context):
+                if (
+                    len(contained) == 1
+                    and getattr(contained[0], "context", None) == test.context
+                ):
                     test = contained[0]
             yield test
         else:
@@ -602,8 +653,7 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
             # fixtures at any deeper level, so we need to examine it all
             # the way down to the case level
             for case in test:
-                for batch in self.nextBatch(case):
-                    yield batch
+                yield from self.nextBatch(case)
 
     def checkCanSplit(context, fixt):
         """
@@ -616,17 +666,17 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
         """
         if not fixt:
             return False
-        if getattr(context, '_multiprocess_can_split_', False):
+        if getattr(context, "_multiprocess_can_split_", False):
             return False
         return True
 
     checkCanSplit = staticmethod(checkCanSplit)
 
     def sharedFixtures(self, case):
-        context = getattr(case, 'context', None)
+        context = getattr(case, "context", None)
         if not context:
             return False
-        return getattr(context, '_multiprocess_shared_', False)
+        return getattr(context, "_multiprocess_shared_", False)
 
     def consolidate(self, result, batch_result):
         log.debug("batch result is %s", batch_result)
@@ -651,20 +701,50 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
         log.debug("Ran %s tests (total: %s)", testsRun, result.testsRun)
 
 
-def runner(ix, testQueue, resultQueue, currentaddr, currentstart,
-           keyboardCaught, shouldStop, loaderClass, resultClass, config):
+def runner(
+    ix,
+    testQueue,
+    resultQueue,
+    currentaddr,
+    currentstart,
+    keyboardCaught,
+    shouldStop,
+    loaderClass,
+    resultClass,
+    config,
+):
     try:
         try:
-            return __runner(ix, testQueue, resultQueue, currentaddr, currentstart,
-                            keyboardCaught, shouldStop, loaderClass, resultClass, config)
+            return __runner(
+                ix,
+                testQueue,
+                resultQueue,
+                currentaddr,
+                currentstart,
+                keyboardCaught,
+                shouldStop,
+                loaderClass,
+                resultClass,
+                config,
+            )
         except KeyboardInterrupt:
-            log.debug('Worker %s keyboard interrupt, stopping', ix)
+            log.debug("Worker %s keyboard interrupt, stopping", ix)
     except Empty:
         log.debug("Worker %s timed out waiting for tasks", ix)
 
 
-def __runner(ix, testQueue, resultQueue, currentaddr, currentstart,
-             keyboardCaught, shouldStop, loaderClass, resultClass, config):
+def __runner(
+    ix,
+    testQueue,
+    resultQueue,
+    currentaddr,
+    currentstart,
+    keyboardCaught,
+    shouldStop,
+    loaderClass,
+    resultClass,
+    config,
+):
     config = pickle.loads(config)
     dummy_parser = config.parserClass()
     if _instantiate_plugins is not None:
@@ -680,10 +760,10 @@ def __runner(ix, testQueue, resultQueue, currentaddr, currentstart,
         return testQueue.get(timeout=config.multiprocess_timeout)
 
     def makeResult():
-        stream = (StringIO())
-        result = resultClass(stream, descriptions=1,
-                             verbosity=config.verbosity,
-                             config=config)
+        stream = StringIO()
+        result = resultClass(
+            stream, descriptions=1, verbosity=config.verbosity, config=config
+        )
         plug_result = config.plugins.prepareTestResult(result)
         if plug_result:
             return plug_result
@@ -712,45 +792,52 @@ def __runner(ix, testQueue, resultQueue, currentaddr, currentstart,
             try:
                 if isinstance(err, tuple) and len(err) == 3:
                     exc_type, exc_value, exc_tb = err
-                    tb_presence = "\n(Traceback obj detected)" if exc_tb is not None else ""
-                    formatted = "".join(traceback.format_exception_only(exc_type, exc_value)).strip()
+                    tb_presence = (
+                        "\n(Traceback obj detected)" if exc_tb is not None else ""
+                    )
+                    formatted = "".join(
+                        traceback.format_exception_only(exc_type, exc_value)
+                    ).strip()
                     return formatted + tb_presence + "\n(Error originally tuple)"
                 elif isinstance(err, Exception):
                     return f"Exception: {type(err).__name__}: {err}"
                 else:
                     return f"Unknown Error Type (converted): {repr(err)}"
             except Exception as e:
-                return "Error during ensure_string_err: %s\nOriginal error repr: %r" % (e, err)
+                return "Error during ensure_string_err: {}\nOriginal error repr: {!r}".format(
+                    e,
+                    err,
+                )
 
-        failures = [(get_test_id(c), ensure_string_err(err)) for c, err in result.failures]
+        failures = [
+            (get_test_id(c), ensure_string_err(err)) for c, err in result.failures
+        ]
         errors = [(get_test_id(c), ensure_string_err(err)) for c, err in result.errors]
 
         errorClasses = {}
         for key, (storage, label, isfail) in result.errorClasses.items():
             try:
-                formatted_storage = [(get_test_id(c), ensure_string_err(err)) for c, err in storage]
+                formatted_storage = [
+                    (get_test_id(c), ensure_string_err(err)) for c, err in storage
+                ]
             except Exception as e:
-                formatted_storage = [("Error processing case in errorClass", "Details: %s" % e)]
+                formatted_storage = [
+                    ("Error processing case in errorClass", "Details: %s" % e)
+                ]
             errorClasses[key] = (formatted_storage, label, isfail)
 
         output_val = ""
-        if hasattr(result, 'stream') and hasattr(result.stream, 'getvalue'):
+        if hasattr(result, "stream") and hasattr(result.stream, "getvalue"):
             try:
                 output_val = result.stream.getvalue()
             except Exception as e:
                 output_val = "Error getting stream value: %s" % e
 
-        return (
-            output_val,
-            result.testsRun,
-            failures,
-            errors,
-            errorClasses
-        )
+        return (output_val, result.testsRun, failures, errors, errorClasses)
 
-    for test_addr, arg in iter(get, 'STOP'):
+    for test_addr, arg in iter(get, "STOP"):
         if shouldStop.is_set():
-            log.exception('Worker %d STOPPED', ix)
+            log.exception("Worker %d STOPPED", ix)
             break
         result = makeResult()
         loader = loaderClass(config=config)
@@ -764,14 +851,18 @@ def __runner(ix, testQueue, resultQueue, currentaddr, currentstart,
         original_test_addr = test_addr
         current_test_id_for_reporting = test_addr
         if arg is not None:
-             current_test_id_for_reporting += str(arg)
+            current_test_id_for_reporting += str(arg)
 
         try:
-            currentaddr.value = current_test_id_for_reporting.encode('ascii', errors='replace')
+            currentaddr.value = current_test_id_for_reporting.encode(
+                "ascii", errors="replace"
+            )
             currentstart.value = time.time()
             test(result)
-            currentaddr.value = bytes_('')
-            resultQueue.put((ix, current_test_id_for_reporting, test.tasks, batch(result)))
+            currentaddr.value = bytes_("")
+            resultQueue.put(
+                (ix, current_test_id_for_reporting, test.tasks, batch(result))
+            )
 
         except KeyboardInterrupt as e:
             timeout = isinstance(e, TimedOutException)
@@ -780,33 +871,41 @@ def __runner(ix, testQueue, resultQueue, currentaddr, currentstart,
 
             current_test_id = current_test_id_for_reporting
             if timeout:
-                msg = 'Worker %s timed out, failing current test %s'
+                msg = "Worker %s timed out, failing current test %s"
             else:
-                msg = 'Worker %s keyboard interrupt, failing current test %s'
+                msg = "Worker %s keyboard interrupt, failing current test %s"
             log.info(msg, ix, current_test_id)
             current_exc_info = sys.exc_info()
             formatted_tb = "".join(traceback.format_exception(*current_exc_info))
             minimal_error_list = [(current_test_id, formatted_tb)]
-            minimal_batch_result = ('', 0, [], minimal_error_list, {})
+            minimal_batch_result = ("", 0, [], minimal_error_list, {})
             resultQueue.put((ix, current_test_id, [], minimal_batch_result))
 
-            currentaddr.value = bytes_('')
+            currentaddr.value = bytes_("")
             if not timeout:
                 raise
 
         except SystemExit:
-            currentaddr.value = bytes_('')
-            log.exception('Worker %s system exit during test %s', ix, current_test_id_for_reporting)
+            currentaddr.value = bytes_("")
+            log.exception(
+                "Worker %s system exit during test %s",
+                ix,
+                current_test_id_for_reporting,
+            )
             raise
 
         except Exception as e:
             current_test_id = current_test_id_for_reporting
-            currentaddr.value = bytes_('')
-            log.exception("Worker %s error running test or returning results for %s", ix, current_test_id)
+            currentaddr.value = bytes_("")
+            log.exception(
+                "Worker %s error running test or returning results for %s",
+                ix,
+                current_test_id,
+            )
             current_exc_info = sys.exc_info()
             formatted_tb = "".join(traceback.format_exception(*current_exc_info))
             minimal_error_list = [(current_test_id, formatted_tb)]
-            minimal_batch_result = ('', 0, [], minimal_error_list, {})
+            minimal_batch_result = ("", 0, [], minimal_error_list, {})
             resultQueue.put((ix, current_test_id, [], minimal_batch_result))
 
         if config.multiprocess_restartworker:
@@ -824,26 +923,25 @@ class NoSharedFixtureContextSuite(ContextSuite):
     from executing in the runner process as well.
 
     """
+
     testQueue = None
     tasks = None
     arg = None
 
     def setupContext(self, context):
-        if getattr(context, '_multiprocess_shared_', False):
+        if getattr(context, "_multiprocess_shared_", False):
             return
-        super(NoSharedFixtureContextSuite, self).setupContext(context)
+        super().setupContext(context)
 
     def teardownContext(self, context):
-        if getattr(context, '_multiprocess_shared_', False):
+        if getattr(context, "_multiprocess_shared_", False):
             return
-        super(NoSharedFixtureContextSuite, self).teardownContext(context)
+        super().teardownContext(context)
 
     def run(self, result):
-        """Run tests in suite inside of suite fixtures.
-        """
+        """Run tests in suite inside of suite fixtures."""
         # proxy the result for myself
-        log.debug("suite %s (%s) run called, tests: %s",
-                  id(self), self, self._tests)
+        log.debug("suite %s (%s) run called, tests: %s", id(self), self, self._tests)
         if self.resultProxy:
             result, orig = self.resultProxy(result, self), result
         else:
@@ -854,13 +952,12 @@ class NoSharedFixtureContextSuite(ContextSuite):
         except KeyboardInterrupt:
             raise
         except:
-            self.error_context = 'setup'
+            self.error_context = "setup"
             result.addError(self, self._exc_info())
             return
         try:
             for test in self._tests:
-                if (isinstance(test, nose.case.Test)
-                        and self.arg is not None):
+                if isinstance(test, nose.case.Test) and self.arg is not None:
                     test.test.arg = self.arg
                 else:
                     test.arg = self.arg
@@ -878,12 +975,15 @@ class NoSharedFixtureContextSuite(ContextSuite):
                 except KeyboardInterrupt as e:
                     timeout = isinstance(e, TimedOutException)
                     if timeout:
-                        msg = 'Timeout when running test %s in suite %s'
+                        msg = "Timeout when running test %s in suite %s"
                     else:
-                        msg = 'KeyboardInterrupt when running test %s in suite %s'
+                        msg = "KeyboardInterrupt when running test %s in suite %s"
                     log.debug(msg, test, self)
-                    err = (TimedOutException, TimedOutException(str(test)),
-                           sys.exc_info()[2])
+                    err = (
+                        TimedOutException,
+                        TimedOutException(str(test)),
+                        sys.exc_info()[2],
+                    )
                     test.config.plugins.addError(test, err)
                     orig.addError(test, err)
                     if not timeout:
@@ -896,5 +996,5 @@ class NoSharedFixtureContextSuite(ContextSuite):
             except KeyboardInterrupt:
                 raise
             except:
-                self.error_context = 'teardown'
+                self.error_context = "teardown"
                 result.addError(self, self._exc_info())

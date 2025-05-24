@@ -1,6 +1,7 @@
 """
 This module contains fixups for using nose under different versions of Python.
 """
+
 import inspect
 import os
 import sys
@@ -8,10 +9,20 @@ import traceback
 
 import nose.util
 
-__all__ = ['make_instancemethod', 'cmp_to_key', 'sort_list',
-           'UNICODE_STRINGS', 'unbound_method', 'ismethod',
-           'bytes_', 'is_base_exception', 'force_unicode', 'exc_to_unicode',
-           'format_exception', 'isgenerator']
+__all__ = [
+    "make_instancemethod",
+    "cmp_to_key",
+    "sort_list",
+    "UNICODE_STRINGS",
+    "unbound_method",
+    "ismethod",
+    "bytes_",
+    "is_base_exception",
+    "force_unicode",
+    "exc_to_unicode",
+    "format_exception",
+    "isgenerator",
+]
 
 UNICODE_STRINGS = True
 
@@ -23,6 +34,7 @@ def force_unicode(s):
 # new.instancemethod() is obsolete for new-style classes (Python 3.x)
 # We need to use descriptor methods instead.
 
+
 def make_instancemethod(function, instance):
     return function.__get__(instance, instance.__class__)
 
@@ -33,7 +45,7 @@ def make_instancemethod(function, instance):
 def cmp_to_key(mycmp):
     """Convert a cmp= function into a key= function"""
 
-    class Key(object):
+    class Key:
         def __init__(self, obj):
             self.obj = obj
 
@@ -66,17 +78,20 @@ class UnboundMethod:
         self.__dict__ = func.__dict__.copy()
         self._func = func
         self.__self__ = UnboundSelf(cls)
-        self.__doc__ = getattr(func, '__doc__', None)
+        self.__doc__ = getattr(func, "__doc__", None)
 
     def address(self):
         cls = self.__self__.cls
         modname = cls.__module__
         module = sys.modules[modname]
-        filename = getattr(module, '__file__', None)
+        filename = getattr(module, "__file__", None)
         if filename is not None:
             filename = os.path.abspath(filename)
-        return (nose.util.src(filename), modname, "%s.%s" % (cls.__name__,
-                                                             self._func.__name__))
+        return (
+            nose.util.src(filename),
+            modname,
+            "{}.{}".format(cls.__name__, self._func.__name__),
+        )
 
     def __call__(self, *args, **kwargs):
         return self._func(*args, **kwargs)
@@ -85,8 +100,10 @@ class UnboundMethod:
         return getattr(self._func, attr)
 
     def __repr__(self):
-        return '<unbound method %s.%s>' % (self.__self__.cls.__name__,
-                                           self._func.__name__)
+        return "<unbound method {}.{}>".format(
+            self.__self__.cls.__name__,
+            self._func.__name__,
+        )
 
     @property
     def func(self):
@@ -100,7 +117,7 @@ class UnboundSelf:
     # We have to do this hackery because Python won't let us override the
     # __class__ attribute...
     def __getattribute__(self, attr):
-        if attr == '__class__':
+        if attr == "__class__":
             return self.cls
         else:
             return object.__getattribute__(self, attr)
@@ -110,7 +127,7 @@ def unbound_method(cls, func):
     if inspect.ismethod(func):
         return func
     if not inspect.isfunction(func):
-        raise TypeError('%s is not a function' % (repr(func),))
+        raise TypeError("{} is not a function".format(repr(func)))
     return UnboundMethod(cls, func)
 
 
@@ -119,14 +136,12 @@ def ismethod(obj):
 
 
 # Make a pseudo-bytes function that can be called without the encoding arg:
-if sys.version_info >= (3, 0):
-    def bytes_(s, encoding='utf8'):
-        if isinstance(s, bytes):
-            return s
-        return bytes(s, encoding)
-else:
-    def bytes_(s, encoding=None):
-        return str(s)
+
+def bytes_(s, encoding="utf8"):
+    if isinstance(s, bytes):
+        return s
+    return bytes(s, encoding)
+
 
 
 def isgenerator(o):
@@ -145,7 +160,7 @@ def exc_to_unicode(ev):
     return str(ev)
 
 
-def format_exception(exc_info, encoding='UTF-8'):
+def format_exception(exc_info, encoding="UTF-8"):
     ec, ev, tb = exc_info
 
     # Our exception object may have been turned into a string, and Python 3's
@@ -153,10 +168,8 @@ def format_exception(exc_info, encoding='UTF-8'):
     # actual exception object).  So we work around it, by doing the work
     # ourselves if ev is not an exception object.
     if not is_base_exception(ev):
-        tb_data = force_unicode(
-            ''.join(traceback.format_tb(tb)))
+        tb_data = force_unicode("".join(traceback.format_tb(tb)))
         ev = exc_to_unicode(ev)
         return tb_data + ev
     else:
-        return force_unicode(
-            ''.join(traceback.format_exception(*exc_info)))
+        return force_unicode("".join(traceback.format_exception(*exc_info)))

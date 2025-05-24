@@ -52,7 +52,7 @@ class TestIssue134(PluginTester, unittest.TestCase):
 
     def runTest(self):
         print(str(self.output))
-        f = open(xml_results_filename, 'r')
+        f = open(xml_results_filename, 'r', encoding='utf-8')
         result = f.read()
         f.close()
         print(result)
@@ -68,7 +68,7 @@ class TestIssue279(PluginTester, unittest.TestCase):
 
     def runTest(self):
         print(str(self.output))
-        f = open(xml_results_filename, 'r')
+        f = open(xml_results_filename, 'r', encoding='utf-8')
         result = f.read()
         f.close()
         print(result)
@@ -99,7 +99,7 @@ class TestIssue700(PluginTester, unittest.TestCase):
 
     def runTest(self):
         print(str(self.output))
-        f = open(xml_results_filename, 'r')
+        f = open(xml_results_filename, 'r', encoding='utf-8')
         result = f.read()
         f.close()
         print(result)
@@ -117,7 +117,7 @@ class TestIssue859(PluginTester, unittest.TestCase):
 
     def runTest(self):
         print(str(self.output))
-        f = open(xml_results_filename, 'r')
+        f = open(xml_results_filename, 'r', encoding='utf-8')
         result = f.read()
         f.close()
         print(result)

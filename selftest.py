@@ -23,50 +23,53 @@ not supported.
 # installing the version to be tested, nor uninstalling the currently-installed
 # version.
 
-import glob
 import os
 import sys
 
-import importlib.metadata
-
-
-# replacement for old pkg_resources
-def importlib_env(search_paths):
-    distributions = {}
-    for path in search_paths:
-        try:
-            for distribution in importlib.metadata.distributions(path=path):
-                distributions[distribution.metadata['Name']] = distribution
-        except Exception as e:
-            print(f"Error processing path {path}: {e}")
-    return distributions
-
+# Removed: import glob
+# Removed: import importlib.metadata
+# Removed: importlib_env function
 
 if __name__ == "__main__":
     this_dir = os.path.normpath(os.path.abspath(os.path.dirname(__file__)))
-    lib_dirs = [this_dir]
-    test_dir = this_dir
 
-    lib_dirs = glob.glob(os.path.join(this_dir, 'build', 'lib*'))
-    test_dir = os.path.join(this_dir, 'build', 'tests')
-    if not os.path.isdir(test_dir):
-        raise Exception(
-            "Error: %s does not exist.  Use the setup.py 'build_tests' command to create it." % (
-                test_dir,))
+    # Ensure the local 'nose' library is on the path
+    # this_dir is the project root, which contains the 'nose' package.
+    sys.path.insert(0, this_dir)
 
-    env = importlib_env(lib_dirs)
+    # Define test source directories relative to the project root
+    test_source_dirs_relative = [
+        "functional_tests",
+        "unit_tests",
+        os.path.join("doc", "doc_tests")
+    ]
 
-    distributions = env["nose-py3"]
-    if not distributions:
-        raise Exception("No nose distibution has been built")
-    elif len(distributions) != 1:
-        raise Exception("More than one nose distribution found")
+    # Add test source directories to sys.path
+    # We insert them after the project root to ensure local 'nose' is preferred,
+    # and then in reverse order so the first one in the list is searched first.
+    for test_subdir in reversed(test_source_dirs_relative):
+        abs_test_dir = os.path.join(this_dir, test_subdir)
+        if not os.path.isdir(abs_test_dir):
+            # This is a basic sanity check, though setup.py's test_dirs should be accurate.
+            print(f"Warning: Test directory {abs_test_dir} not found, skipping.")
+        else:
+            sys.path.insert(1, abs_test_dir) # Insert after project_root
 
-    dist = distributions[0]
-    dist.activate()
+    # Removed: lib_dirs = glob.glob(os.path.join(this_dir, 'build', 'lib*'))
+    # Removed: test_dir = os.path.join(this_dir, 'build', 'tests')
+    # Removed: if not os.path.isdir(test_dir): ... (existence check for build/tests)
 
-    # Always make sure our chosen test dir is first on the path
-    sys.path.insert(0, test_dir)
+    # Removed: env = importlib_env(lib_dirs)
+    # Removed: distributions = env["nose-py3"]
+    # Removed: if not distributions: ...
+    # Removed: elif len(distributions) != 1: ...
+    # Removed: dist = distributions[0]
+    # Removed: dist.activate()
+
+    # Removed: sys.path.insert(0, test_dir) # This was for the build/tests directory
+
+    # Import nose (should now pick up the local version)
     import nose
 
+    # Run tests
     nose.run_exit()

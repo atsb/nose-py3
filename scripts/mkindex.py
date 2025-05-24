@@ -35,7 +35,7 @@ root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 print
 "Main..."
-tpl = open(os.path.join(root, 'index.html.tpl'), 'r').read()
+tpl = open(os.path.join(root, 'index.html.tpl'), 'r', encoding='utf-8').read()
 
 pat = re.compile(r'^.*(Basic usage)', re.DOTALL)
 txt = nose.__doc__.replace(':: python', '::')
@@ -62,13 +62,13 @@ docs['commands'] = cmds['body']
 
 print
 "Changelog..."
-changes = open(os.path.join(root, 'CHANGELOG'), 'r').read()
+changes = open(os.path.join(root, 'CHANGELOG'), 'r', encoding='utf-8').read()
 changes_html = publish_parts(changes, reader=DocReader(), writer_name='html')
 docs['changelog'] = changes_html['body']
 
 print
 "News..."
-news = open(os.path.join(root, 'NEWS'), 'r').read()
+news = open(os.path.join(root, 'NEWS'), 'r', encoding='utf-8').read()
 news_html = publish_parts(news, reader=DocReader(), writer_name='html')
 docs['news'] = news_html['body']
 
@@ -81,10 +81,10 @@ docs['usage'] = '<pre>%s</pre>' % usage_txt
 
 out = tpl % docs
 
-index = open(os.path.join(root, 'index.html'), 'w')
+index = open(os.path.join(root, 'index.html'), 'w', encoding='utf-8')
 index.write(out)
 index.close()
 
-readme = open(os.path.join(root, 'README.txt'), 'w')
+readme = open(os.path.join(root, 'README.txt'), 'w', encoding='utf-8')
 readme.write(nose.__doc__)
 readme.close()

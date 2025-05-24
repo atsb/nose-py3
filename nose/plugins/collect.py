@@ -1,6 +1,6 @@
 """
 This plugin bypasses the actual execution of tests, and instead just collects
-test names. Fixtures are also bypassed, so running nosetests with the 
+test names. Fixtures are also bypassed, so running nosetests with the
 collection plugin enabled should be very quick.
 
 This plugin is useful in combination with the testid plugin (``--with-id``).
@@ -10,6 +10,7 @@ run individual tests by index number.
 This plugin is also useful for counting tests in a test suite, and making
 people watching your demo think all of your tests pass.
 """
+
 import logging
 import unittest
 
@@ -23,29 +24,28 @@ class CollectOnly(Plugin):
     """
     Collect and output test names only, don't run any tests.
     """
+
     name = "collect-only"
-    enableOpt = 'collect_only'
+    enableOpt = "collect_only"
 
     def options(self, parser, env):
-        """Register commandline options.
-        """
-        parser.add_option('--collect-only',
-                          action='store_true',
-                          dest=self.enableOpt,
-                          default=env.get('NOSE_COLLECT_ONLY'),
-                          help="Enable collect-only: %s [COLLECT_ONLY]" %
-                               (self.help()))
+        """Register commandline options."""
+        parser.add_option(
+            "--collect-only",
+            action="store_true",
+            dest=self.enableOpt,
+            default=env.get("NOSE_COLLECT_ONLY"),
+            help="Enable collect-only: %s [COLLECT_ONLY]" % (self.help()),
+        )
 
     def prepareTestLoader(self, loader):
-        """Install collect-only suite class in TestLoader.
-        """
+        """Install collect-only suite class in TestLoader."""
         # Disable context awareness
         log.debug("Preparing test loader")
         loader.suiteClass = TestSuiteFactory(self.conf)
 
     def prepareTestCase(self, test):
-        """Replace actual test with dummy that always passes.
-        """
+        """Replace actual test with dummy that always passes."""
         # Return something that always passes
         log.debug("Preparing test case %s", test)
         if not isinstance(test, Test):

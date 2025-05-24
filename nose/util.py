@@ -1,5 +1,5 @@
-"""Utility functions and classes used by nose internally.
-"""
+"""Utility functions and classes used by nose internally."""
+
 import inspect
 import itertools
 import logging
@@ -12,25 +12,37 @@ import unittest
 
 from nose.pyversion import isgenerator
 
-log = logging.getLogger('nose')
+log = logging.getLogger("nose")
 
-ident_re = re.compile(r'^[A-Za-z_][A-Za-z0-9_.]*$')
+ident_re = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*$")
 skip_pattern = r"(?:\.svn)|(?:[^.]+\.py[co])|(?:.*~)|(?:.*\$py\.class)|(?:__pycache__)"
 set = set
 
 
-def ls_tree(dir_path="",
-            skip_pattern=skip_pattern,
-            indent="|-- ", branch_indent="|   ",
-            last_indent="`-- ", last_branch_indent="    "):
+def ls_tree(
+    dir_path="",
+    skip_pattern=skip_pattern,
+    indent="|-- ",
+    branch_indent="|   ",
+    last_indent="`-- ",
+    last_branch_indent="    ",
+):
     # TODO: empty directories look like non-directory files
-    return "\n".join(_ls_tree_lines(dir_path, skip_pattern,
-                                    indent, branch_indent,
-                                    last_indent, last_branch_indent))
+    return "\n".join(
+        _ls_tree_lines(
+            dir_path,
+            skip_pattern,
+            indent,
+            branch_indent,
+            last_indent,
+            last_branch_indent,
+        )
+    )
 
 
-def _ls_tree_lines(dir_path, skip_pattern,
-                   indent, branch_indent, last_indent, last_branch_indent):
+def _ls_tree_lines(
+    dir_path, skip_pattern, indent, branch_indent, last_indent, last_branch_indent
+):
     if dir_path == "":
         dir_path = os.getcwd()
 
@@ -48,8 +60,11 @@ def _ls_tree_lines(dir_path, skip_pattern,
             nondirs.append(name)
 
     # list non-directories first
-    entries = list(itertools.chain([(name, False) for name in nondirs],
-                                   [(name, True) for name in dirs]))
+    entries = list(
+        itertools.chain(
+            [(name, False) for name in nondirs], [(name, True) for name in dirs]
+        )
+    )
 
     def ls_entry(name, is_dir, ind, branch_ind):
         if not is_dir:
@@ -58,19 +73,22 @@ def _ls_tree_lines(dir_path, skip_pattern,
             path = os.path.join(dir_path, name)
             if not os.path.islink(path):
                 yield ind + name
-                subtree = _ls_tree_lines(path, skip_pattern,
-                                         indent, branch_indent,
-                                         last_indent, last_branch_indent)
+                subtree = _ls_tree_lines(
+                    path,
+                    skip_pattern,
+                    indent,
+                    branch_indent,
+                    last_indent,
+                    last_branch_indent,
+                )
                 for x in subtree:
                     yield branch_ind + x
 
     for name, is_dir in entries[:-1]:
-        for line in ls_entry(name, is_dir, indent, branch_indent):
-            yield line
+        yield from ls_entry(name, is_dir, indent, branch_indent)
     if entries:
         name, is_dir = entries[-1]
-        for line in ls_entry(name, is_dir, last_indent, last_branch_indent):
-            yield line
+        yield from ls_entry(name, is_dir, last_indent, last_branch_indent)
 
 
 def absdir(path):
@@ -78,8 +96,7 @@ def absdir(path):
     otherwise.
     """
     if not os.path.isabs(path):
-        path = os.path.normpath(os.path.abspath(os.path.join(os.getcwd(),
-                                                             path)))
+        path = os.path.normpath(os.path.abspath(os.path.join(os.getcwd(), path)))
     if path is None or not os.path.isdir(path):
         return None
     return path
@@ -104,13 +121,12 @@ def absfile(path, where=None):
     if path is None or not os.path.exists(path):
         if where != os.getcwd():
             # try the cwd instead
-            path = os.path.normpath(os.path.abspath(os.path.join(os.getcwd(),
-                                                                 orig)))
+            path = os.path.normpath(os.path.abspath(os.path.join(os.getcwd(), orig)))
     if path is None or not os.path.exists(path):
         return None
     if os.path.isdir(path):
         # might want an __init__.py from pacakge
-        init = os.path.join(path, '__init__.py')
+        init = os.path.join(path, "__init__.py")
         if os.path.isfile(init):
             return init
     elif os.path.isfile(path):
@@ -130,10 +146,12 @@ def file_like(name):
     directory part, or it ends in .py, or it isn't a legal python
     identifier.
     """
-    return (os.path.exists(name)
-            or os.path.dirname(name)
-            or name.endswith('.py')
-            or not ident_re.match(os.path.splitext(name)[0]))
+    return (
+        os.path.exists(name)
+        or os.path.dirname(name)
+        or name.endswith(".py")
+        or not ident_re.match(os.path.splitext(name)[0])
+    )
 
 
 def func_lineno(func):
@@ -179,11 +197,12 @@ def ispackage(path):
         # and __init__.py[co] must exist
         end = os.path.basename(path)
         if ident_re.match(end):
-            for init in ('__init__.py', '__init__.pyc', '__init__.pyo'):
+            for init in ("__init__.py", "__init__.pyc", "__init__.pyo"):
                 if os.path.isfile(os.path.join(path, init)):
                     return True
-            if sys.platform.startswith('java') and \
-                    os.path.isfile(os.path.join(path, '__init__$py.class')):
+            if sys.platform.startswith("java") and os.path.isfile(
+                os.path.join(path, "__init__$py.class")
+            ):
                 return True
     return False
 
@@ -214,10 +233,10 @@ def getfilename(package, relativeTo=None):
     """
     if relativeTo is None:
         relativeTo = os.getcwd()
-    path = os.path.join(relativeTo, os.sep.join(package.split('.')))
-    if os.path.exists(path + '/__init__.py'):
+    path = os.path.join(relativeTo, os.sep.join(package.split(".")))
+    if os.path.exists(path + "/__init__.py"):
         return path
-    filename = path + '.py'
+    filename = path + ".py"
     if os.path.exists(filename):
         return filename
     return None
@@ -254,10 +273,12 @@ def getpackage(filename):
     'nose.plugins'
     """
     src_file = src(filename)
-    if (os.path.isdir(src_file) or not src_file.endswith('.py')) and not ispackage(src_file):
+    if (os.path.isdir(src_file) or not src_file.endswith(".py")) and not ispackage(
+        src_file
+    ):
         return None
     base, ext = os.path.splitext(os.path.basename(src_file))
-    if base == '__init__':
+    if base == "__init__":
         mod_parts = []
     else:
         mod_parts = [base]
@@ -269,7 +290,7 @@ def getpackage(filename):
             break
         path, part = os.path.split(path)
     mod_parts.reverse()
-    return '.'.join(mod_parts)
+    return ".".join(mod_parts)
 
 
 def ln(label):
@@ -280,10 +301,10 @@ def ln(label):
     """
     label_len = len(label) + 2
     chunk = (70 - label_len) // 2
-    out = '%s %s %s' % ('-' * chunk, label, '-' * chunk)
+    out = "{} {} {}".format("-" * chunk, label, "-" * chunk)
     pad = 70 - len(out)
     if pad > 0:
-        out = out + ('-' * pad)
+        out = out + ("-" * pad)
     return out
 
 
@@ -296,13 +317,13 @@ def resolve_name(name, module=None):
     >>> resolve_name('nose.util.resolve_name') #doctest: +ELLIPSIS
     <function resolve_name at...>
     """
-    parts = name.split('.')
+    parts = name.split(".")
     parts_copy = parts[:]
     if module is None:
         while parts_copy:
             try:
                 log.debug("__import__ %s", name)
-                module = __import__('.'.join(parts_copy))
+                module = __import__(".".join(parts_copy))
                 break
             except ImportError:
                 del parts_copy[-1]
@@ -330,7 +351,7 @@ def split_test_name(test):
     norm = os.path.normpath
     file_or_mod = test
     fn = None
-    if not ':' in test:
+    if not ":" in test:
         # only a file or mod part
         if file_like(test):
             return (norm(test), None, None)
@@ -344,28 +365,30 @@ def split_test_name(test):
         # name followed by a callable, but also may be a windows
         # drive letter followed by a path
         try:
-            file_or_mod, fn = test.split(':')
+            file_or_mod, fn = test.split(":")
             if file_like(fn):
                 # must be a funny path
                 file_or_mod, fn = test, None
         except ValueError:
             # more than one : in the test
             # this is a case like c:\some\path.py:a_test
-            parts = test.split(':')
+            parts = test.split(":")
             if len(parts[0]) == 1:
-                file_or_mod, fn = ':'.join(parts[:-1]), parts[-1]
+                file_or_mod, fn = ":".join(parts[:-1]), parts[-1]
             else:
                 # nonsense like foo:bar:baz
-                raise ValueError("Test name '%s' could not be parsed. Please "
-                                 "format test names as path:callable or "
-                                 "module:callable." % (test,))
+                raise ValueError(
+                    "Test name '%s' could not be parsed. Please "
+                    "format test names as path:callable or "
+                    "module:callable." % (test,)
+                )
     elif not tail:
         # this is a case like 'foo:bar/'
         # : must be part of the file path, so ignore it
         file_or_mod = test
     else:
-        if ':' in tail:
-            file_part, fn = tail.split(':')
+        if ":" in tail:
+            file_part, fn = tail.split(":")
         else:
             file_part = tail
         file_or_mod = os.sep.join([head, file_part])
@@ -392,26 +415,26 @@ def test_address(test):
     t = type(test)
     file = module = call = None
     if t == types.ModuleType:
-        file = getattr(test, '__file__', None)
-        module = getattr(test, '__name__', None)
+        file = getattr(test, "__file__", None)
+        module = getattr(test, "__name__", None)
         return src(file), module, call
     if t == types.FunctionType or t is type or issubclass(t, type):
-        module = getattr(test, '__module__', None)
+        module = getattr(test, "__module__", None)
         if module is not None:
             m = sys.modules[module]
-            file = getattr(m, '__file__', None)
+            file = getattr(m, "__file__", None)
             if file is not None:
                 file = os.path.abspath(file)
-        call = getattr(test, '__name__', None)
+        call = getattr(test, "__name__", None)
         return src(file), module, call
     if t == types.MethodType:
         cls_adr = test_address(test.__self__.__class__)
-        return (src(cls_adr[0]), cls_adr[1],
-                "%s.%s" % (cls_adr[2], test.__name__))
+        return (src(cls_adr[0]), cls_adr[1], "{}.{}".format(cls_adr[2], test.__name__))
     # handle unittest.TestCase instances
     if isinstance(test, unittest.TestCase):
-        if (hasattr(test, '_FunctionTestCase__testFunc')  # pre 2.7
-                or hasattr(test, '_testFunc')):  # 2.7
+        if hasattr(test, "_FunctionTestCase__testFunc") or hasattr(  # pre 2.7
+            test, "_testFunc"
+        ):  # 2.7
             # unittest FunctionTestCase
             try:
                 return test_address(test._FunctionTestCase__testFunc)
@@ -424,12 +447,13 @@ def test_address(test):
             method_name = test._TestCase__testMethodName
         except AttributeError:
             method_name = test._testMethodName
-        return (src(cls_adr[0]), cls_adr[1],
-                "%s.%s" % (cls_adr[2], method_name))
-    if (hasattr(test, '__class__') and
-            test.__class__.__module__ not in ('__builtin__', 'builtins')):
+        return (src(cls_adr[0]), cls_adr[1], "{}.{}".format(cls_adr[2], method_name))
+    if hasattr(test, "__class__") and test.__class__.__module__ not in (
+        "__builtin__",
+        "builtins",
+    ):
         return test_address(test.__class__)
-    raise TypeError("I don't know what %s is (%s)" % (test, t))
+    raise TypeError("I don't know what {} is ({})".format(test, t))
 
 
 test_address.__test__ = False  # do not collect
@@ -451,17 +475,18 @@ def try_run(obj, names):
 
                 else:
                     # Not a function. If it's callable, call it anyway
-                    if hasattr(func, '__call__') and not inspect.ismethod(func):
+                    if hasattr(func, "__call__") and not inspect.ismethod(func):
                         func = func.__call__
                     try:
                         spec = inspect.getfullargspec(func)
                         args, varargs, varkw, defaults = spec[:4]
                         args.pop(0)  # pop the self off
                     except TypeError:
-                        raise TypeError("Attribute %s of %r is not a python "
-                                        "function. Only functions or callables"
-                                        " may be used as fixtures." %
-                                        (name, obj))
+                        raise TypeError(
+                            "Attribute %s of %r is not a python "
+                            "function. Only functions or callables"
+                            " may be used as fixtures." % (name, obj)
+                        )
                 if len(args):
                     log.debug("call fixture %s.%s(%s)", obj, name, obj)
                     return func(obj)
@@ -476,11 +501,11 @@ def src(filename):
     """
     if filename is None:
         return filename
-    if sys.platform.startswith('java') and filename.endswith('$py.class'):
-        return '.'.join((filename[:-9], 'py'))
+    if sys.platform.startswith("java") and filename.endswith("$py.class"):
+        return ".".join((filename[:-9], "py"))
     base, ext = os.path.splitext(filename)
-    if ext in ('.pyc', '.pyo', '.py'):
-        return '.'.join((base, 'py'))
+    if ext in (".pyc", ".pyo", ".py"):
+        return ".".join((base, "py"))
     return filename
 
 
@@ -527,7 +552,7 @@ def tolist(val):
         pass
     # might be a string
     try:
-        return re.split(r'\s*,\s*', val)
+        return re.split(r"\s*,\s*", val)
     except TypeError:
         # who knows...
         return list(val)
@@ -541,26 +566,26 @@ class odict(dict):
 
     def __init__(self, *arg, **kw):
         self._keys = []
-        super(odict, self).__init__(*arg, **kw)
+        super().__init__(*arg, **kw)
 
     def __delitem__(self, key):
-        super(odict, self).__delitem__(key)
+        super().__delitem__(key)
         self._keys.remove(key)
 
     def __setitem__(self, key, item):
-        super(odict, self).__setitem__(key, item)
+        super().__setitem__(key, item)
         if key not in self._keys:
             self._keys.append(key)
 
     def __str__(self):
-        return "{%s}" % ', '.join(["%r: %r" % (k, v) for k, v in self.items()])
+        return "{%s}" % ", ".join(["{!r}: {!r}".format(k, v) for k, v in self.items()])
 
     def clear(self):
-        super(odict, self).clear()
+        super().clear()
         self._keys = []
 
     def copy(self):
-        d = super(odict, self).copy()
+        d = super().copy()
         d._keys = self._keys[:]
         return d
 
@@ -571,13 +596,13 @@ class odict(dict):
         return self._keys[:]
 
     def setdefault(self, key, failobj=None):
-        item = super(odict, self).setdefault(key, failobj)
+        item = super().setdefault(key, failobj)
         if key not in self._keys:
             self._keys.append(key)
         return item
 
     def update(self, dict):
-        super(odict, self).update(dict)
+        super().update(dict)
         for key in dict.keys():
             if key not in self._keys:
                 self._keys.append(key)
@@ -612,11 +637,14 @@ def transplant_func(func, module):
 
     """
     from nose.tools import make_decorator
+
     if isgenerator(func):
+
         def newfunc(*arg, **kw):
-            for v in func(*arg, **kw):
-                yield v
+            yield from func(*arg, **kw)
+
     else:
+
         def newfunc(*arg, **kw):
             return func(*arg, **kw)
 
@@ -650,12 +678,11 @@ def transplant_class(cls, module):
     return C
 
 
-def safe_str(val, encoding='utf-8'):
+def safe_str(val, encoding="utf-8"):
     if isinstance(val, bytes):
-        return val.decode(encoding, errors='replace')
+        return val.decode(encoding, errors="replace")
     elif isinstance(val, Exception):
-        return ' '.join([safe_str(arg, encoding)
-                         for arg in val.args])
+        return " ".join([safe_str(arg, encoding) for arg in val.args])
     else:
         try:
             return str(val)
@@ -670,7 +697,7 @@ def is_executable(file):
     return bool(st.st_mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
 
     doctest.testmod()

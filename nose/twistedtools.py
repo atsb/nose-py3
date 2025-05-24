@@ -10,7 +10,7 @@ You must import this module *before* importing anything from Twisted itself!
 Example::
 
   from nose.twistedtools import reactor, deferred
-  
+
   @deferred()
   def test_resolve():
       return reactor.resolve("www.python.org")
@@ -34,10 +34,7 @@ from queue import Queue, Empty
 
 from nose.tools import make_decorator, TimeExpired
 
-__all__ = [
-    'threaded_reactor', 'reactor', 'deferred', 'TimeExpired',
-    'stop_reactor'
-]
+__all__ = ["threaded_reactor", "reactor", "deferred", "TimeExpired", "stop_reactor"]
 
 _twisted_thread = None
 
@@ -55,8 +52,10 @@ def threaded_reactor():
         return None, None
     if not _twisted_thread:
         from threading import Thread
-        _twisted_thread = Thread(target=lambda: reactor.run( \
-            installSignalHandlers=False))
+
+        _twisted_thread = Thread(
+            target=lambda: reactor.run(installSignalHandlers=False)
+        )
         if sys.version_info < (3, 10):
             _twisted_thread.setDaemon(True)
         else:
@@ -105,7 +104,7 @@ def deferred(timeout=None):
     If the errback is triggered or the timeout expires, the test has failed.
 
     Example::
-    
+
         @deferred(timeout=5.0)
         def test_resolve():
             return reactor.resolve("www.python.org")
@@ -114,14 +113,14 @@ def deferred(timeout=None):
     "raises"), deferred() must be called *first*!
 
     In other words, this is good::
-        
+
         @raises(DNSLookupError)
         @deferred()
         def test_error():
             return reactor.resolve("xxxjhjhj.biz")
 
     and this is bad::
-        
+
         @deferred()
         @raises(DNSLookupError)
         def test_error():
@@ -160,8 +159,9 @@ def deferred(timeout=None):
                     # Check for a common mistake and display a nice error
                     # message
                     except AttributeError:
-                        raise TypeError("you must return a twisted Deferred "
-                                        "from your test case!")
+                        raise TypeError(
+                            "you must return a twisted Deferred " "from your test case!"
+                        )
                 # Catch exceptions raised in the test body (from the
                 # Twisted thread)
                 except:
@@ -171,8 +171,9 @@ def deferred(timeout=None):
             try:
                 error = q.get(timeout=timeout)
             except Empty:
-                raise TimeExpired("timeout expired before end of test (%f s.)"
-                                  % timeout)
+                raise TimeExpired(
+                    "timeout expired before end of test (%f s.)" % timeout
+                )
             # Re-raise all exceptions
             if error is not None:
                 exc_type, exc_value, tb = error

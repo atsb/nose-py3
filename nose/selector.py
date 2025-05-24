@@ -6,16 +6,24 @@ Test selection is handled by a Selector. The test loader calls the
 appropriate selector method for each object it encounters that it
 thinks may be a test.
 """
+
 import logging
 import os
 import unittest
 
 from nose.config import Config
-from nose.util import split_test_name, src, getfilename, getpackage, ispackage, is_executable
+from nose.util import (
+    split_test_name,
+    src,
+    getfilename,
+    getpackage,
+    ispackage,
+    is_executable,
+)
 
 log = logging.getLogger(__name__)
 
-__all__ = ['Selector', 'defaultSelector', 'TestAddress']
+__all__ = ["Selector", "defaultSelector", "TestAddress"]
 
 # for efficiency and easier mocking
 op_join = os.path.join
@@ -26,7 +34,7 @@ op_isabs = os.path.isabs
 op_abspath = os.path.abspath
 
 
-class Selector(object):
+class Selector:
     """Core test selector. Examines test candidates and determines whether,
     given the specified configuration, the test candidate should be selected
     as a test.
@@ -51,14 +59,16 @@ class Selector(object):
         To match, a name must match config.testMatch OR config.include
         and it must not match config.exclude
         """
-        return ((self.match.search(name)
-                 or (self.include and
-                     filter(None,
-                            [inc.search(name) for inc in self.include])))
-                and ((not self.exclude)
-                     or not filter(None,
-                                   [exc.search(name) for exc in self.exclude])
-                     ))
+        return (
+            self.match.search(name)
+            or (
+                self.include
+                and filter(None, [inc.search(name) for inc in self.include])
+            )
+        ) and (
+            (not self.exclude)
+            or not filter(None, [exc.search(name) for exc in self.exclude])
+        )
 
     def wantClass(self, cls):
         """Is the class a wanted test class?
@@ -66,13 +76,13 @@ class Selector(object):
         A class must be a unittest.TestCase subclass, or match test name
         requirements. Classes that start with _ are always excluded.
         """
-        declared = getattr(cls, '__test__', None)
+        declared = getattr(cls, "__test__", None)
         if declared is not None:
             wanted = declared
         else:
-            wanted = (not cls.__name__.startswith('_')
-                      and (issubclass(cls, unittest.TestCase)
-                           or self.matches(cls.__name__)))
+            wanted = not cls.__name__.startswith("_") and (
+                issubclass(cls, unittest.TestCase) or self.matches(cls.__name__)
+            )
 
         plug_wants = self.plugins.wantClass(cls)
         if plug_wants is not None:
@@ -84,23 +94,21 @@ class Selector(object):
     def wantDirectory(self, dirname):
         """Is the directory a wanted test directory?
 
-        All package directories match, so long as they do not match exclude. 
+        All package directories match, so long as they do not match exclude.
         All other directories must match test requirements.
         """
         tail = op_basename(dirname)
         if ispackage(dirname):
-            wanted = (not self.exclude
-                      or not filter(None,
-                                    [exc.search(tail) for exc in self.exclude]
-                                    ))
+            wanted = not self.exclude or not filter(
+                None, [exc.search(tail) for exc in self.exclude]
+            )
         else:
-            wanted = (self.matches(tail)
-                      or (self.config.srcDirs
-                          and tail in self.config.srcDirs))
+            wanted = self.matches(tail) or (
+                self.config.srcDirs and tail in self.config.srcDirs
+            )
         plug_wants = self.plugins.wantDirectory(dirname)
         if plug_wants is not None:
-            log.debug("Plugin setting selection of %s to %s",
-                      dirname, plug_wants)
+            log.debug("Plugin setting selection of %s to %s", dirname, plug_wants)
             wanted = plug_wants
         log.debug("wantDirectory %s? %s", dirname, wanted)
         return wanted
@@ -115,17 +123,17 @@ class Selector(object):
         # never, ever load files that match anything in ignore
         # (.* _* and *setup*.py by default)
         base = op_basename(file)
-        ignore_matches = [ignore_this for ignore_this in self.ignoreFiles
-                          if ignore_this.search(base)]
+        ignore_matches = [
+            ignore_this for ignore_this in self.ignoreFiles if ignore_this.search(base)
+        ]
         if ignore_matches:
-            log.debug('%s matches ignoreFiles pattern; skipped',
-                      base)
+            log.debug("%s matches ignoreFiles pattern; skipped", base)
             return False
         if not self.config.includeExe and is_executable(file):
-            log.info('%s is executable; skipped', file)
+            log.info("%s is executable; skipped", file)
             return False
         dummy, ext = op_splitext(base)
-        pysrc = ext == '.py'
+        pysrc = ext == ".py"
 
         wanted = pysrc and self.matches(base)
         plug_wants = self.plugins.wantFile(file)
@@ -136,21 +144,20 @@ class Selector(object):
         return wanted
 
     def wantFunction(self, function):
-        """Is the function a test function?
-        """
+        """Is the function a test function?"""
         try:
-            if hasattr(function, 'compat_func_name'):
+            if hasattr(function, "compat_func_name"):
                 funcname = function.compat_func_name
             else:
                 funcname = function.__name__
         except AttributeError:
             # not a function
             return False
-        declared = getattr(function, '__test__', None)
+        declared = getattr(function, "__test__", None)
         if declared is not None:
             wanted = declared
         else:
-            wanted = not funcname.startswith('_') and self.matches(funcname)
+            wanted = not funcname.startswith("_") and self.matches(funcname)
         plug_wants = self.plugins.wantFunction(function)
         if plug_wants is not None:
             wanted = plug_wants
@@ -158,17 +165,16 @@ class Selector(object):
         return wanted
 
     def wantMethod(self, method):
-        """Is the method a test method?
-        """
+        """Is the method a test method?"""
         try:
             method_name = method.__name__
         except AttributeError:
             # not a method
             return False
-        if method_name.startswith('_'):
+        if method_name.startswith("_"):
             # never collect 'private' methods
             return False
-        declared = getattr(method, '__test__', None)
+        declared = getattr(method, "__test__", None)
         if declared is not None:
             wanted = declared
         else:
@@ -185,12 +191,14 @@ class Selector(object):
         The tail of the module name must match test requirements. One exception:
         we always want __main__.
         """
-        declared = getattr(module, '__test__', None)
+        declared = getattr(module, "__test__", None)
         if declared is not None:
             wanted = declared
         else:
-            wanted = self.matches(module.__name__.split('.')[-1]) \
-                     or module.__name__ == '__main__'
+            wanted = (
+                self.matches(module.__name__.split(".")[-1])
+                or module.__name__ == "__main__"
+            )
         plug_wants = self.plugins.wantModule(module)
         if plug_wants is not None:
             wanted = plug_wants
@@ -201,7 +209,7 @@ class Selector(object):
 defaultSelector = Selector
 
 
-class TestAddress(object):
+class TestAddress:
     """A test address represents a user's request to run a particular
     test. The user may specify a filename or module (or neither),
     and/or a callable (a class, function, or method). The naming
@@ -227,21 +235,29 @@ class TestAddress(object):
         self.name = name
         self.workingDir = workingDir
         self.filename, self.module, self.call = split_test_name(name)
-        log.debug('Test name %s resolved to file %s, module %s, call %s',
-                  name, self.filename, self.module, self.call)
+        log.debug(
+            "Test name %s resolved to file %s, module %s, call %s",
+            name,
+            self.filename,
+            self.module,
+            self.call,
+        )
         if self.filename is None:
             if self.module is not None:
                 self.filename = getfilename(self.module, self.workingDir)
         if self.filename:
             self.filename = src(self.filename)
             if not op_isabs(self.filename):
-                self.filename = op_abspath(op_join(workingDir,
-                                                   self.filename))
+                self.filename = op_abspath(op_join(workingDir, self.filename))
             if self.module is None:
                 self.module = getpackage(self.filename)
         log.debug(
-            'Final resolution of test name %s: file %s module %s call %s',
-            name, self.filename, self.module, self.call)
+            "Final resolution of test name %s: file %s module %s call %s",
+            name,
+            self.filename,
+            self.module,
+            self.call,
+        )
 
     def totuple(self):
         return (self.filename, self.module, self.call)
@@ -250,5 +266,4 @@ class TestAddress(object):
         return self.name
 
     def __repr__(self):
-        return "%s: (%s, %s, %s)" % (self.name, self.filename,
-                                     self.module, self.call)
+        return "{}: ({}, {}, {})".format(self.name, self.filename, self.module, self.call)

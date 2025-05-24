@@ -9,6 +9,7 @@ the options ``-s`` or ``--nocapture``.
     Don't capture stdout (any stdout output will be printed immediately)
 
 """
+
 import logging
 import sys
 
@@ -28,9 +29,10 @@ class Capture(Plugin):
     appending any output captured to the error or failure output,
     should the test fail or raise an error.
     """
+
     enabled = True
-    env_opt = 'NOSE_NOCAPTURE'
-    name = 'capture'
+    env_opt = "NOSE_NOCAPTURE"
+    name = "capture"
     score = 1600
 
     def __init__(self):
@@ -38,40 +40,38 @@ class Capture(Plugin):
         self._buf = None
 
     def options(self, parser, env):
-        """Register commandline options
-        """
+        """Register commandline options"""
         parser.add_option(
-            "-s", "--nocapture", action="store_false",
-            default=not env.get(self.env_opt), dest="capture",
+            "-s",
+            "--nocapture",
+            action="store_false",
+            default=not env.get(self.env_opt),
+            dest="capture",
             help="Don't capture stdout (any stdout output "
-                 "will be printed immediately) [NOSE_NOCAPTURE]")
+            "will be printed immediately) [NOSE_NOCAPTURE]",
+        )
 
     def configure(self, options, conf):
-        """Configure plugin. Plugin is enabled by default.
-        """
+        """Configure plugin. Plugin is enabled by default."""
         self.conf = conf
         if not options.capture:
             self.enabled = False
 
     def afterTest(self, test):
-        """Clear capture buffer.
-        """
+        """Clear capture buffer."""
         self.end()
         self._buf = None
 
     def begin(self):
-        """Replace sys.stdout with capture buffer.
-        """
+        """Replace sys.stdout with capture buffer."""
         self.start()  # get an early handle on sys.stdout
 
     def beforeTest(self, test):
-        """Flush capture buffer.
-        """
+        """Flush capture buffer."""
         self.start()
 
     def formatError(self, test, err):
-        """Add captured output to error report.
-        """
+        """Add captured output to error report."""
         test.capturedOutput = output = self.buffer
         self._buf = None
         if not output:
@@ -83,15 +83,20 @@ class Capture(Plugin):
         return (ec, self.addCaptureToErr(ev, output), tb)
 
     def formatFailure(self, test, err):
-        """Add captured output to failure report.
-        """
+        """Add captured output to failure report."""
         return self.formatError(test, err)
 
     def addCaptureToErr(self, ev, output):
         ev = exc_to_unicode(ev)
         output = force_unicode(output)
-        return u'\n'.join([ev, ln(u'>> begin captured stdout <<'),
-                           output, ln(u'>> end captured stdout <<')])
+        return "\n".join(
+            [
+                ev,
+                ln(">> begin captured stdout <<"),
+                output,
+                ln(">> end captured stdout <<"),
+            ]
+        )
 
     def start(self):
         self.stdout.append(sys.stdout)
@@ -99,11 +104,9 @@ class Capture(Plugin):
         # Python 3's StringIO objects don't support setting encoding or errors
         # directly and they're already set to None.  So if the attributes
         # already exist, skip adding them.
-        if (not hasattr(self._buf, 'encoding') and
-                hasattr(sys.stdout, 'encoding')):
+        if not hasattr(self._buf, "encoding") and hasattr(sys.stdout, "encoding"):
             self._buf.encoding = sys.stdout.encoding
-        if (not hasattr(self._buf, 'errors') and
-                hasattr(sys.stdout, 'errors')):
+        if not hasattr(self._buf, "errors") and hasattr(sys.stdout, "errors"):
             self._buf.errors = sys.stdout.errors
         sys.stdout = self._buf
 
@@ -112,8 +115,7 @@ class Capture(Plugin):
             sys.stdout = self.stdout.pop()
 
     def finalize(self, result):
-        """Restore stdout.
-        """
+        """Restore stdout."""
         while self.stdout:
             self.end()
 
@@ -121,5 +123,4 @@ class Capture(Plugin):
         if self._buf is not None:
             return self._buf.getvalue()
 
-    buffer = property(_get_buffer, None, None,
-                      """Captured stdout output.""")
+    buffer = property(_get_buffer, None, None, """Captured stdout output.""")

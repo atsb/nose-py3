@@ -10,6 +10,7 @@ variable.
 
 .. _coverage: http://www.nedbatchelder.com/code/modules/coverage.html
 """
+
 import io
 import logging
 import re
@@ -27,6 +28,7 @@ class Coverage(Plugin):
     """
     Activate a coverage report using Ned Batchelder's coverage module.
     """
+
     coverTests = False
     coverPackages = None
     coverInstance = None
@@ -40,87 +42,118 @@ class Coverage(Plugin):
         """
         Add options to command line.
         """
-        super(Coverage, self).options(parser, env)
-        parser.add_option("--cover-package", action="append",
-                          default=env.get('NOSE_COVER_PACKAGE'),
-                          metavar="PACKAGE",
-                          dest="cover_packages",
-                          help="Restrict coverage output to selected packages "
-                               "[NOSE_COVER_PACKAGE]")
-        parser.add_option("--cover-erase", action="store_true",
-                          default=env.get('NOSE_COVER_ERASE'),
-                          dest="cover_erase",
-                          help="Erase previously collected coverage "
-                               "statistics before run")
-        parser.add_option("--cover-tests", action="store_true",
-                          dest="cover_tests",
-                          default=env.get('NOSE_COVER_TESTS'),
-                          help="Include test modules in coverage report "
-                               "[NOSE_COVER_TESTS]")
-        parser.add_option("--cover-min-percentage", action="store",
-                          dest="cover_min_percentage",
-                          default=env.get('NOSE_COVER_MIN_PERCENTAGE'),
-                          help="Minimum percentage of coverage for tests "
-                               "to pass [NOSE_COVER_MIN_PERCENTAGE]")
-        parser.add_option("--cover-inclusive", action="store_true",
-                          dest="cover_inclusive",
-                          default=env.get('NOSE_COVER_INCLUSIVE'),
-                          help="Include all python files under working "
-                               "directory in coverage report.  Useful for "
-                               "discovering holes in test coverage if not all "
-                               "files are imported by the test suite. "
-                               "[NOSE_COVER_INCLUSIVE]")
-        parser.add_option("--cover-html", action="store_true",
-                          default=env.get('NOSE_COVER_HTML'),
-                          dest='cover_html',
-                          help="Produce HTML coverage information")
-        parser.add_option('--cover-html-dir', action='store',
-                          default=env.get('NOSE_COVER_HTML_DIR', 'cover'),
-                          dest='cover_html_dir',
-                          metavar='DIR',
-                          help='Produce HTML coverage information in dir')
-        parser.add_option("--cover-branches", action="store_true",
-                          default=env.get('NOSE_COVER_BRANCHES'),
-                          dest="cover_branches",
-                          help="Include branch coverage in coverage report "
-                               "[NOSE_COVER_BRANCHES]")
-        parser.add_option("--cover-xml", action="store_true",
-                          default=env.get('NOSE_COVER_XML'),
-                          dest="cover_xml",
-                          help="Produce XML coverage information")
-        parser.add_option("--cover-xml-file", action="store",
-                          default=env.get('NOSE_COVER_XML_FILE',
-                                          'coverage.xml'),
-                          dest="cover_xml_file",
-                          metavar="FILE",
-                          help="Produce XML coverage information in file")
-        parser.add_option("--cover-config-file", action="store",
-                          default=env.get('NOSE_COVER_CONFIG_FILE'),
-                          dest="cover_config_file",
-                          help="Location of coverage config file "
-                               "[NOSE_COVER_CONFIG_FILE]")
-        parser.add_option("--cover-no-print", action="store_true",
-                          default=env.get('NOSE_COVER_NO_PRINT'),
-                          dest="cover_no_print",
-                          help="Suppress printing of coverage information")
+        super().options(parser, env)
+        parser.add_option(
+            "--cover-package",
+            action="append",
+            default=env.get("NOSE_COVER_PACKAGE"),
+            metavar="PACKAGE",
+            dest="cover_packages",
+            help="Restrict coverage output to selected packages "
+            "[NOSE_COVER_PACKAGE]",
+        )
+        parser.add_option(
+            "--cover-erase",
+            action="store_true",
+            default=env.get("NOSE_COVER_ERASE"),
+            dest="cover_erase",
+            help="Erase previously collected coverage " "statistics before run",
+        )
+        parser.add_option(
+            "--cover-tests",
+            action="store_true",
+            dest="cover_tests",
+            default=env.get("NOSE_COVER_TESTS"),
+            help="Include test modules in coverage report " "[NOSE_COVER_TESTS]",
+        )
+        parser.add_option(
+            "--cover-min-percentage",
+            action="store",
+            dest="cover_min_percentage",
+            default=env.get("NOSE_COVER_MIN_PERCENTAGE"),
+            help="Minimum percentage of coverage for tests "
+            "to pass [NOSE_COVER_MIN_PERCENTAGE]",
+        )
+        parser.add_option(
+            "--cover-inclusive",
+            action="store_true",
+            dest="cover_inclusive",
+            default=env.get("NOSE_COVER_INCLUSIVE"),
+            help="Include all python files under working "
+            "directory in coverage report.  Useful for "
+            "discovering holes in test coverage if not all "
+            "files are imported by the test suite. "
+            "[NOSE_COVER_INCLUSIVE]",
+        )
+        parser.add_option(
+            "--cover-html",
+            action="store_true",
+            default=env.get("NOSE_COVER_HTML"),
+            dest="cover_html",
+            help="Produce HTML coverage information",
+        )
+        parser.add_option(
+            "--cover-html-dir",
+            action="store",
+            default=env.get("NOSE_COVER_HTML_DIR", "cover"),
+            dest="cover_html_dir",
+            metavar="DIR",
+            help="Produce HTML coverage information in dir",
+        )
+        parser.add_option(
+            "--cover-branches",
+            action="store_true",
+            default=env.get("NOSE_COVER_BRANCHES"),
+            dest="cover_branches",
+            help="Include branch coverage in coverage report " "[NOSE_COVER_BRANCHES]",
+        )
+        parser.add_option(
+            "--cover-xml",
+            action="store_true",
+            default=env.get("NOSE_COVER_XML"),
+            dest="cover_xml",
+            help="Produce XML coverage information",
+        )
+        parser.add_option(
+            "--cover-xml-file",
+            action="store",
+            default=env.get("NOSE_COVER_XML_FILE", "coverage.xml"),
+            dest="cover_xml_file",
+            metavar="FILE",
+            help="Produce XML coverage information in file",
+        )
+        parser.add_option(
+            "--cover-config-file",
+            action="store",
+            default=env.get("NOSE_COVER_CONFIG_FILE"),
+            dest="cover_config_file",
+            help="Location of coverage config file " "[NOSE_COVER_CONFIG_FILE]",
+        )
+        parser.add_option(
+            "--cover-no-print",
+            action="store_true",
+            default=env.get("NOSE_COVER_NO_PRINT"),
+            dest="cover_no_print",
+            help="Suppress printing of coverage information",
+        )
 
     def configure(self, options, conf):
         """
         Configure plugin.
         """
         try:
-            self.status.pop('active')
+            self.status.pop("active")
         except KeyError:
             pass
-        super(Coverage, self).configure(options, conf)
+        super().configure(options, conf)
         if self.enabled:
             try:
                 import coverage
-                if not hasattr(coverage, 'coverage'):
+
+                if not hasattr(coverage, "coverage"):
                     raise ImportError("Unable to import coverage module")
             except ImportError:
-                log.error("Coverage not available: "
-                          "unable to import coverage module")
+                log.error("Coverage not available: " "unable to import coverage module")
                 self.enabled = False
                 return
         self.conf = conf
@@ -136,33 +169,37 @@ class Coverage(Plugin):
                 self.coverPackages.extend(pkgs)
         self.coverInclusive = options.cover_inclusive
         if self.coverPackages:
-            log.info("Coverage report will include only packages: %s",
-                     self.coverPackages)
+            log.info(
+                "Coverage report will include only packages: %s", self.coverPackages
+            )
         self.coverHtmlDir = None
         if options.cover_html:
             self.coverHtmlDir = options.cover_html_dir
-            log.debug('Will put HTML coverage report in %s', self.coverHtmlDir)
+            log.debug("Will put HTML coverage report in %s", self.coverHtmlDir)
         self.coverBranches = options.cover_branches
         self.coverXmlFile = None
         if options.cover_min_percentage:
-            self.coverMinPercentage = int(options.cover_min_percentage.rstrip('%'))
+            self.coverMinPercentage = int(options.cover_min_percentage.rstrip("%"))
         if options.cover_xml:
             self.coverXmlFile = options.cover_xml_file
-            log.debug('Will put XML coverage report in %s', self.coverXmlFile)
+            log.debug("Will put XML coverage report in %s", self.coverXmlFile)
         # Coverage uses True to mean default
         self.coverConfigFile = True
         if options.cover_config_file:
             self.coverConfigFile = options.cover_config_file
         self.coverPrint = not options.cover_no_print
         if self.enabled:
-            self.status['active'] = True
-            self.coverInstance = coverage.coverage(auto_data=False,
-                                                   branch=self.coverBranches, data_suffix=conf.worker,
-                                                   source=self.coverPackages,
-                                                   config_file=self.coverConfigFile)
+            self.status["active"] = True
+            self.coverInstance = coverage.coverage(
+                auto_data=False,
+                branch=self.coverBranches,
+                data_suffix=conf.worker,
+                source=self.coverPackages,
+                config_file=self.coverConfigFile,
+            )
             self.coverInstance._warn_no_data = False
             self.coverInstance.is_worker = conf.worker
-            self.coverInstance.exclude('#pragma[: ]+[nN][oO] [cC][oO][vV][eE][rR]')
+            self.coverInstance.exclude("#pragma[: ]+[nN][oO] [cC][oO][vV][eE][rR]")
 
             log.debug("Coverage begin")
             self.skipModules = list(sys.modules.keys())[:]
@@ -201,14 +238,17 @@ class Coverage(Plugin):
         self.coverInstance.stop()
         self.coverInstance.combine()
         self.coverInstance.save()
-        modules = [module
-                   for name, module in sys.modules.items()
-                   if self.wantModuleCoverage(name, module)]
+        modules = [
+            module
+            for name, module in sys.modules.items()
+            if self.wantModuleCoverage(name, module)
+        ]
         log.debug("Coverage report will cover modules: %s", modules)
         if self.coverPrint:
             self.coverInstance.report(modules, file=stream)
 
         import coverage
+
         if self.coverHtmlDir:
             log.debug("Generating HTML coverage report")
             try:
@@ -228,10 +268,13 @@ class Coverage(Plugin):
             f = io.StringIO()
             self.coverInstance.report(modules, file=f)
 
-            multiPackageRe = (r'-------\s\w+\s+\d+\s+\d+(?:\s+\d+\s+\d+)?'
-                              r'\s+(\d+)%\s+\d*\s{0,1}$')
-            singlePackageRe = (r'-------\s[\w./]+\s+\d+\s+\d+(?:\s+\d+\s+\d+)?'
-                               r'\s+(\d+)%(?:\s+[-\d, ]+)\s{0,1}$')
+            multiPackageRe = (
+                r"-------\s\w+\s+\d+\s+\d+(?:\s+\d+\s+\d+)?" r"\s+(\d+)%\s+\d*\s{0,1}$"
+            )
+            singlePackageRe = (
+                r"-------\s[\w./]+\s+\d+\s+\d+(?:\s+\d+\s+\d+)?"
+                r"\s+(\d+)%(?:\s+[-\d, ]+)\s{0,1}$"
+            )
 
             m = re.search(multiPackageRe, f.getvalue())
             if m is None:
@@ -240,31 +283,34 @@ class Coverage(Plugin):
             if m:
                 percentage = int(m.groups()[0])
                 if percentage < self.coverMinPercentage:
-                    log.error('TOTAL Coverage did not reach minimum '
-                              'required: %d%%' % self.coverMinPercentage)
+                    log.error(
+                        "TOTAL Coverage did not reach minimum "
+                        "required: %d%%" % self.coverMinPercentage
+                    )
                     sys.exit(1)
             else:
-                log.error("No total percentage was found in coverage output, "
-                          "something went wrong.")
+                log.error(
+                    "No total percentage was found in coverage output, "
+                    "something went wrong."
+                )
 
     def wantModuleCoverage(self, name, module):
-        if not hasattr(module, '__file__'):
+        if not hasattr(module, "__file__"):
             log.debug("no coverage of %s: no __file__", name)
             return False
         module_file = src(module.__file__)
-        if not module_file or not module_file.endswith('.py'):
+        if not module_file or not module_file.endswith(".py"):
             log.debug("no coverage of %s: not a python file", name)
             return False
         if self.coverPackages:
             for package in self.coverPackages:
-                if (re.findall(r'^%s\b' % re.escape(package), name)
-                        and (self.coverTests
-                             or not self.conf.testMatch.search(name))):
+                if re.findall(r"^%s\b" % re.escape(package), name) and (
+                    self.coverTests or not self.conf.testMatch.search(name)
+                ):
                     log.debug("coverage for %s", name)
                     return True
         if name in self.skipModules:
-            log.debug("no coverage for %s: loaded before coverage start",
-                      name)
+            log.debug("no coverage for %s: loaded before coverage start", name)
             return False
         if self.conf.testMatch.search(name) and not self.coverTests:
             log.debug("no coverage for %s: is a test", name)

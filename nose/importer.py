@@ -4,6 +4,7 @@ necessary because test modules in different directories frequently have the
 same names, which means that the first loaded would mask the rest when using
 the builtin importer.
 """
+
 import logging
 import os
 import sys
@@ -15,9 +16,12 @@ log = logging.getLogger(__name__)
 try:
     _samefile = os.path.samefile
 except AttributeError:
+
     def _samefile(src, dst):
-        return (os.path.normcase(os.path.realpath(src)) ==
-                os.path.normcase(os.path.realpath(dst)))
+        return os.path.normcase(os.path.realpath(src)) == os.path.normcase(
+            os.path.realpath(dst)
+        )
+
 
 """
 Below are the new standalone importlib variant functions
@@ -28,20 +32,25 @@ The names are kept the same for ease of use.
 
 if sys.version_info < (3, 11):
     from imp import (
-        find_module, load_module, acquire_lock, release_lock, )
+        find_module,
+        load_module,
+        acquire_lock,
+        release_lock,
+    )
 
 else:
     # some magic to make importlib.util look a bit like good ol' imp
 
     from importlib.util import (
-        spec_from_file_location, module_from_spec, )
+        spec_from_file_location,
+        module_from_spec,
+    )
     from importlib.machinery import PathFinder
     from threading import Lock
 
     _import_lock = Lock()
     acquire_lock = _import_lock.acquire
     release_lock = _import_lock.release
-
 
     def find_module(part, path=None):
         spec = PathFinder.find_spec(part, path)
@@ -51,10 +60,9 @@ else:
         filename = spec.origin
         desc = (".py", "U", 1)
 
-        fh = open(filename, 'r') if spec.origin else None
+        fh = open(filename, encoding='utf-8') if spec.origin else None
 
         return fh, filename, desc
-
 
     def load_module(module_name, fh, filename, desc):
         if fh:
@@ -71,7 +79,7 @@ else:
         return module
 
 
-class Importer(object):
+class Importer:
     """An importer class that does only path-specific imports. That
     is, the given module is not searched for on sys.path, but only at
     the path or in the directory specified.
@@ -89,12 +97,12 @@ class Importer(object):
         """
         # find the base dir of the package
         path_parts = os.path.normpath(os.path.abspath(path)).split(os.sep)
-        name_parts = fqname.split('.')
+        name_parts = fqname.split(".")
 
-        if path_parts[-1] == '__init__.py':
+        if path_parts[-1] == "__init__.py":
             path_parts.pop()
 
-        path_parts = path_parts[:-(len(name_parts))]
+        path_parts = path_parts[: -(len(name_parts))]
         dir_path = os.sep.join(path_parts)
         # then import fqname starting from that dir
         return self.importFromDir(dir_path, fqname)
@@ -109,26 +117,25 @@ class Importer(object):
         # FIXME reimplement local per-dir cache?
 
         # special case for __main__
-        if fqname == '__main__':
+        if fqname == "__main__":
             return sys.modules[fqname]
 
         if self.config.addPaths:
             add_path(dir, self.config)
 
         path = [dir]
-        parts = fqname.split('.')
-        part_fqname = ''
+        parts = fqname.split(".")
+        part_fqname = ""
         mod = parent = fh = None
 
         for part in parts:
-            if part_fqname == '':
+            if part_fqname == "":
                 part_fqname = part
             else:
-                part_fqname = "%s.%s" % (part_fqname, part)
+                part_fqname = "{}.{}".format(part_fqname, part)
             try:
                 acquire_lock()
-                log.debug("find module part %s (%s) in %s",
-                          part, part_fqname, path)
+                log.debug("find module part %s (%s) in %s", part, part_fqname, path)
 
                 if sys.version_info < (3, 11):
                     fh, filename, desc = find_module(part, path)
@@ -141,9 +148,9 @@ class Importer(object):
                     # we get a fresh copy of anything we are trying to load
                     # from a new path
                     log.debug("sys.modules has %s as %s", part_fqname, old)
-                    if (self.sameModule(old, filename)
-                            or (self.config.firstPackageWins and
-                                getattr(old, '__path__', None))):
+                    if self.sameModule(old, filename) or (
+                        self.config.firstPackageWins and getattr(old, "__path__", None)
+                    ):
                         mod = old
                     else:
                         del sys.modules[part_fqname]
@@ -156,7 +163,7 @@ class Importer(object):
                 release_lock()
             if parent:
                 setattr(parent, part, mod)
-            if hasattr(mod, '__path__'):
+            if hasattr(mod, "__path__"):
                 path = mod.__path__
             parent = mod
         return mod
@@ -172,10 +179,10 @@ class Importer(object):
 
     def sameModule(self, mod, filename):
         mod_paths = []
-        if hasattr(mod, '__path__'):
+        if hasattr(mod, "__path__"):
             for path in mod.__path__:
                 mod_paths.append(self._dirname_if_file(path))
-        elif hasattr(mod, '__file__'):
+        elif hasattr(mod, "__file__"):
             mod_paths.append(self._dirname_if_file(mod.__file__))
         else:
             # builtin or other module-like object that
@@ -183,9 +190,7 @@ class Importer(object):
             return False
         new_path = self._dirname_if_file(filename)
         for mod_path in mod_paths:
-            log.debug(
-                "module already loaded? mod: %s new: %s",
-                mod_path, new_path)
+            log.debug("module already loaded? mod: %s new: %s", mod_path, new_path)
             if _samefile(mod_path, new_path):
                 return True
         return False
@@ -198,13 +203,12 @@ def add_path(path, config=None):
 
     # FIXME add any src-looking dirs seen too... need to get config for that
 
-    log.debug('Add path %s' % path)
+    log.debug("Add path %s" % path)
     if not path:
         return []
     added = []
     parent = os.path.dirname(path)
-    if (parent
-            and os.path.exists(os.path.join(path, '__init__.py'))):
+    if parent and os.path.exists(os.path.join(path, "__init__.py")):
         added.extend(add_path(parent, config))
     elif not path in sys.path:
         log.debug("insert %s into sys.path", path)
@@ -220,6 +224,6 @@ def add_path(path, config=None):
 
 
 def remove_path(path):
-    log.debug('Remove path %s' % path)
+    log.debug("Remove path %s" % path)
     if path in sys.path:
         sys.path.remove(path)

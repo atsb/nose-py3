@@ -181,11 +181,12 @@ the nose source distribution. There is a list of third-party plugins
 .. _on jottit: http://nose-plugins.jottit.com/
 
 """
+
 from nose.plugins.base import Plugin
 from nose.plugins.manager import *
 from nose.plugins.plugintest import PluginTester
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
 
     doctest.testmod()

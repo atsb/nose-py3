@@ -1841,7 +1841,7 @@ def testfile(filename, module_relative=True, name=None, package=None,
         runner = DocTestRunner(verbose=verbose, optionflags=optionflags)
 
     # Read the file, convert it to a test, and run it.
-    s = open(filename).read()
+    s = open(filename, encoding='utf-8').read()
     test = parser.get_doctest(s, globs, name, filename, 0)
     runner.run(test)
 
@@ -2146,7 +2146,7 @@ def DocFileTest(path, module_relative=True, package=None,
 
     # Find the file and read it.
     name = os.path.basename(path)
-    doc = open(path).read()
+    doc = open(path, encoding='utf-8').read()
 
     # Convert it to a test, and wrap it in a DocFileCase.
     test = parser.get_doctest(doc, globs, name, path, 0)
@@ -2281,7 +2281,7 @@ def debug_script(src, pm=False, globs=None):
     # docs say, a file so created cannot be opened by name a second time
     # on modern Windows boxes, and execfile() needs to open it.
     srcfilename = tempfile.mktemp(".py", "doctestdebug")
-    f = open(srcfilename, 'w')
+    f = open(srcfilename, "w", encoding='utf-8')
     f.write(src)
     f.close()
 
@@ -2293,7 +2293,7 @@ def debug_script(src, pm=False, globs=None):
 
         if pm:
             try:
-                exec(open(srcfilename, globs, globs).read())
+                exec(open(srcfilename, encoding='utf-8', errors='surrogateescape').read())
             except Exception:
                 print(sys.exc_info()[1])
                 pdb.post_mortem(sys.exc_info()[2])

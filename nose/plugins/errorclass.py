@@ -31,20 +31,20 @@ class MetaErrorClass(type):
                 attr.pop(name)
                 for classes in detail:
                     errorClasses.append(
-                        (classes, (name, detail.label, detail.isfailure)))
-        super(MetaErrorClass, cls).__init__(name, bases, attr)
+                        (classes, (name, detail.label, detail.isfailure))
+                    )
+        super().__init__(name, bases, attr)
         cls.errorClasses = tuple(errorClasses)
 
 
-class ErrorClass(object):
+class ErrorClass:
     def __init__(self, *errorClasses, **kw):
         self.errorClasses = errorClasses
         try:
-            for key in ('label', 'isfailure'):
+            for key in ("label", "isfailure"):
                 setattr(self, key, kw.pop(key))
         except KeyError:
-            raise TypeError("%r is a required named argument for ErrorClass"
-                            % key)
+            raise TypeError("%r is a required named argument for ErrorClass" % key)
 
     def __iter__(self):
         return iter(self.errorClasses)
@@ -55,6 +55,7 @@ class ErrorClassPlugin(Plugin):
     Base class for ErrorClass plugins. Subclass this class and declare the
     exceptions that you wish to handle as attributes of the subclass.
     """
+
     __metaclass__ = MetaErrorClass
     score = 1000
     errorClasses = ()
@@ -68,7 +69,7 @@ class ErrorClassPlugin(Plugin):
             return True
 
     def prepareTestResult(self, result):
-        if not hasattr(result, 'errorClasses'):
+        if not hasattr(result, "errorClasses"):
             self.patchResult(result)
         for cls, (storage_attr, label, isfail) in self.errorClasses:
             if cls not in result.errorClasses:
@@ -78,16 +79,22 @@ class ErrorClassPlugin(Plugin):
 
     def patchResult(self, result):
         result.printLabel = print_label_patch(result)
-        result._orig_addError, result.addError = \
-            result.addError, add_error_patch(result)
-        result._orig_wasSuccessful, result.wasSuccessful = \
-            result.wasSuccessful, wassuccessful_patch(result)
-        if hasattr(result, 'printErrors'):
-            result._orig_printErrors, result.printErrors = \
-                result.printErrors, print_errors_patch(result)
-        if hasattr(result, 'addSkip'):
-            result._orig_addSkip, result.addSkip = \
-                result.addSkip, add_skip_patch(result)
+        result._orig_addError, result.addError = result.addError, add_error_patch(
+            result
+        )
+        result._orig_wasSuccessful, result.wasSuccessful = (
+            result.wasSuccessful,
+            wassuccessful_patch(result),
+        )
+        if hasattr(result, "printErrors"):
+            result._orig_printErrors, result.printErrors = (
+                result.printErrors,
+                print_errors_patch(result),
+            )
+        if hasattr(result, "addSkip"):
+            result._orig_addSkip, result.addSkip = result.addSkip, add_skip_patch(
+                result
+            )
         result.errorClasses = {}
 
 
@@ -128,7 +135,7 @@ def add_skip_patch(result):
     return make_instancemethod(NoseTextTestResult.addSkip, result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
 
     doctest.testmod()

@@ -9,6 +9,7 @@ more details on the various output options.
 
 .. _hotshot documentation: http://docs.python.org/library/hotshot.html
 """
+
 import cProfile
 import logging
 import os
@@ -18,38 +19,46 @@ import tempfile
 from nose.plugins.base import Plugin
 from nose.util import tolist
 
-log = logging.getLogger('nose.plugins')
+log = logging.getLogger("nose.plugins")
 
 
 class Profile(Plugin):
     """
-    Use this plugin to run tests using the hotshot profiler. 
+    Use this plugin to run tests using the hotshot profiler.
     """
+
     pfile = None
     clean_stats_file = False
 
     def options(self, parser, env):
-        """Register commandline options.
-        """
+        """Register commandline options."""
         if not self.available():
             return
         Plugin.options(self, parser, env)
-        parser.add_option('--profile-sort', action='store', dest='profile_sort',
-                          default=env.get('NOSE_PROFILE_SORT', 'cumulative'),
-                          metavar="SORT",
-                          help="Set sort order for profiler output")
-        parser.add_option('--profile-stats-file', action='store',
-                          dest='profile_stats_file',
-                          metavar="FILE",
-                          default=env.get('NOSE_PROFILE_STATS_FILE'),
-                          help='Profiler stats file; default is a new '
-                               'temp file on each run')
-        parser.add_option('--profile-restrict', action='append',
-                          dest='profile_restrict',
-                          metavar="RESTRICT",
-                          default=env.get('NOSE_PROFILE_RESTRICT'),
-                          help="Restrict profiler output. See help for "
-                               "pstats.Stats for details")
+        parser.add_option(
+            "--profile-sort",
+            action="store",
+            dest="profile_sort",
+            default=env.get("NOSE_PROFILE_SORT", "cumulative"),
+            metavar="SORT",
+            help="Set sort order for profiler output",
+        )
+        parser.add_option(
+            "--profile-stats-file",
+            action="store",
+            dest="profile_stats_file",
+            metavar="FILE",
+            default=env.get("NOSE_PROFILE_STATS_FILE"),
+            help="Profiler stats file; default is a new " "temp file on each run",
+        )
+        parser.add_option(
+            "--profile-restrict",
+            action="append",
+            dest="profile_restrict",
+            metavar="RESTRICT",
+            default=env.get("NOSE_PROFILE_RESTRICT"),
+            help="Restrict profiler output. See help for " "pstats.Stats for details",
+        )
 
     def available(cls):
         return cProfile is not None
@@ -57,16 +66,14 @@ class Profile(Plugin):
     available = classmethod(available)
 
     def begin(self):
-        """Create profile stats file and load profiler.
-        """
+        """Create profile stats file and load profiler."""
         if not self.available():
             return
         self._create_pfile()
         self.prof = cProfile.Profile(self.pfile)
 
     def configure(self, options, conf):
-        """Configure plugin.
-        """
+        """Configure plugin."""
         if not self.available():
             self.enabled = False
             return
@@ -83,11 +90,10 @@ class Profile(Plugin):
         self.restrict = tolist(options.profile_restrict)
 
     def prepareTest(self, test):
-        """Wrap entire test run in :func:`prof.runcall`.
-        """
+        """Wrap entire test run in :func:`prof.runcall`."""
         if not self.available():
             return
-        log.debug('preparing test %s' % test)
+        log.debug("preparing test %s" % test)
 
         def run_and_profile(result, prof=self.prof, test=test):
             self._create_pfile()
@@ -96,9 +102,8 @@ class Profile(Plugin):
         return run_and_profile
 
     def report(self, stream):
-        """Output profiler report.
-        """
-        log.debug('printing profiler report')
+        """Output profiler report."""
+        log.debug("printing profiler report")
         self.prof.disable()
         prof_stats = cProfile.Profile(self.pfile)
         prof_stats.print_stats(self.sort)
@@ -106,7 +111,7 @@ class Profile(Plugin):
         # 2.5 has completely different stream handling from 2.4 and earlier.
         # Before 2.5, stats objects have no stream attribute; in 2.5 and later
         # a reference sys.stdout is stored before we can tweak it.
-        compat_25 = hasattr(prof_stats, 'stream')
+        compat_25 = hasattr(prof_stats, "stream")
         if compat_25:
             tmp = prof_stats.stream
             prof_stats.stream = stream
@@ -115,7 +120,7 @@ class Profile(Plugin):
             sys.stdout = stream
         try:
             if self.restrict:
-                log.debug('setting profiler restriction to %s', self.restrict)
+                log.debug("setting profiler restriction to %s", self.restrict)
                 prof_stats.print_stats(*self.restrict)
             else:
                 prof_stats.print_stats()
@@ -126,8 +131,7 @@ class Profile(Plugin):
                 sys.stdout = tmp
 
     def finalize(self, result):
-        """Clean up stats file, if configured to do so.
-        """
+        """Clean up stats file, if configured to do so."""
         if not self.available():
             return
         try:

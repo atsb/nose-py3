@@ -10,7 +10,7 @@ killfile = os.environ['NOSE_MP_KILL']
 
 
 def log(w):
-    f = open(logfile, 'a')
+    f = open(logfile, 'a', encoding='utf-8')
     f.write(w + "\n")
     f.close()
 

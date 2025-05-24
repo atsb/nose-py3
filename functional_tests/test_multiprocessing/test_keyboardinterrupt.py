@@ -63,7 +63,7 @@ def get_log_content(logfile):
     if not stdout.startswith(prefix):
         raise Exception('stdout does not contain tmp file name: '+stdout)
     logfile = stdout[len(prefix):].strip() #remove trailing new line char'''
-    f = open(logfile)
+    f = open(logfile, encoding='utf-8')
     content = f.read()
     f.close()
     os.remove(logfile)
