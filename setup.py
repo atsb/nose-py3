@@ -39,34 +39,8 @@ try:
     )
     addl_args.update(extra)
 
-    if sys.platform == 'win32':
-        import re
-        from setuptools.command.easy_install import easy_install
-
-        def wrap_write_script(self, script_name, contents, *arg, **kwarg):
-            if script_name.endswith('.exe'):
-                return self._write_script(script_name, contents, *arg, **kwarg)
-            bad_text = re.compile(
-                "\n"
-                "sys.exit\(\n"
-                "   load_entry_point\(([^\)]+)\)\(\)\n"
-                "\)\n")
-            good_text = (
-                "\n"
-                "if __name__ == '__main__':\n"
-                "    sys.exit(\n"
-                r"        load_entry_point(\1)()\n"
-                "    )\n"
-            )
-            contents = bad_text.sub(good_text, contents)
-            return self._write_script(script_name, contents, *arg, **kwarg)
-
-        easy_install._write_script = easy_install.write_script
-        easy_install.write_script = wrap_write_script
-
 except ImportError:
     import re
-    from setuptools.command.easy_install import easy_install
     from setuptools import setup
     from setup3lib import setup
     from setuptools import find_packages
