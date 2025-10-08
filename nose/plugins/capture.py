@@ -80,7 +80,7 @@ class Capture(Plugin):
             # formats, instead return the err we got
             return err
         ec, ev, tb = err
-        return (ec, self.addCaptureToErr(ev, output), tb)
+        return ec, self.addCaptureToErr(ev, output), tb
 
     def formatFailure(self, test, err):
         """Add captured output to failure report.

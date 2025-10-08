@@ -15,8 +15,6 @@ import logging
 import re
 import sys
 
-from io import StringIO
-
 from nose.plugins.base import Plugin
 from nose.util import src, tolist
 

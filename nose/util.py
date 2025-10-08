@@ -333,9 +333,9 @@ def split_test_name(test):
     if not ':' in test:
         # only a file or mod part
         if file_like(test):
-            return (norm(test), None, None)
+            return norm(test), None, None
         else:
-            return (None, test, None)
+            return None, test, None
 
     # could be path|mod:callable, or a : in the file path someplace
     head, tail = os.path.split(test)
@@ -371,11 +371,11 @@ def split_test_name(test):
         file_or_mod = os.sep.join([head, file_part])
     if file_or_mod:
         if file_like(file_or_mod):
-            return (norm(file_or_mod), None, fn)
+            return norm(file_or_mod), None, fn
         else:
-            return (None, file_or_mod, fn)
+            return None, file_or_mod, fn
     else:
-        return (None, None, fn)
+        return None, None, fn
 
 
 split_test_name.__test__ = False  # do not collect
@@ -500,8 +500,8 @@ def regex_last_key(regex):
 
     def k(obj):
         if regex.search(obj):
-            return (1, obj)
-        return (0, obj)
+            return 1, obj
+        return 0, obj
 
     return k
 

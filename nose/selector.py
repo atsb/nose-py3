@@ -244,7 +244,7 @@ class TestAddress(object):
             name, self.filename, self.module, self.call)
 
     def totuple(self):
-        return (self.filename, self.module, self.call)
+        return self.filename, self.module, self.call
 
     def __str__(self):
         return self.name

@@ -344,15 +344,10 @@ class ZeroNinePlugin:
         return getattr(self.plugin, val)
 
 
-if sys.version_info < (3, 11):
-    # pkg_resources is deprecated from 3.11 onwards
-    from pkg_resources import iter_entry_points
-
-else:
-    # this API is unstable prior to 3.11, so do not use it
-    from importlib.metadata import entry_points as _entry_points
-    def iter_entry_points(group):
-        return _entry_points(group=group)
+# this API is unstable prior to 3.11, so do not use it
+from importlib.metadata import entry_points as _entry_points
+def iter_entry_points(group):
+    return _entry_points(group=group)
 
 
 class EntryPointPluginManager(PluginManager):

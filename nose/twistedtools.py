@@ -55,12 +55,8 @@ def threaded_reactor():
         return None, None
     if not _twisted_thread:
         from threading import Thread
-        _twisted_thread = Thread(target=lambda: reactor.run( \
-            installSignalHandlers=False))
-        if sys.version_info < (3, 10):
-            _twisted_thread.setDaemon(True)
-        else:
-            _twisted_thread.daemon = True
+        _twisted_thread = Thread(target=lambda: reactor.run(installSignalHandlers=False))
+        _twisted_thread.daemon = True
         _twisted_thread.start()
     return reactor, _twisted_thread
 

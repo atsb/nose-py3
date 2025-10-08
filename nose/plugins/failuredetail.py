@@ -46,4 +46,4 @@ class FailureDetail(Plugin):
             tbinfo = force_unicode(inspect_traceback(tb))
             str_ev = '\n'.join([str_ev, tbinfo])
         test.tbinfo = tbinfo
-        return (ec, str_ev, tb)
+        return ec, str_ev, tb

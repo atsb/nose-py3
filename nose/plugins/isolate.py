@@ -96,7 +96,7 @@ class IsolationPlugin(Plugin):
                 yield loader.loadTestsFromName(name, module=module)
                 plugins.afterContext()
 
-        return (loader.suiteClass(lazy), [])
+        return loader.suiteClass(lazy), []
 
     def prepareTestLoader(self, loader):
         """Get handle on test loader so we can use it in loadTestsFromNames.

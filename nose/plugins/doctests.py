@@ -406,7 +406,7 @@ class DocTestCase(doctest.DocTestCase):
         if value is None:
             return
         setattr(builtin_mod, self._result_var, value)
-        print
+        print("")
         repr(value)
 
     def tearDown(self):

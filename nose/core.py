@@ -12,7 +12,7 @@ from nose.config import Config, all_config_files
 from nose.loader import defaultTestLoader
 from nose.plugins.manager import PluginManager, DefaultPluginManager, \
     RestrictedPluginManager
-from nose.result import TextTestResult, NoseTextTestResult
+from nose.result import NoseTextTestResult
 from nose.suite import FinalizingSuiteWrapper
 from nose.util import isclass, tolist
 

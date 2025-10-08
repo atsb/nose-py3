@@ -248,7 +248,7 @@ class LogCapture(Plugin):
         if not records:
             return err
         ec, ev, tb = err
-        return (ec, self.addCaptureToErr(ev, records), tb)
+        return ec, self.addCaptureToErr(ev, records), tb
 
     def formatLogRecords(self):
         return map(safe_str, self.handler.buffer)

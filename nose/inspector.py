@@ -101,7 +101,7 @@ def tbsource(tb, context=6):
     else:
         lines, index = [''], 0
     log.debug("tbsource lines '''%s''' around index %s", lines, index)
-    return (lines, index)
+    return lines, index
 
 
 def find_inspectable_lines(lines, pos):

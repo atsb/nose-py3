@@ -1731,8 +1731,6 @@ def testmod(m=None, name=None, globs=None, verbose=None, isprivate=None,
 
     if master is None:
         master = runner
-    else:
-        master.merge(runner)
 
     return runner.failures, runner.tries
 
@@ -1850,8 +1848,6 @@ def testfile(filename, module_relative=True, name=None, package=None,
 
     if master is None:
         master = runner
-    else:
-        master.merge(runner)
 
     return runner.failures, runner.tries
 

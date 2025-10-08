@@ -241,7 +241,7 @@ class TestId(Plugin):
             self.collecting = False
         log.debug("translated: %s new sources %s names %s",
                   translated, really_new, names)
-        return (None, translated + really_new or names)
+        return None, translated + really_new or names
 
     def makeName(self, addr):
         log.debug("Make name %s", addr)
