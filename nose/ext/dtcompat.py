@@ -707,7 +707,7 @@ class DocTestParser:
 
     # This regular expression finds the indentation of every non-blank
     # line in a string.
-    _INDENT_RE = re.compile('^([ ]*)(?=\S)', re.MULTILINE)
+    _INDENT_RE = re.compile(r'^([ ]*)(?=\S)', re.MULTILINE)
 
     def _min_indent(self, s):
         """Return the minimum indentation of any non-blank line in `s`"""
@@ -1042,7 +1042,7 @@ class DocTestFinder:
         if lineno is not None:
             if source_lines is None:
                 return lineno + 1
-            pat = re.compile('(^|.*:)\s*\w*("|\')')
+            pat = re.compile(r'(^|.*:)\s*\w*("|\')')
             for lineno in range(lineno, len(source_lines)):
                 if pat.match(source_lines[lineno]):
                     return lineno

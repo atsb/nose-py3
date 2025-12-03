@@ -28,6 +28,7 @@ try:
         packages=find_packages(),
         entry_points={
             'console_scripts': [
+                'nose = nose:run_exit',
                 'nosetests = nose:run_exit',
                 'nosetests%s = nose:run_exit' % py_vers_tag,
             ],
