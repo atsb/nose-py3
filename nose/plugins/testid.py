@@ -141,16 +141,23 @@ class TestId(Plugin):
         if not os.path.isabs(self.idfile):
             self.idfile = os.path.join(conf.workingDir, self.idfile)
         self.id = 1
-        # Ids and tests are mirror images: ids are {id: test address} and
-        # tests are {test address: id}
         self.ids = {}
         self.tests = {}
         self.failed = []
         self.source_names = []
-        # used to track ids seen when tests is filled from
-        # loaded ids file
         self._seen = {}
         self._write_hashes = conf.verbosity >= 2
+        self._problematic_tests = set()
+
+    def _safe_address(self, test):
+        """Safely get test address, return None if invalid"""
+        try:
+            adr = test.address()
+            if isinstance(adr, tuple) and len(adr) == 3:
+                return adr
+        except:
+            pass
+        return None
 
     def finalize(self, result):
         """Save new ids file, if needed.
@@ -183,7 +190,6 @@ class TestId(Plugin):
                     self.failed = data['failed']
                     self.source_names = data['source_names']
                 else:
-                    # old ids field
                     self.ids = data
                     self.failed = []
                     self.source_names = names
@@ -197,9 +203,6 @@ class TestId(Plugin):
                     self.ids, self.tests, self.failed, self.source_names,
                     self.idfile)
             except ValueError as e:
-                # load() may throw a ValueError when reading the ids file, if it
-                # was generated with a newer version of Python than we are currently
-                # running.
                 log.debug('Error loading %s : %s', self.idfile, str(e))
             finally:
                 fh.close()
@@ -210,8 +213,7 @@ class TestId(Plugin):
             self.collecting = False
             names = self.failed
             self.failed = []
-        # I don't load any tests myself, only translate names like '#2'
-        # into the associated test addresses
+
         translated = []
         new_source = []
         really_new = []
@@ -221,27 +223,44 @@ class TestId(Plugin):
                 translated.append(trans)
             else:
                 new_source.append(name)
-        # names that are not ids and that are not in the current
-        # list of source names go into the list for next time
+
         if new_source:
             new_set = set(new_source)
             old_set = set(self.source_names)
             log.debug("old: %s new: %s", old_set, new_set)
-            really_new = [s for s in new_source
-                          if not s in old_set]
+            really_new = [s for s in new_source if s not in old_set]
             if really_new:
-                # remember new sources
                 self.source_names.extend(really_new)
             if not translated:
-                # new set of source names, no translations
-                # means "run the requested tests"
                 names = new_source
         else:
-            # no new names to translate and add to id set
             self.collecting = False
+
         log.debug("translated: %s new sources %s names %s",
                   translated, really_new, names)
         return None, translated + really_new or names
+
+    def loadTestsFromTestCase(self, cls):
+        """Handle test case loading, skip problematic tests silently"""
+        for name in getattr(cls, '_testMethodNames', []):
+            test = cls(name)
+            test_name = f"{cls.__name__}.{name}"
+            adr = self._safe_address(test)
+            if adr is None:
+                self._problematic_tests.add(test_name)
+                log.debug("Skipping test case '%s': invalid address", test_name)
+                continue
+        return None
+
+    def loadTestsFromGenerator(self, generator, module=None):
+        """Handle generator tests, skip problematic ones silently"""
+        for test in generator:
+            test_name = str(test).split('test ')[-1] if 'test ' in str(test) else str(test)
+            adr = self._safe_address(test)
+            if adr is None:
+                self._problematic_tests.add(test_name)
+                log.debug("Skipping generator test '%s': invalid address", test_name)
+        return None
 
     def makeName(self, addr):
         log.debug("Make name %s", addr)
@@ -261,49 +280,40 @@ class TestId(Plugin):
 
     def startTest(self, test):
         """Maybe output an id # before the test name.
-           Handles cases where test.address() returns unexpected types.
         """
-        try:
-            adr = test.address()
+        test_name = str(test).split('test ')[-1] if 'test ' in str(test) else str(test)
+        if test_name in self._problematic_tests:
+            return
 
-            if not isinstance(adr, tuple):
-                log.warning(f"Skipping ID assignment for test '{test}': "
-                            f"test.address() returned type {type(adr)} instead of tuple.")
-                return
+        adr = self._safe_address(test)
+        if adr is None:
+            self._problematic_tests.add(test_name)
+            log.debug("Skipping ID for test '%s': invalid address", test_name)
+            return
 
-            log.debug('start test %s (%s)', adr, adr in self.tests)
+        log.debug('start test %s (%s)', adr, adr in self.tests)
 
-            if adr in self.tests:
-                test_id = self.tests[adr]
-                if adr in self._seen:
-                    self.write('   ')
-                else:
-                    self.write('#%s ' % test_id)
-                    self._seen[adr] = 1
-
+        if adr in self.tests:
+            test_id = self.tests[adr]
+            if adr in self._seen:
+                self.write('   ')
             else:
-                test_id = self.id
-                self.tests[adr] = test_id
                 self.write('#%s ' % test_id)
-                self.id += 1
                 self._seen[adr] = 1
-
-        except Exception as e:
-            log.error(f"Error processing startTest for test {test}: {e}", exc_info=True)
+        else:
+            test_id = self.id
+            self.tests[adr] = test_id
+            self.write('#%s ' % test_id)
+            self.id += 1
+            self._seen[adr] = 1
 
     def afterTest(self, test):
         if test.passed is False:
-            try:
-                adr = test.address()
-                if isinstance(adr, tuple) and adr in self.tests:
-                    key = str(self.tests[adr])
-                    if key not in self.failed:
-                        self.failed.append(key)
-
-            except KeyError:
-                log.warning(f"KeyError looking up test address in afterTest for: {test.address()}")
-            except Exception as e:
-                log.error(f"Error processing afterTest for test {test}: {e}", exc_info=True)
+            adr = self._safe_address(test)
+            if adr is not None and adr in self.tests:
+                key = str(self.tests[adr])
+                if key not in self.failed:
+                    self.failed.append(key)
 
     def tr(self, name):
         log.debug("tr '%s'", name)
@@ -312,8 +322,6 @@ class TestId(Plugin):
         except ValueError:
             return name
         log.debug("Got key %s", key)
-        # I'm running tests mapped from the ids file,
-        # not collecting new ones
         if key in self.ids:
             return self.makeName(self.ids[key])
         return name

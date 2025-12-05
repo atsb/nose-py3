@@ -90,8 +90,7 @@ class Capture(Plugin):
     def addCaptureToErr(self, ev, output):
         ev = exc_to_unicode(ev)
         output = force_unicode(output)
-        return u'\n'.join([ev, ln(u'>> begin captured stdout <<'),
-                           output, ln(u'>> end captured stdout <<')])
+        return u'\n'.join([ev, output])
 
     def start(self):
         self.stdout.append(sys.stdout)

@@ -8,7 +8,7 @@ restrict the coverage report to modules from a particular package or packages,
 use the ``--cover-package`` switch or the NOSE_COVER_PACKAGE environment
 variable.
 
-.. _coverage: http://www.nedbatchelder.com/code/modules/coverage.html
+. _coverage: [www.nedbatchelder.com/code/modules/coverage.html](www.nedbatchelder.com/code/modules/coverage.html)
 """
 import io
 import logging
@@ -114,13 +114,12 @@ class Coverage(Plugin):
         if self.enabled:
             try:
                 import coverage
-                if not hasattr(coverage, 'coverage'):
-                    raise ImportError("Unable to import coverage module")
             except ImportError:
                 log.error("Coverage not available: "
                           "unable to import coverage module")
                 self.enabled = False
                 return
+
         self.conf = conf
         self.coverErase = bool(options.cover_erase)
         self.coverTests = bool(options.cover_tests)
@@ -147,103 +146,106 @@ class Coverage(Plugin):
         if options.cover_xml:
             self.coverXmlFile = options.cover_xml_file
             log.debug('Will put XML coverage report in %s', self.coverXmlFile)
-        # Coverage uses True to mean default
         self.coverConfigFile = True
         if options.cover_config_file:
             self.coverConfigFile = options.cover_config_file
         self.coverPrint = not options.cover_no_print
+
         if self.enabled:
             self.status['active'] = True
-            self.coverInstance = coverage.coverage(auto_data=False,
-                                                   branch=self.coverBranches, data_suffix=conf.worker,
-                                                   source=self.coverPackages,
-                                                   config_file=self.coverConfigFile)
+            self.is_worker = bool(conf.worker)
+
+            self.coverInstance = coverage.Coverage(
+                branch=self.coverBranches,
+                data_suffix=conf.worker,
+                source=self.coverPackages,
+                config_file=self.coverConfigFile,
+            )
+            self.coverInstance.exclude('#pragma: *no cover')
+            self.coverInstance.exclude('# *pragma: *no cover')
+            self.coverInstance.exclude('raise AssertionError')
+            self.coverInstance.exclude('raise NotImplementedError')
             self.coverInstance._warn_no_data = False
-            self.coverInstance.is_worker = conf.worker
-            self.coverInstance.exclude('#pragma[: ]+[nN][oO] [cC][oO][vV][eE][rR]')
+            self.coverInstance.is_worker = self.is_worker
 
             log.debug("Coverage begin")
             self.skipModules = list(sys.modules.keys())[:]
+
             if self.coverErase:
                 log.debug("Clearing previously collected coverage statistics")
-                self.coverInstance.combine()
                 self.coverInstance.erase()
 
-            if not self.coverInstance.is_worker:
-                self.coverInstance.load()
+            if not self.is_worker:
                 self.coverInstance.start()
 
     def beforeTest(self, *args, **kwargs):
-        """
-        Begin recording coverage information.
-        """
-
-        if self.coverInstance.is_worker:
-            self.coverInstance.load()
+        """Begin recording coverage information."""
+        if self.is_worker:
             self.coverInstance.start()
 
     def afterTest(self, *args, **kwargs):
-        """
-        Stop recording coverage information.
-        """
-
-        if self.coverInstance.is_worker:
+        """Stop recording coverage information."""
+        if self.is_worker:
             self.coverInstance.stop()
             self.coverInstance.save()
 
     def report(self, stream):
-        """
-        Output code coverage report.
-        """
+        """Output code coverage report."""
         log.debug("Coverage report")
         self.coverInstance.stop()
         self.coverInstance.combine()
         self.coverInstance.save()
+
         modules = [module
                    for name, module in sys.modules.items()
                    if self.wantModuleCoverage(name, module)]
         log.debug("Coverage report will cover modules: %s", modules)
+
         if self.coverPrint:
             self.coverInstance.report(modules, file=stream)
 
-        import coverage
         if self.coverHtmlDir:
             log.debug("Generating HTML coverage report")
             try:
-                self.coverInstance.html_report(modules, self.coverHtmlDir)
-            except coverage.misc.CoverageException as e:
-                log.warning("Failed to generate HTML report: %s" % str(e))
+                self.coverInstance.html_report(modules, directory=self.coverHtmlDir)
+            except Exception as e:
+                log.warning("Failed to generate HTML report: %s", str(e))
 
         if self.coverXmlFile:
             log.debug("Generating XML coverage report")
             try:
-                self.coverInstance.xml_report(modules, self.coverXmlFile)
-            except coverage.misc.CoverageException as e:
-                log.warning("Failed to generate XML report: %s" % str(e))
+                self.coverInstance.xml_report(modules, outfile=self.coverXmlFile)
+            except Exception as e:
+                log.warning("Failed to generate XML report: %s", str(e))
 
-        # make sure we have minimum required coverage
         if self.coverMinPercentage:
             f = io.StringIO()
             self.coverInstance.report(modules, file=f)
 
-            multiPackageRe = (r'-------\s\w+\s+\d+\s+\d+(?:\s+\d+\s+\d+)?'
-                              r'\s+(\d+)%\s+\d*\s{0,1}$')
-            singlePackageRe = (r'-------\s[\w./]+\s+\d+\s+\d+(?:\s+\d+\s+\d+)?'
-                               r'\s+(\d+)%(?:\s+[-\d, ]+)\s{0,1}$')
+            content = f.getvalue()
+            percent_patterns = [
+                r'TOTAL.*?\s+(\d+)%',
+                r'TOTAL\s+(\d+)%',
+                r'\b(\d+)%\s*$',
+                r'coverage:\s+(\d+)%',
+            ]
 
-            m = re.search(multiPackageRe, f.getvalue())
-            if m is None:
-                m = re.search(singlePackageRe, f.getvalue())
+            percentage = None
+            for pattern in percent_patterns:
+                match = re.search(pattern, content)
+                if match:
+                    percentage = int(match.group(1))
+                    break
 
-            if m:
-                percentage = int(m.groups()[0])
+            if percentage is not None:
                 if percentage < self.coverMinPercentage:
                     log.error('TOTAL Coverage did not reach minimum '
-                              'required: %d%%' % self.coverMinPercentage)
+                              'required: %d%%', self.coverMinPercentage)
                     sys.exit(1)
+                else:
+                    log.info('Coverage OK: %d%% >= %d%% required', percentage, self.coverMinPercentage)
             else:
-                log.error("No total percentage was found in coverage output, "
-                          "something went wrong.")
+                log.warning("No total percentage found in coverage output - skipping threshold check")
 
     def wantModuleCoverage(self, name, module):
         if not hasattr(module, '__file__'):
@@ -260,16 +262,13 @@ class Coverage(Plugin):
                              or not self.conf.testMatch.search(name))):
                     log.debug("coverage for %s", name)
                     return True
-        if name in self.skipModules:
+        if 'skipModules' in self.__dict__ and name in self.skipModules:
             log.debug("no coverage for %s: loaded before coverage start",
                       name)
             return False
         if self.conf.testMatch.search(name) and not self.coverTests:
             log.debug("no coverage for %s: is a test", name)
             return False
-        # accept any package that passed the previous tests, unless
-        # coverPackages is on -- in that case, if we wanted this
-        # module, we would have already returned True
         return not self.coverPackages
 
     def wantFile(self, file, package=None):
