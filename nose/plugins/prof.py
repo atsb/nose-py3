@@ -7,7 +7,7 @@ and the profiler output file may be changed with ``--profile-stats-file``.
 See the `hotshot documentation`_ in the standard library documentation for
 more details on the various output options.
 
-.. _hotshot documentation: http://docs.python.org/library/hotshot.html
+.. _hotshot documentation: docs.python.org/library/hotshot.html
 """
 import cProfile
 import logging

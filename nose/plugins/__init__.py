@@ -68,7 +68,7 @@ in the setup.py for the package:
 Once the package is installed with install or develop, nose will be able
 to load the plugin.
 
-.. _setuptools: http://peak.telecommunity.com/DevCenter/setuptools
+.. _setuptools: peak.telecommunity.com/DevCenter/setuptools
 
 Registering a plugin without setuptools
 =======================================
@@ -176,9 +176,9 @@ See any builtin plugin or example plugin in the examples_ directory in
 the nose source distribution. There is a list of third-party plugins
 `on jottit`_.
 
-.. _examples/html_plugin/htmlplug.py: http://python-nose.googlecode.com/svn/trunk/examples/html_plugin/htmlplug.py
-.. _examples: http://python-nose.googlecode.com/svn/trunk/examples
-.. _on jottit: http://nose-plugins.jottit.com/
+.. _examples/html_plugin/htmlplug.py: python-nose.googlecode.com/svn/trunk/examples/html_plugin/htmlplug.py
+.. _examples: python-nose.googlecode.com/svn/trunk/examples
+.. _on jottit: nose-plugins.jottit.com/
 
 """
 from nose.plugins.base import Plugin

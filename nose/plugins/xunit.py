@@ -41,9 +41,6 @@ Here is an abbreviated version of what an XML test report might look like::
             </error>
         </testcase>
     </testsuite>
-
-.. _Jenkins: http://jenkins-ci.org/
-
 """
 import codecs
 import inspect

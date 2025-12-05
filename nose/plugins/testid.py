@@ -287,6 +287,7 @@ class TestId(Plugin):
 
         adr = self._safe_address(test)
         if adr is None:
+
             self._problematic_tests.add(test_name)
             log.debug("Skipping ID for test '%s': invalid address", test_name)
             return

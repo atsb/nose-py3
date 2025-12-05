@@ -536,7 +536,7 @@ def tolist(val):
 class odict(dict):
     """Simple ordered dict implementation, based on:
 
-    http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747
+    aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747
     """
 
     def __init__(self, *arg, **kw):

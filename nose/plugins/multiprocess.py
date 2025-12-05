@@ -15,7 +15,7 @@ spend most of their time waiting for data to arrive from someplace else.
    2.5 or earlier requires the multiprocessing_ module, also available
    from PyPI.
 
-.. _multiprocessing : http://code.google.com/p/python-multiprocessing/
+.. _multiprocessing : code.google.com/p/python-multiprocessing/
 
 How tests are distributed
 =========================

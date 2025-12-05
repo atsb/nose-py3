@@ -25,7 +25,7 @@ Or, more realistically::
       d.addCallback(check_ip)
       return d
 
-.. _Twisted: http://twistedmatrix.com/trac/
+.. _Twisted: twistedmatrix.com/trac/
 """
 
 import sys
