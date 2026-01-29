@@ -1,3 +1,9 @@
+# Migration to CodeBerg
+Nose-py3 has migrated to EU-based CodeBerg!
+https://codeberg.org/atsb/nose-py3
+
+No further developments will be done here and the repo will be closed on GitHub in 6 months.
+
 # nose-py3
 The original nose for nicer testing, converted to Python 3, cleaned and maintained
 
