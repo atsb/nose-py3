@@ -17,8 +17,6 @@ from nose.suite import FinalizingSuiteWrapper
 from nose.util import isclass, tolist
 
 log = logging.getLogger('nose.core')
-compat_24 = sys.version_info >= (2, 4)
-
 __all__ = ['TestProgram', 'main', 'run', 'run_exit', 'runmodule', 'collector',
            'NoseTextTestRunner']
 

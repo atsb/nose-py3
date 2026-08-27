@@ -32,10 +32,6 @@ class ErrPkgResources(object):
         yield ErrPlugin()
 
 
-# some plugins have 2.4-only features
-compat_24 = sys.version_info >= (2, 4)
-
-
 class TestBuiltinPlugins(unittest.TestCase):
 
     def setUp(self):
@@ -218,8 +214,7 @@ class TestAttribPlugin(unittest.TestCase):
                     'help': 'Run only tests that have attributes '
                             'specified by ATTR [NOSE_ATTR]'})]
 
-        if compat_24:
-            expect.append(
+        expect.append(
                 (('-A', '--eval-attr'),
                  {'dest': 'eval_attr', 'action': 'append',
                   'default': None, 'metavar': 'EXPR',
@@ -245,12 +240,11 @@ class TestAttribPlugin(unittest.TestCase):
         plug.configure(opt, Config())
         self.assertEqual(plug.attribs, [[('something', True)]])
 
-        if compat_24:
-            opt.attr = None
-            opt.eval_attr = ['weird >= 66']
-            plug.configure(opt, Config())
-            self.assertEqual(plug.attribs[0][0][0], 'weird >= 66')
-            assert callable(plug.attribs[0][0][1])
+        opt.attr = None
+        opt.eval_attr = ['weird >= 66']
+        plug.configure(opt, Config())
+        self.assertEqual(plug.attribs[0][0][0], 'weird >= 66')
+        assert callable(plug.attribs[0][0][1])
 
     def test_basic_attr(self):
         def f():
@@ -282,11 +276,6 @@ class TestAttribPlugin(unittest.TestCase):
         assert plug.wantFunction(i) is False
 
     def test_eval_attr(self):
-        if not compat_24:
-            warn("No support for eval attributes in python versions older"
-                 " than 2.4")
-            return
-
         def f():
             pass
 
