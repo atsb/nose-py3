@@ -127,5 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-.idea/nose-py3.iml
-.idea/misc.xml
+
+# IDE project files
+.idea/
+.vscode/
