@@ -87,6 +87,7 @@ setup(
         the very latest, you may want the development version instead:
         https://github.com/atsb/nose-py3
         """,
+    long_description_content_type="text/markdown",
     license='GNU LGPL',
     keywords='test unittest doctest automatic discovery',
     url='https://github.com/atsb/nose-py3',
