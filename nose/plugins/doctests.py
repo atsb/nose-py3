@@ -223,7 +223,7 @@ class Doctest(Plugin):
         if not tests:
             log.debug("No tests found in %s", module)
             return
-        tests.sort()
+        tests.sort(key=lambda t: t.name)
         module_file = src(module.__file__)
         # FIXME this breaks the id plugin somehow (tests probably don't
         # get wrapped in result proxy or something)
@@ -276,8 +276,8 @@ class Doctest(Plugin):
                 case = DocFileCase(
                     test,
                     optionflags=self.optionflags,
-                    setUp=getattr(fixture_context, 'setup_test', None),
-                    tearDown=getattr(fixture_context, 'teardown_test', None),
+                    set_up=getattr(fixture_context, 'setup_test', None),
+                    tear_down=getattr(fixture_context, 'teardown_test', None),
                     result_var=self.doctest_result_var)
                 if fixture_context:
                     yield ContextList((case,), context=fixture_context)

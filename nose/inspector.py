@@ -12,7 +12,18 @@ from nose.util import resolve_name, test_address, try_run
 
 log = logging.getLogger(__name__)
 
-__all__ = ['Test']
+__all__ = ['Test', 'inspect_traceback']
+
+
+def inspect_traceback(tb):
+    """Simple traceback inspector helper."""
+    lines = []
+    while tb:
+        frame = tb.tb_frame
+        code = frame.f_code
+        lines.append(f"File {code.co_filename}, line {tb.tb_lineno}, in {code.co_name}")
+        tb = tb.tb_next
+    return "\n".join(lines)
 
 
 class Test(unittest.TestCase):

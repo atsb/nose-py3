@@ -264,18 +264,15 @@ def _exception_traceback(exc_info):
 class _SpoofOut(StringIO):
     def getvalue(self):
         result = StringIO.getvalue(self)
-        # If anything at all was written, make sure there's a trailing
-        # newline.  There's no way for the expected output to indicate
-        # that a trailing newline is missing.
         if result and not result.endswith("\n"):
             result += "\n"
-        # Prevent softspace from screwing up the next test case, in
-        # case they used print with a trailing comma in an example.
         if hasattr(self, "softspace"):
             del self.softspace
         return result
 
     def truncate(self, size=None):
+        if size == 0 or size is None:
+            self.seek(0)
         StringIO.truncate(self, size)
         if hasattr(self, "softspace"):
             del self.softspace
@@ -862,7 +859,7 @@ class DocTestFinder:
         # verbose-mode output.  This was a feature of doctest in Pythons
         # <= 2.3 that got lost by accident in 2.4.  It was repaired in
         # 2.4.4 and 2.5.
-        tests.sort()
+        tests.sort(key=lambda t: t.name)
         return tests
 
     def _filter(self, obj, prefix, base):
@@ -1204,12 +1201,12 @@ class DocTestRunner:
             # keyboard interrupts.)
             try:
                 # Don't blink!  This is where the user's code gets run.
-                exec(compile(example.source, filename, "single", compileflags, 1 in test.globs))
+                exec(compile(example.source, filename, "single", compileflags, 1 in test.globs), test.globs)
                 self.debugger.set_continue()  # ==== Example Finished ====
                 exception = None
             except KeyboardInterrupt:
                 raise
-            except:
+            except Exception as exc:
                 exception = sys.exc_info()
                 self.debugger.set_continue()  # ==== Example Finished ====
 
@@ -1225,7 +1222,7 @@ class DocTestRunner:
 
             # The example raised an exception:  check if it was expected.
             else:
-                exc_info = sys.exc_info()
+                exc_info = exception
                 exc_msg = traceback.format_exception_only(*exc_info[:2])[-1]
                 if not quiet:
                     got += _exception_traceback(exc_info)
@@ -1284,13 +1281,16 @@ class DocTestRunner:
                                          r'(?P<name>[\w\.]+)'
                                          r'\[(?P<examplenum>\d+)\]>$')
 
-    def __patched_linecache_getlines(self, filename):
+    def __patched_linecache_getlines(self, filename, module_globals=None):
         m = self.__LINECACHE_FILENAME_RE.match(filename)
         if m and m.group('name') == self.test.name:
             example = self.test.examples[int(m.group('examplenum'))]
             return example.source.splitlines(True)
         else:
-            return self.save_linecache_getlines(filename)
+            try:
+                return self.save_linecache_getlines(filename, module_globals)
+            except TypeError:
+                return self.save_linecache_getlines(filename)
 
     def run(self, test, compileflags=None, out=None, clear_globs=True):
         """

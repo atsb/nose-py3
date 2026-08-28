@@ -105,7 +105,10 @@ class NoseTextTestResult(TextTestResult):
     def printErrors(self):
         """Overrides to print all errorClasses errors as well.
         """
-        super().printErrors()
+        try:
+            super().printErrors()
+        except TypeError:
+            pass
 
         for cls in self.errorClasses:
             storage, label, isfail = self.errorClasses[cls]

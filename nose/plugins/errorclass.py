@@ -26,12 +26,12 @@ class MetaErrorClass(type):
 
     def __init__(cls, name, bases, attr):
         errorClasses = []
-        for name, detail in attr.items():
+        for key, detail in list(attr.items()):
             if isinstance(detail, ErrorClass):
-                attr.pop(name)
+                attr.pop(key)
                 for classes in detail:
                     errorClasses.append(
-                        (classes, (name, detail.label, detail.isfailure)))
+                        (classes, (key, detail.label, detail.isfailure)))
         super(MetaErrorClass, cls).__init__(name, bases, attr)
         cls.errorClasses = tuple(errorClasses)
 
@@ -50,12 +50,11 @@ class ErrorClass(object):
         return iter(self.errorClasses)
 
 
-class ErrorClassPlugin(Plugin):
+class ErrorClassPlugin(Plugin, metaclass=MetaErrorClass):
     """
     Base class for ErrorClass plugins. Subclass this class and declare the
     exceptions that you wish to handle as attributes of the subclass.
     """
-    __metaclass__ = MetaErrorClass
     score = 1000
     errorClasses = ()
 

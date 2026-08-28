@@ -155,6 +155,10 @@ class Test(unittest.TestCase):
         desc = self.plugins.describeTest(self)
         if desc is not None:
             return desc
+        if hasattr(self.test, 'shortDescription'):
+            d = self.test.shortDescription()
+            if d is not None:
+                return d
         # work around bug in unittest.TestCase.shortDescription
         # with multiline docstrings.
         test = self.test

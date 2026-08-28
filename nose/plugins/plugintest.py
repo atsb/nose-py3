@@ -165,13 +165,15 @@ class PluginTester:
         """
         from nose.config import Config
         from nose.core import TestProgram
-        from nose.plugins.manager import PluginManager
+        from nose.plugins.manager import DefaultPluginManager
 
         suite = None
         stream = Buffer()
+        plugins = DefaultPluginManager(plugins=self.plugins)
+        plugins.loadPlugins()
         conf = Config(env=self.env,
                       stream=stream,
-                      plugins=PluginManager(plugins=self.plugins))
+                      plugins=plugins)
         if self.ignoreFiles is not None:
             conf.ignoreFiles = self.ignoreFiles
         if not self.suitepath:

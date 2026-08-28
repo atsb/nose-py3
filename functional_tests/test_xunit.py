@@ -6,6 +6,7 @@ import unittest
 from nose.plugins import PluginTester
 from nose.plugins.capture import Capture
 from nose.plugins.skip import Skip
+from nose.plugins.skip import Skip
 from nose.plugins.xunit import Xunit
 
 support = os.path.join(os.path.dirname(__file__), 'support')

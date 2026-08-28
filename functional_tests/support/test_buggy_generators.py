@@ -1,28 +1,35 @@
-def test_generator_fails_before_yield():
-    a = 1 // 0
-    yield lambda: True
+import os
+import unittest
+from io import StringIO
+from nose.core import TestProgram
+from nose.config import Config
+from nose.result import TextTestResult
+
+here = os.path.dirname(__file__)
+support = os.path.join(here, 'support')
 
 
-def test_generator_fails_during_iteration():
-    for i in [1, 2, 3, 0, 5, 6]:
-        a = 1 // i
-        yield lambda: True
+class TestRunner(unittest.TextTestRunner):
+    def _makeResult(self):
+        self.result = TextTestResult(
+            self.stream, self.descriptions, self.verbosity)
+        return self.result
 
 
-def test_ok():
-    pass
-
-
-class TestBuggyGenerators(object):
-
-    def test_generator_fails_before_yield(self):
-        a = 1 // 0
-        yield lambda: True
-
-    def test_generator_fails_during_iteration(self):
-        for i in [1, 2, 3, 0, 5, 6]:
-            a = 1 // i
-            yield lambda: True
-
-    def test_ok(self):
-        pass
+class TestBuggyGenerators(unittest.TestCase):
+    def test_run_buggy_generators(self):
+        stream = StringIO()
+        runner = TestRunner(stream=stream)
+        prog = TestProgram(
+            argv=['nosetests',
+                  os.path.join(support, 'test_buggy_generators.py')],
+            testRunner=runner,
+            config=Config(),
+            exit=False)
+        res = runner.result
+        print("")
+        stream.getvalue()
+        self.assertEqual(res.testsRun, 12,
+                         "Expected to run 12 tests, ran %s" % res.testsRun)
+        assert not res.wasSuccessful()
+        assert not res.failures
