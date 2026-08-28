@@ -3,9 +3,9 @@
 import os
 import re
 import sys
+from subprocess import getstatusoutput
 
-import pudge.browser
-from commands import getstatusoutput
+import file
 from docutils.core import publish_string
 from docutils.nodes import SparseNodeVisitor
 from docutils.readers.standalone import Reader
@@ -18,7 +18,6 @@ from nose.plugins import errorclass
 from nose.plugins.manager import BuiltinPluginManager
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-from mkdocs import formatargspec
 
 # constants
 success = 0
@@ -215,53 +214,14 @@ def wikirst(doc):
 
 
 def plugin_interface():
-    """use pudge browser to generate interface docs
-    from nose.plugins.base.PluginInterface
-    """
-    b = pudge.browser.Browser(['nose.plugins.base'], None)
-    m = b.modules()[0]
-    intf = list([c for c in m.classes() if c.name ==
-                 'IPluginInterface'])[0]
-    doc = wikirst(intf.doc())
-    methods = [m for m in intf.routines() if not m.name.startswith('_')]
-    methods.sort(lambda a, b: cmp(a.name, b.name))
-    mdoc = []
-    for m in methods:
-        # FIXME fix the arg list so literal os.environ is not in there
-        mdoc.append('*%s%s*\n\n' % (m.name, formatargspec(m.obj)))
-        # FIXME this is resulting in poorly formatted doc sections
-        mdoc.append(' ' + m.doc().replace('\n', '\n '))
-        mdoc.append('\n\n')
-    doc = doc + ''.join(mdoc)
-    return doc
-
+    """pudge is not 3.10+ compatible"""
 
 def example_plugin():
-    # FIXME dump whole example plugin code from setup.py and plug.py
-    # into python source sections
-    root = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                        '..'))
-    exp = os.path.join(root, 'examples', 'plugin')
-    setup = file(os.path.join(exp, 'setup.py'), 'r').read()
-    plug = file(os.path.join(exp, 'plug.py'), 'r').read()
-
-    wik = "*%s:*\n{{{\n%s\n}}}\n"
-    return wik % ('setup.py', setup) + wik % ('plug.py', plug)
+    """deprecated"""
 
 
 def tools():
-    top = wikirst(nose.tools.__doc__)
-    b = pudge.browser.Browser(['nose.tools'], None)
-    m = b.modules()[0]
-    funcs = [(f.name, f.formatargs().replace('(self, ', '('), f.doc())
-             for f in m.routines()]
-    funcs.sort()
-    mdoc = [top, '\n\n']
-    for name, args, doc in funcs:
-        mdoc.append("*%s%s*\n\n" % (name, args))
-        mdoc.append(' ' + doc.replace('\n', '\n '))
-        mdoc.append('\n\n')
-    return ''.join(mdoc)
+    """deprecated"""
 
 
 def usage():

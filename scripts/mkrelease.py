@@ -6,8 +6,8 @@ import os
 import sys
 import urllib
 
-from commands import getstatusoutput
-from urllib2 import urlopen
+from subprocess import getstatusoutput
+from urllib.request import urlopen
 
 success = 0
 

@@ -40,7 +40,7 @@ class ConfigError(Exception):
     pass
 
 
-class ConfiguredDefaultsOptionParser(object):
+class ConfiguredDefaultsOptionParser:
     """
     Handler for options from commandline and config files.
     """
@@ -141,7 +141,7 @@ class ConfiguredDefaultsOptionParser(object):
         return self._parser.parse_args(args, values)
 
 
-class Config(object):
+class Config:
     r"""nose configuration.
 
     Instances of Config are used throughout nose to configure
@@ -197,7 +197,7 @@ class Config(object):
                                           r'^_',
                                           r'^setup\.py$',
                                           ]
-        self.ignoreFiles = map(re.compile, self.ignoreFilesDefaultStrings)
+        self.ignoreFiles = list(map(re.compile, self.ignoreFilesDefaultStrings))
         self.include = None
         self.loggingConfig = None
         self.logStream = sys.stderr
@@ -332,17 +332,17 @@ class Config(object):
             self.testMatch = re.compile(options.testMatch)
 
         if options.ignoreFiles:
-            self.ignoreFiles = map(re.compile, tolist(options.ignoreFiles))
+            self.ignoreFiles = list(map(re.compile, tolist(options.ignoreFiles)))
             log.info("Ignoring files matching %s", options.ignoreFiles)
         else:
             log.info("Ignoring files matching %s", self.ignoreFilesDefaultStrings)
 
         if options.include:
-            self.include = map(re.compile, tolist(options.include))
+            self.include = list(map(re.compile, tolist(options.include)))
             log.info("Including tests matching %s", options.include)
 
         if options.exclude:
-            self.exclude = map(re.compile, tolist(options.exclude))
+            self.exclude = list(map(re.compile, tolist(options.exclude)))
             log.info("Excluding tests matching %s", options.exclude)
 
         # When listing plugins we don't want to run them
@@ -615,7 +615,7 @@ class Config(object):
         self.__dict__.update(d)
 
 
-class NoOptions(object):
+class NoOptions:
     """Options container that returns None for all options.
     """
 
@@ -628,7 +628,7 @@ class NoOptions(object):
     def __getnewargs__(self):
         return ()
 
-    def __nonzero__(self):
+    def __bool__(self):
         return False
 
 

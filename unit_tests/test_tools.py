@@ -1,5 +1,4 @@
 import time
-import unittest
 
 from nose.tools import *
 

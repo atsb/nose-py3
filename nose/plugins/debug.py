@@ -5,6 +5,7 @@ drop into pdb on failure, use ``--pdb-failures``.
 """
 
 import pdb
+import sys
 
 from nose.plugins.base import Plugin
 
@@ -59,7 +60,6 @@ class Pdb(Plugin):
         self.debug(err)
 
     def debug(self, err):
-        import sys  # FIXME why is this import here?
         ec, ev, tb = err
         stdout = sys.stdout
         sys.stdout = sys.__stdout__

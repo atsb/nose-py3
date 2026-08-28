@@ -137,14 +137,12 @@ def file_like(name):
 
 
 def func_lineno(func):
-    """Get the line number of a function. First looks for
-    compat_co_firstlineno, then func_code.co_first_lineno.
-    """
+    """Get the line number of a function."""
     try:
         return func.compat_co_firstlineno
     except AttributeError:
         try:
-            return func.func_code.co_firstlineno
+            return func.__code__.co_firstlineno
         except AttributeError:
             return -1
 

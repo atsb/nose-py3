@@ -1,7 +1,5 @@
 """Implements nose test program and collector.
 """
-from __future__ import generators
-
 import logging
 import os
 import sys
@@ -10,8 +8,11 @@ import unittest
 
 from nose.config import Config, all_config_files
 from nose.loader import defaultTestLoader
-from nose.plugins.manager import PluginManager, DefaultPluginManager, \
-    RestrictedPluginManager
+from nose.plugins.manager import (
+    DefaultPluginManager,
+    PluginManager,
+    RestrictedPluginManager,
+)
 from nose.result import NoseTextTestResult
 from nose.suite import FinalizingSuiteWrapper
 from nose.util import isclass, tolist
@@ -32,7 +33,7 @@ class NoseTextTestRunner(unittest.TextTestRunner):
         if config is None:
             config = Config()
         self.config = config
-        unittest.TextTestRunner.__init__(self, stream, descriptions, verbosity)
+        super().__init__(stream, descriptions, verbosity)
 
     def _makeResult(self):
         return NoseTextTestResult(self.stream,
@@ -108,14 +109,15 @@ class TestProgram(unittest.TestProgram):
         self.config = config
         self.suite = suite
         self.exit = exit
-        extra_args = {}
-        version = sys.version_info[0:2]
-        if version >= (2, 7) and version != (3, 0):
-            extra_args['exit'] = exit
         unittest.TestProgram.__init__(
-            self, module=module, defaultTest=defaultTest,
-            argv=argv, testRunner=testRunner, testLoader=testLoader,
-            **extra_args)
+            self,
+            module=module,
+            defaultTest=defaultTest,
+            argv=argv,
+            testRunner=testRunner,
+            testLoader=testLoader,
+            exit=exit,
+        )
 
     def getAllConfigFiles(self, env=None):
         env = env or {}
@@ -250,12 +252,11 @@ class TestProgram(unittest.TestProgram):
             text = ld.get_data(os.path.join(
                 os.path.dirname(__file__), 'usage.txt'))
         except AttributeError:
-            f = open(os.path.join(
-                os.path.dirname(__file__), 'usage.txt'), 'r')
-            try:
+            with open(
+                os.path.join(os.path.dirname(__file__), 'usage.txt'),
+                'r',
+            ) as f:
                 text = f.read()
-            finally:
-                f.close()
         # Ensure that we return str, not bytes.
         if not isinstance(text, str):
             text = text.decode('utf-8')

@@ -1,10 +1,10 @@
 import logging
 import unittest
 
-# from nose.core import configure_logging
-from mock import *
-
 from nose.config import Config
+
+
+# from nose.core import configure_logging
 
 
 class TestLoggingConfig(unittest.TestCase):

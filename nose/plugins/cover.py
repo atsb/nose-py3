@@ -1,15 +1,13 @@
-"""If you have Ned Batchelder's coverage_ module installed, you may activate a
-coverage report with the ``--with-coverage`` switch or NOSE_WITH_COVERAGE
-environment variable. The coverage report will cover any python source module
-imported after the start of the test run, excluding modules that match
-testMatch. If you want to include those modules too, use the ``--cover-tests``
-switch, or set the NOSE_COVER_TESTS environment variable to a true value. To
-restrict the coverage report to modules from a particular package or packages,
-use the ``--cover-package`` switch or the NOSE_COVER_PACKAGE environment
-variable.
+"""This plugin provides coverage reports using the ``coverage`` package.
 
-. _coverage: [www.nedbatchelder.com/code/modules/coverage.html](www.nedbatchelder.com/code/modules/coverage.html)
+Use the ``--with-coverage`` switch or the NOSE_WITH_COVERAGE environment
+variable to enable coverage reporting. The coverage report covers Python
+source modules imported after the start of the test run, excluding modules
+that match testMatch. Use ``--cover-tests`` or NOSE_COVER_TESTS to include
+test modules, and ``--cover-package`` or NOSE_COVER_PACKAGE to restrict the
+report to selected packages.
 """
+
 import io
 import logging
 import re
@@ -18,12 +16,13 @@ import sys
 from nose.plugins.base import Plugin
 from nose.util import src, tolist
 
+
 log = logging.getLogger(__name__)
 
 
 class Coverage(Plugin):
     """
-    Activate a coverage report using Ned Batchelder's coverage module.
+    Activate a coverage report using the coverage module.
     """
     coverTests = False
     coverPackages = None
@@ -38,7 +37,7 @@ class Coverage(Plugin):
         """
         Add options to command line.
         """
-        super(Coverage, self).options(parser, env)
+        super().options(parser, env)
         parser.add_option("--cover-package", action="append",
                           default=env.get('NOSE_COVER_PACKAGE'),
                           metavar="PACKAGE",
@@ -110,7 +109,7 @@ class Coverage(Plugin):
             self.status.pop('active')
         except KeyError:
             pass
-        super(Coverage, self).configure(options, conf)
+        super().configure(options, conf)
         if self.enabled:
             try:
                 import coverage
@@ -142,7 +141,9 @@ class Coverage(Plugin):
         self.coverBranches = options.cover_branches
         self.coverXmlFile = None
         if options.cover_min_percentage:
-            self.coverMinPercentage = int(options.cover_min_percentage.rstrip('%'))
+            self.coverMinPercentage = int(
+                options.cover_min_percentage.rstrip('%')
+            )
         if options.cover_xml:
             self.coverXmlFile = options.cover_xml_file
             log.debug('Will put XML coverage report in %s', self.coverXmlFile)
@@ -196,9 +197,11 @@ class Coverage(Plugin):
         self.coverInstance.combine()
         self.coverInstance.save()
 
-        modules = [module
-                   for name, module in sys.modules.items()
-                   if self.wantModuleCoverage(name, module)]
+        modules = [
+            module
+            for name, module in sys.modules.items()
+            if self.wantModuleCoverage(name, module)
+        ]
         log.debug("Coverage report will cover modules: %s", modules)
 
         if self.coverPrint:
@@ -207,14 +210,20 @@ class Coverage(Plugin):
         if self.coverHtmlDir:
             log.debug("Generating HTML coverage report")
             try:
-                self.coverInstance.html_report(modules, directory=self.coverHtmlDir)
+                self.coverInstance.html_report(
+                    modules,
+                    directory=self.coverHtmlDir,
+                )
             except Exception as e:
                 log.warning("Failed to generate HTML report: %s", str(e))
 
         if self.coverXmlFile:
             log.debug("Generating XML coverage report")
             try:
-                self.coverInstance.xml_report(modules, outfile=self.coverXmlFile)
+                self.coverInstance.xml_report(
+                    modules,
+                    outfile=self.coverXmlFile,
+                )
             except Exception as e:
                 log.warning("Failed to generate XML report: %s", str(e))
 
@@ -239,13 +248,23 @@ class Coverage(Plugin):
 
             if percentage is not None:
                 if percentage < self.coverMinPercentage:
-                    log.error('TOTAL Coverage did not reach minimum '
-                              'required: %d%%', self.coverMinPercentage)
+                    log.error(
+                        'TOTAL Coverage did not reach minimum '
+                        'required: %d%%',
+                        self.coverMinPercentage,
+                    )
                     sys.exit(1)
                 else:
-                    log.info('Coverage OK: %d%% >= %d%% required', percentage, self.coverMinPercentage)
+                    log.info(
+                        'Coverage OK: %d%% >= %d%% required',
+                        percentage,
+                        self.coverMinPercentage,
+                    )
             else:
-                log.warning("No total percentage found in coverage output - skipping threshold check")
+                log.warning(
+                    "No total percentage found in coverage output - "
+                    "skipping threshold check"
+                )
 
     def wantModuleCoverage(self, name, module):
         if not hasattr(module, '__file__'):

@@ -21,7 +21,7 @@ import threading
 from logging import Handler
 
 from nose.plugins.base import Plugin
-from nose.util import anyp, ln, safe_str
+from nose.util import anyp, safe_str
 
 log = logging.getLogger(__name__)
 

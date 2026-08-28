@@ -39,7 +39,7 @@ def proxied_attribute(local_attr, proxied_attr, doc):
     return property(fget, fset, fdel, doc)
 
 
-class ResultProxyFactory(object):
+class ResultProxyFactory:
     """Factory for result proxies. Generates a ResultProxy bound to each test
     and the result passed to the test.
     """
@@ -69,7 +69,7 @@ class ResultProxyFactory(object):
         return ResultProxy(result, test, config=self.config)
 
 
-class ResultProxy(object):
+class ResultProxy:
     """Proxy to TestResults (or other results handler).
 
     One ResultProxy is created for each nose.case.Test. The result
@@ -106,11 +106,14 @@ class ResultProxy(object):
         # .test's .test. or my .test.test's .case
 
         case = getattr(self.test, 'test', None)
-        assert (test is self.test
-                or test is case
-                or test is getattr(case, '_nose_case', None)), (
-                "ResultProxy for %r (%s) was called with test %r (%s)"
-                % (self.test, id(self.test), test, id(test)))
+        assert (
+            test is self.test
+            or test is case
+            or test is getattr(case, '_nose_case', None)
+        ), (
+            "ResultProxy for %r (%s) was called with test %r (%s)"
+            % (self.test, id(self.test), test, id(test))
+        )
 
     def afterTest(self, test):
         self.assertMyTest(test)
@@ -186,12 +189,15 @@ class ResultProxy(object):
         self.plugins.addDuration(self.test, duration)
         self.result.addDuration(self.test, duration)
 
-    # proxied attributes
-    shouldStop = proxied_attribute('result', 'shouldStop',
-                                   """Should the test run stop?""")
-    errors = proxied_attribute('result', 'errors',
-                               """Tests that raised an exception""")
-    failures = proxied_attribute('result', 'failures',
-                                 """Tests that failed""")
-    testsRun = proxied_attribute('result', 'testsRun',
-                                 """Number of tests run""")
+    shouldStop = proxied_attribute(
+        'result', 'shouldStop', """Should the test run stop?"""
+    )
+    errors = proxied_attribute(
+        'result', 'errors', """Tests that raised an exception"""
+    )
+    failures = proxied_attribute(
+        'result', 'failures', """Tests that failed"""
+    )
+    testsRun = proxied_attribute(
+        'result', 'testsRun', """Number of tests run"""
+    )

@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
         self.resultProxy = resultProxy
         self.plugins = config.plugins
         self.passed = None
-        unittest.TestCase.__init__(self)
+        super().__init__()
 
     def __call__(self, *arg, **kwarg):
         return self.run(*arg, **kwarg)
@@ -233,7 +233,7 @@ class FunctionTestCase(TestBase):
         self.arg = arg
         self.arg_repr = repr(self.arg)
         self.descriptor = descriptor
-        TestBase.__init__(self)
+        super().__init__()
 
     def address(self):
         """Return a round-trip name for this test, a name that can be
@@ -309,8 +309,8 @@ class MethodTestCase(TestBase):
 
         * method -- the method to call, may be bound or unbound. In either
           case, a new instance of the method's class will be instantiated to
-	  make the call.  Note: In Python 3.x, if using an unbound method, you
-	  must wrap it using pyversion.unbound_method.
+      make the call.  Note: In Python 3.x, if using an unbound method, you
+      must wrap it using pyversion.unbound_method.
 
         Optional arguments:
 
@@ -332,13 +332,15 @@ class MethodTestCase(TestBase):
         self.descriptor = descriptor
         if isfunction(method):
             raise ValueError(
-                "Unbound methods must be wrapped using pyversion.unbound_method before passing to MethodTestCase")
+                "Unbound methods must be wrapped using pyversion.unbound_method "
+                "before passing to MethodTestCase"
+            )
         self.cls = method.__self__.__class__
         self.inst = self.cls()
         if self.test is None:
             method_name = self.method.__name__
             self.test = getattr(self.inst, method_name)
-        TestBase.__init__(self)
+        super().__init__()
 
     def __str__(self):
         func = self._descriptor()

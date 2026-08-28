@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
-    <orderEntry type="jdk" jdkName="Python 3.12 (nose-py3)" jdkType="Python SDK" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/build/lib" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/functional_tests" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/functional_tests/doc_tests/test_selector_plugin/support" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/functional_tests/support/namespace_pkg" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/functional_tests/support/namespace_pkg/site-packages" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/functional_tests/support/package2" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/unit_tests/support" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/.venv" />
+    </content>
+    <orderEntry type="jdk" jdkName="~/Development/GitHub/nose-py3/.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

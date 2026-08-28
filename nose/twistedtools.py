@@ -10,7 +10,7 @@ You must import this module *before* importing anything from Twisted itself!
 Example::
 
   from nose.twistedtools import reactor, deferred
-  
+
   @deferred()
   def test_resolve():
       return reactor.resolve("www.python.org")
@@ -29,10 +29,10 @@ Or, more realistically::
 """
 
 import sys
+from queue import Empty, Queue
+from threading import Thread
 
-from queue import Queue, Empty
-
-from nose.tools import make_decorator, TimeExpired
+from nose.tools import TimeExpired, make_decorator
 
 __all__ = [
     'threaded_reactor', 'reactor', 'deferred', 'TimeExpired',
@@ -53,11 +53,14 @@ def threaded_reactor():
         from twisted.internet import reactor
     except ImportError:
         return None, None
+
     if not _twisted_thread:
-        from threading import Thread
-        _twisted_thread = Thread(target=lambda: reactor.run(installSignalHandlers=False))
+        _twisted_thread = Thread(
+            target=lambda: reactor.run(installSignalHandlers=False)
+        )
         _twisted_thread.daemon = True
         _twisted_thread.start()
+
     return reactor, _twisted_thread
 
 
@@ -73,15 +76,17 @@ def stop_reactor():
     """
     global _twisted_thread
 
-    def stop_reactor():
+    def stop():
         """Helper for calling stop from withing the thread."""
         reactor.stop()
 
-    reactor.callFromThread(stop_reactor)
+    reactor.callFromThread(stop)
     reactor_thread.join()
+
     for p in reactor.getDelayedCalls():
         if p.active():
             p.cancel()
+
     _twisted_thread = None
 
 
@@ -101,7 +106,7 @@ def deferred(timeout=None):
     If the errback is triggered or the timeout expires, the test has failed.
 
     Example::
-    
+
         @deferred(timeout=5.0)
         def test_resolve():
             return reactor.resolve("www.python.org")
@@ -110,14 +115,14 @@ def deferred(timeout=None):
     "raises"), deferred() must be called *first*!
 
     In other words, this is good::
-        
+
         @raises(DNSLookupError)
         @deferred()
         def test_error():
             return reactor.resolve("xxxjhjhj.biz")
 
     and this is bad::
-        
+
         @deferred()
         @raises(DNSLookupError)
         def test_error():
@@ -126,13 +131,14 @@ def deferred(timeout=None):
     reactor, reactor_thread = threaded_reactor()
     if reactor is None:
         raise ImportError("twisted is not available or could not be imported")
+
     # Check for common syntax mistake
     # (otherwise, tests can be silently ignored
     # if one writes "@deferred" instead of "@deferred()")
     try:
         timeout is None or timeout + 0
     except TypeError:
-        raise TypeError("'timeout' argument must be a number or None")
+        raise TypeError("'timeout' argument must be a number or None") from None
 
     def decorate(func):
         def wrapper(*args, **kargs):
@@ -145,30 +151,32 @@ def deferred(timeout=None):
                 # Retrieve and save full exception info
                 try:
                     failure.raiseException()
-                except:
+                except Exception:
                     q.put(sys.exc_info())
 
             def g():
                 try:
                     d = func(*args, **kargs)
-                    try:
-                        d.addCallbacks(callback, errback)
-                    # Check for a common mistake and display a nice error
-                    # message
-                    except AttributeError:
-                        raise TypeError("you must return a twisted Deferred "
-                                        "from your test case!")
-                # Catch exceptions raised in the test body (from the
-                # Twisted thread)
-                except:
+                except Exception:
                     q.put(sys.exc_info())
+                    return
+
+                try:
+                    d.addCallbacks(callback, errback)
+                # Check for a common mistake and display a nice error
+                # message
+                except AttributeError:
+                    raise TypeError("you must return a twisted Deferred "
+                                    "from your test case!")
 
             reactor.callFromThread(g)
             try:
                 error = q.get(timeout=timeout)
             except Empty:
-                raise TimeExpired("timeout expired before end of test (%f s.)"
-                                  % timeout)
+                raise TimeExpired(
+                    "timeout expired before end of test (%f s.)" % timeout
+                ) from None
+
             # Re-raise all exceptions
             if error is not None:
                 exc_type, exc_value, tb = error

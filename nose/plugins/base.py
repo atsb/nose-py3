@@ -6,7 +6,7 @@ from warnings import warn
 from nose.util import tolist
 
 
-class Plugin(object):
+class Plugin:
     """Base class for nose plugins. It's recommended but not *necessary* to
     subclass this class to create a plugin, but all plugins *must* implement
     `options(self, parser, env)` and `configure(self, options, conf)`, and
@@ -70,8 +70,11 @@ class Plugin(object):
             self.options(parser, env)
             self.can_configure = True
         except OptionConflictError as e:
-            warn("Plugin %s has conflicting option string: %s and will "
-                 "be disabled" % (self, e), RuntimeWarning)
+            warn(
+                "Plugin %s has conflicting option string: %s and will "
+                "be disabled" % (self, e),
+                RuntimeWarning,
+            )
             self.enabled = False
             self.can_configure = False
 
@@ -119,7 +122,7 @@ class Plugin(object):
         return tolist(val)
 
 
-class IPluginInterface(object):
+class IPluginInterface:
     """
     IPluginInterface describes the plugin API. Do not subclass or use this
     class directly.
@@ -160,7 +163,7 @@ class IPluginInterface(object):
         test has raised an error.
 
         :param test: the test case
-        :type test: :class:`nose.case.Test`            
+        :type test: :class:`nose.case.Test`
         :param err: sys.exc_info() tuple
         :type err: 3-tuple
         """
@@ -318,7 +321,7 @@ class IPluginInterface(object):
         them.
 
         :param result: test result object
-        
+
         .. Note:: When tests are run under a test runner other than
            :class:`nose.core.NoseTextTestRunner`, such as
            via ``python setup.py test``, this method may be called
@@ -342,7 +345,7 @@ class IPluginInterface(object):
         """Called in result.addError, before plugin.addError. If you
         want to replace or modify the error tuple, return a new error
         tuple, otherwise return err, the original error tuple.
-        
+
         :param test: the test case
         :type test: :class:`nose.case.Test`
         :param err: sys.exc_info() tuple
@@ -359,7 +362,7 @@ class IPluginInterface(object):
         """Called in result.addFailure, before plugin.addFailure. If you
         want to replace or modify the error tuple, return a new error
         tuple, otherwise return err, the original error tuple.
-        
+
         :param test: the test case
         :type test: :class:`nose.case.Test`
         :param err: sys.exc_info() tuple
@@ -589,7 +592,7 @@ class IPluginInterface(object):
         test loader, return None. Only one plugin may replace the test
         loader. Only valid when using nose.TestProgram.
 
-        :param loader: :class:`nose.loader.TestLoader` 
+        :param loader: :class:`nose.loader.TestLoader`
              (or other loader) instance
         """
         pass
@@ -610,7 +613,7 @@ class IPluginInterface(object):
         monkeypatch and stop other plugins from doing so, monkeypatch
         and return the patched result.
 
-        :param result: :class:`nose.result.TextTestResult` 
+        :param result: :class:`nose.result.TextTestResult`
              (or other result) instance
         """
         pass
@@ -749,7 +752,7 @@ class IPluginInterface(object):
     def wantMethod(self, method):
         """Return true to collect this method as a test, false to
         prevent it from being collected, and None if you don't care.
-        
+
         :param method: The method object being examined by the selector
         :type method: unbound method
         """
@@ -773,3 +776,4 @@ class IPluginInterface(object):
         pass
 
     wantModuleTests.deprecated = True
+

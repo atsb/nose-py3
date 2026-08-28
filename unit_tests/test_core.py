@@ -1,9 +1,7 @@
 import os
 import sys
 import unittest
-
 from io import StringIO
-from optparse import OptionParser
 
 import nose.core
 from nose.config import Config, all_config_files

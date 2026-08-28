@@ -25,7 +25,7 @@ class Failure(unittest.TestCase):
         self.exc_val = exc_val
         self.tb = tb
         self._address = address
-        unittest.TestCase.__init__(self)
+        super().__init__()
 
     def __str__(self):
         return "Failure: %s (%s)" % (
@@ -39,5 +39,4 @@ class Failure(unittest.TestCase):
             if is_base_exception(self.exc_val):
                 raise self.exc_val.with_traceback(self.tb)
             raise self.exc_class(self.exc_val).with_traceback(self.tb)
-        else:
-            raise self.exc_class(self.exc_val)
+        raise self.exc_class(self.exc_val)
