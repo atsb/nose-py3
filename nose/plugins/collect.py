@@ -16,6 +16,7 @@ import unittest
 from nose.case import Test
 from nose.plugins.base import Plugin
 
+
 log = logging.getLogger(__name__)
 
 
@@ -24,17 +25,18 @@ class CollectOnly(Plugin):
     Collect and output test names only, don't run any tests.
     """
     name = "collect-only"
-    enableOpt = 'collect_only'
+    enableOpt = "collect_only"
 
     def options(self, parser, env):
         """Register commandline options.
         """
-        parser.add_option('--collect-only',
-                          action='store_true',
-                          dest=self.enableOpt,
-                          default=env.get('NOSE_COLLECT_ONLY'),
-                          help="Enable collect-only: %s [COLLECT_ONLY]" %
-                               (self.help()))
+        parser.add_option(
+            "--collect-only",
+            action="store_true",
+            dest=self.enableOpt,
+            default=env.get("NOSE_COLLECT_ONLY"),
+            help="Enable collect-only: %s [COLLECT_ONLY]" % self.help(),
+        )
 
     def prepareTestLoader(self, loader):
         """Install collect-only suite class in TestLoader.
@@ -88,7 +90,7 @@ class TestSuite(unittest.TestSuite):
         if callable(tests):
             tests = tests()
         log.debug("TestSuite(%r)", tests)
-        unittest.TestSuite.__init__(self, tests)
+        super().__init__(tests)
 
     def addTest(self, test):
         log.debug("Add test %s", test)

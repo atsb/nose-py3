@@ -47,8 +47,6 @@ test.
    additional documentation and examples.
 
 """
-from __future__ import generators
-
 import builtins as builtin_mod
 import logging
 import os
@@ -85,7 +83,7 @@ class NoseOutputRedirectingPdb(_orp):
         _orp.set_trace(self, sys._getframe().f_back)
 
     def set_continue(self):
-        # Calling set_continue unconditionally would break unit test 
+        # Calling set_continue unconditionally would break unit test
         # coverage reporting, as Bdb.set_continue calls sys.settrace(None).
         if self.__debugger_used:
             _orp.set_continue(self)
@@ -103,7 +101,7 @@ class DoctestSuite(unittest.TestSuite):
 
     This class is used only if the plugin is not fully prepared;
     in normal use, the loader's suiteClass is used.
-    
+
     """
     can_split = False
 
@@ -133,7 +131,7 @@ class Doctest(Plugin):
     def options(self, parser, env):
         """Register commmandline options.
         """
-        Plugin.options(self, parser, env)
+        super().options(parser, env)
         parser.add_option('--doctest-tests', action='store_true',
                           dest='doctest_tests',
                           default=env.get('NOSE_DOCTEST_TESTS'),
@@ -173,10 +171,10 @@ class Doctest(Plugin):
         if env_setting is not None:
             parser.set_defaults(doctestExtension=tolist(env_setting))
 
-    def configure(self, options, config):
+    def configure(self, options, conf):
         """Configure plugin.
         """
-        Plugin.configure(self, options, config)
+        super().configure(options, conf)
         self.doctest_result_var = options.doctest_result_var
         self.doctest_tests = options.doctest_tests
         self.extension = tolist(options.doctestExtension)
@@ -204,7 +202,7 @@ class Doctest(Plugin):
         """Capture loader's suiteClass.
 
         This is used to create test suites from doctest files.
-        
+
         """
         self.suiteClass = loader.suiteClass
 
@@ -250,11 +248,8 @@ class Doctest(Plugin):
         """
         if self.extension and anyp(filename.endswith, self.extension):
             name = os.path.basename(filename)
-            dh = open(filename)
-            try:
+            with open(filename) as dh:
                 doc = dh.read()
-            finally:
-                dh.close()
 
             fixture_context = None
             globs = {'__file__': filename}
@@ -312,13 +307,9 @@ class Doctest(Plugin):
         # FIXME don't think we need include/exclude checks here?
         return ((self.doctest_tests or not self.conf.testMatch.search(name)
                  or (self.conf.include
-                     and filter(None,
-                                [inc.search(name)
-                                 for inc in self.conf.include])))
+                     and any(inc.search(name) for inc in self.conf.include)))
                 and (not self.conf.exclude
-                     or not filter(None,
-                                   [exc.search(name)
-                                    for exc in self.conf.exclude])))
+                     or not any(exc.search(name) for exc in self.conf.exclude)))
 
     def wantFile(self, file):
         """Override to select all modules and any file ending with
@@ -331,9 +322,7 @@ class Doctest(Plugin):
         if (self.extension
                 and anyp(file.endswith, self.extension)
                 and (not self.conf.exclude
-                     or not filter(None,
-                                   [exc.search(file)
-                                    for exc in self.conf.exclude]))):
+                     or not any(exc.search(file) for exc in self.conf.exclude))):
             return True
         return None
 
@@ -350,7 +339,7 @@ class DocTestCase(doctest.DocTestCase):
                  checker=None, obj=None, result_var='_'):
         self._result_var = result_var
         self._nose_obj = obj
-        super(DocTestCase, self).__init__(
+        super().__init__(
             test, optionflags=optionflags, setUp=setUp, tearDown=tearDown,
             checker=checker)
 
@@ -400,7 +389,7 @@ class DocTestCase(doctest.DocTestCase):
         if self._result_var is not None:
             self._old_displayhook = sys.displayhook
             sys.displayhook = self._displayhook
-        super(DocTestCase, self).setUp()
+        super().setUp()
 
     def _displayhook(self, value):
         if value is None:
@@ -410,7 +399,7 @@ class DocTestCase(doctest.DocTestCase):
         repr(value)
 
     def tearDown(self):
-        super(DocTestCase, self).tearDown()
+        super().tearDown()
         if self._result_var is not None:
             sys.displayhook = self._old_displayhook
             delattr(builtin_mod, self._result_var)
@@ -424,7 +413,7 @@ class DocFileCase(doctest.DocFileCase):
     def __init__(self, test, optionflags=0, set_up=None, tear_down=None,
                  checker=None, result_var='_'):
         self._result_var = result_var
-        super(DocFileCase, self).__init__(
+        super().__init__(
             test, optionflags=optionflags, setUp=set_up, tearDown=tear_down,
             checker=None)
 
@@ -435,7 +424,7 @@ class DocFileCase(doctest.DocFileCase):
         if self._result_var is not None:
             self._old_displayhook = sys.displayhook
             sys.displayhook = self._displayhook
-        super(DocFileCase, self).setUp()
+        super().setUp()
 
     def _displayhook(self, value):
         if value is None:
@@ -445,7 +434,7 @@ class DocFileCase(doctest.DocFileCase):
         repr(value)
 
     def tearDown(self):
-        super(DocFileCase, self).tearDown()
+        super().tearDown()
         if self._result_var is not None:
             sys.displayhook = self._old_displayhook
             delattr(builtin_mod, self._result_var)

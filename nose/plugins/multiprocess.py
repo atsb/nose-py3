@@ -101,6 +101,7 @@ import sys
 import time
 import traceback
 import unittest
+import multiprocessing
 from io import StringIO
 from queue import Empty
 from warnings import warn
@@ -114,7 +115,7 @@ from nose.pyversion import bytes_
 from nose.suite import ContextSuite
 from nose.util import test_address
 
-# this is a list of plugin classes that will be checked for and created inside 
+# this is a list of plugin classes that will be checked for and created inside
 # each worker process
 _instantiate_plugins = None
 
@@ -135,20 +136,13 @@ class TimedOutException(KeyboardInterrupt):
 def _import_mp():
     global Process, Queue, Pool, Event, Value, Array
     try:
-        from multiprocessing import Manager, Process
-        # prevent the server process created in the manager which holds Python
-        # objects and allows other processes to manipulate them using proxies
-        # to interrupt on SIGINT (keyboardinterrupt) so that the communication
-        # channel between subprocesses and main process is still usable after
-        # ctrl+C is received in the main process.
-        old = signal.signal(signal.SIGINT, signal.SIG_IGN)
-        m = Manager()
-        # reset it back so main process will receive a KeyboardInterrupt
-        # exception on ctrl+c
-        signal.signal(signal.SIGINT, old)
-        Queue, Pool, Event, Value, Array = (
-            m.Queue, m.Pool, m.Event, m.Value, m.Array
-        )
+        context = multiprocessing.get_context()
+        Process = context.Process
+        Queue = context.Queue
+        Pool = context.Pool
+        Event = context.Event
+        Value = context.Value
+        Array = context.Array
     except ImportError:
         warn("multiprocessing module is not available, multiprocess plugin "
              "cannot be used", RuntimeWarning)
@@ -212,7 +206,7 @@ class MultiProcess(Plugin):
                                "leaks from killing the system. "
                                "[NOSE_PROCESS_RESTARTWORKER]")
 
-    def configure(self, options, config):
+    def configure(self, options, conf):
         """
         Configure plugin.
         """
@@ -224,9 +218,9 @@ class MultiProcess(Plugin):
             self.enabled = False
             return
         # don't start inside of a worker process
-        if config.worker:
+        if conf.worker:
             return
-        self.config = config
+        self.config = conf
         try:
             workers = int(options.multiprocess_workers)
         except (TypeError, ValueError):
@@ -279,7 +273,7 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
     # respond to SIGILL
     def __init__(self, **kw):
         self.loaderClass = kw.pop('loaderClass', loader.defaultTestLoader)
-        super(NoseMultiProcessTestRunner, self).__init__(**kw)
+        super().__init__(**kw)
 
     def collect(self, test, testQueue, tasks, to_teardown, result):
         # dispatch and collect results
@@ -322,7 +316,7 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
                           len(tasks), test_addr, testQueue)
 
     def startProcess(self, iworker, testQueue, resultQueue, shouldStop, result):
-        currentaddr = Value('c', bytes_(''))
+        currentaddr = Array('c', 1024)
         currentstart = Value('d', time.time())
         keyboardCaught = Event()
         p = Process(target=runner,
@@ -494,7 +488,7 @@ class NoseMultiProcessTestRunner(NoseTextTestRunner):
                     case.tearDown()
                 except (KeyboardInterrupt, SystemExit):
                     raise
-                except:
+                except Exception:
                     result.addError(case, sys.exc_info())
 
             stop = time.time()
@@ -831,12 +825,12 @@ class NoSharedFixtureContextSuite(ContextSuite):
     def setupContext(self, context):
         if getattr(context, '_multiprocess_shared_', False):
             return
-        super(NoSharedFixtureContextSuite, self).setupContext(context)
+        super().setupContext(context)
 
     def teardownContext(self, context):
         if getattr(context, '_multiprocess_shared_', False):
             return
-        super(NoSharedFixtureContextSuite, self).teardownContext(context)
+        super().teardownContext(context)
 
     def run(self, result):
         """Run tests in suite inside of suite fixtures.
@@ -853,7 +847,7 @@ class NoSharedFixtureContextSuite(ContextSuite):
             self.setUp()
         except KeyboardInterrupt:
             raise
-        except:
+        except Exception:
             self.error_context = 'setup'
             result.addError(self, self._exc_info())
             return
@@ -895,6 +889,6 @@ class NoSharedFixtureContextSuite(ContextSuite):
                 self.tearDown()
             except KeyboardInterrupt:
                 raise
-            except:
+            except Exception:
                 self.error_context = 'teardown'
                 result.addError(self, self._exc_info())

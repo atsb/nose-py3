@@ -131,20 +131,18 @@ def file_like(name):
     identifier.
     """
     return (os.path.exists(name)
-            or os.path.dirname(name)
+            or bool(os.path.dirname(name))
             or name.endswith('.py')
             or not ident_re.match(os.path.splitext(name)[0]))
 
 
 def func_lineno(func):
-    """Get the line number of a function. First looks for
-    compat_co_firstlineno, then func_code.co_first_lineno.
-    """
+    """Get the line number of a function."""
     try:
         return func.compat_co_firstlineno
     except AttributeError:
         try:
-            return func.func_code.co_firstlineno
+            return func.__code__.co_firstlineno
         except AttributeError:
             return -1
 
@@ -560,7 +558,7 @@ class odict(dict):
         self._keys = []
 
     def copy(self):
-        d = super(odict, self).copy()
+        d = odict(self)
         d._keys = self._keys[:]
         return d
 

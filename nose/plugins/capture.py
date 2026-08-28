@@ -11,12 +11,10 @@ the options ``-s`` or ``--nocapture``.
 """
 import logging
 import sys
-
 from io import StringIO
 
 from nose.plugins.base import Plugin
 from nose.pyversion import exc_to_unicode, force_unicode
-from nose.util import ln
 
 log = logging.getLogger(__name__)
 

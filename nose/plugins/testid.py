@@ -97,8 +97,8 @@ __test__ = False
 import logging
 import os
 
-from nose.plugins import Plugin
-from nose.util import src, set
+from nose.plugins.base import Plugin
+from nose.util import src
 
 from pickle import dump, load
 
@@ -132,7 +132,7 @@ class TestId(Plugin):
     def configure(self, options, conf):
         """Configure plugin.
         """
-        Plugin.configure(self, options, conf)
+        super().configure(options, conf)
         if options.failed:
             self.enabled = True
             self.loopOnFailed = True
@@ -155,7 +155,7 @@ class TestId(Plugin):
             adr = test.address()
             if isinstance(adr, tuple) and len(adr) == 3:
                 return adr
-        except:
+        except Exception:
             pass
         return None
 
@@ -165,14 +165,18 @@ class TestId(Plugin):
         if result.wasSuccessful():
             self.failed = []
         if self.collecting:
-            ids = dict(list(zip(list(self.tests.values()), list(self.tests.keys()))))
+            ids = dict(zip(self.tests.values(), self.tests.keys()))
         else:
             ids = self.ids
-        fh = open(self.idfile, 'wb')
-        dump({'ids': ids,
-              'failed': self.failed,
-              'source_names': self.source_names}, fh)
-        fh.close()
+        with open(self.idfile, 'wb') as fh:
+            dump(
+                {
+                    'ids': ids,
+                    'failed': self.failed,
+                    'source_names': self.source_names,
+                },
+                fh,
+            )
         log.debug('Saved test ids: %s, failed %s to %s',
                   ids, self.failed, self.idfile)
 
@@ -182,30 +186,38 @@ class TestId(Plugin):
         """
         log.debug('ltfn %s %s', names, module)
         try:
-            fh = open(self.idfile, 'rb')
-            try:
-                data = load(fh)
-                if 'ids' in data:
-                    self.ids = data['ids']
-                    self.failed = data['failed']
-                    self.source_names = data['source_names']
-                else:
-                    self.ids = data
-                    self.failed = []
-                    self.source_names = names
-                if self.ids:
-                    self.id = max(self.ids) + 1
-                    self.tests = dict(list(zip(list(self.ids.values()), list(self.ids.keys()))))
-                else:
-                    self.id = 1
-                log.debug(
-                    'Loaded test ids %s tests %s failed %s sources %s from %s',
-                    self.ids, self.tests, self.failed, self.source_names,
-                    self.idfile)
-            except ValueError as e:
-                log.debug('Error loading %s : %s', self.idfile, str(e))
-            finally:
-                fh.close()
+            with open(self.idfile, 'rb') as fh:
+                try:
+                    data = load(fh)
+                    if 'ids' in data:
+                        self.ids = data['ids']
+                        self.failed = data['failed']
+                        self.source_names = data['source_names']
+                    else:
+                        self.ids = data
+                        self.failed = []
+                        self.source_names = names
+                    if self.ids:
+                        self.id = max(self.ids) + 1
+                        self.tests = dict(
+                            zip(self.ids.values(), self.ids.keys())
+                        )
+                    else:
+                        self.id = 1
+                    log.debug(
+                        'Loaded test ids %s tests %s failed %s sources %s from %s',
+                        self.ids,
+                        self.tests,
+                        self.failed,
+                        self.source_names,
+                        self.idfile,
+                    )
+                except ValueError as e:
+                    log.debug(
+                        'Error loading %s : %s',
+                        self.idfile,
+                        str(e),
+                    )
         except IOError:
             log.debug('IO error reading %s', self.idfile)
 

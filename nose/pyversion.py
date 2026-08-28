@@ -20,20 +20,14 @@ def force_unicode(s):
     return str(s)
 
 
-# new.instancemethod() is obsolete for new-style classes (Python 3.x)
-# We need to use descriptor methods instead.
-
 def make_instancemethod(function, instance):
     return function.__get__(instance, instance.__class__)
 
 
-# To be forward-compatible, we do all list sorts using keys instead of cmp
-# functions.  However, part of the unittest.TestLoader API involves a
-# user-provideable cmp function, so we need some way to convert that.
 def cmp_to_key(mycmp):
-    """Convert a cmp= function into a key= function"""
+    """Convert a cmp= function to a key= function"""
 
-    class Key(object):
+    class Key:
         def __init__(self, obj):
             self.obj = obj
 
@@ -49,16 +43,11 @@ def cmp_to_key(mycmp):
     return Key
 
 
-# Python 2.3 also does not support list-sorting by key, so we need to convert
-# keys to cmp functions if we're running on old Python..
 def sort_list(l, key, reverse=False):
     sorted_list = sorted(l, key=key, reverse=reverse)
     return sorted_list
 
 
-# The following emulates the behavior (we need) of an 'unbound method' under
-# Python 3.x (namely, the ability to have a class associated with a function
-# definition so that things can do stuff based on its associated class)
 class UnboundMethod:
     def __init__(self, cls, func):
         # Make sure we have all the same attributes as the original function,
@@ -75,8 +64,11 @@ class UnboundMethod:
         filename = getattr(module, '__file__', None)
         if filename is not None:
             filename = os.path.abspath(filename)
-        return (nose.util.src(filename), modname, "%s.%s" % (cls.__name__,
-                                                             self._func.__name__))
+        return (
+            nose.util.src(filename),
+            modname,
+            "%s.%s" % (cls.__name__, self._func.__name__),
+        )
 
     def __call__(self, *args, **kwargs):
         return self._func(*args, **kwargs)
@@ -85,8 +77,10 @@ class UnboundMethod:
         return getattr(self._func, attr)
 
     def __repr__(self):
-        return '<unbound method %s.%s>' % (self.__self__.cls.__name__,
-                                           self._func.__name__)
+        return '<unbound method %s.%s>' % (
+            self.__self__.cls.__name__,
+            self._func.__name__,
+        )
 
     @property
     def func(self):
@@ -97,13 +91,10 @@ class UnboundSelf:
     def __init__(self, cls):
         self.cls = cls
 
-    # We have to do this hackery because Python won't let us override the
-    # __class__ attribute...
     def __getattribute__(self, attr):
         if attr == '__class__':
             return self.cls
-        else:
-            return object.__getattribute__(self, attr)
+        return object.__getattribute__(self, attr)
 
 
 def unbound_method(cls, func):
@@ -118,22 +109,18 @@ def ismethod(obj):
     return inspect.ismethod(obj) or isinstance(obj, UnboundMethod)
 
 
-# Make a pseudo-bytes function that can be called without the encoding arg:
-if sys.version_info >= (3, 0):
-    def bytes_(s, encoding='utf8'):
-        if isinstance(s, bytes):
-            return s
-        return bytes(s, encoding)
+def bytes_(s, encoding='utf8'):
+    if isinstance(s, bytes):
+        return s
+    return bytes(s, encoding)
 
 
 def isgenerator(o):
     if isinstance(o, UnboundMethod):
         o = o.func
-        return inspect.isgeneratorfunction(o) or inspect.isgenerator(o)
+    return inspect.isgeneratorfunction(o) or inspect.isgenerator(o)
 
 
-# Make a function to help check if an exception is derived from BaseException.
-# In Python 2.4, we just use Exception instead.
 def is_base_exception(exc):
     return isinstance(exc, BaseException)
 
@@ -145,15 +132,11 @@ def exc_to_unicode(ev):
 def format_exception(exc_info, encoding='UTF-8'):
     ec, ev, tb = exc_info
 
-    # Our exception object may have been turned into a string, and Python 3's
-    # traceback.format_exception() doesn't take kindly to that (it expects an
-    # actual exception object).  So we work around it, by doing the work
-    # ourselves if ev is not an exception object.
     if not is_base_exception(ev):
         tb_data = force_unicode(
             ''.join(traceback.format_tb(tb)))
         ev = exc_to_unicode(ev)
         return tb_data + ev
-    else:
-        return force_unicode(
-            ''.join(traceback.format_exception(*exc_info)))
+
+    return force_unicode(
+        ''.join(traceback.format_exception(*exc_info)))

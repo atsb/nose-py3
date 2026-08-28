@@ -7,8 +7,6 @@ function, and ContextSuite,which can run fixtures (setup/teardown
 functions or methods) for the context that contains its tests.
 
 """
-from __future__ import generators
-
 import logging
 import sys
 import unittest
@@ -47,7 +45,7 @@ class LazySuite(unittest.TestSuite):
     def __init__(self, tests=()):
         """Initialize the suite. tests may be an iterable or a generator
         """
-        super(LazySuite, self).__init__()
+        super().__init__()
         self._set_tests(tests)
 
     def __iter__(self):
@@ -73,14 +71,14 @@ class LazySuite(unittest.TestSuite):
             test(result)
         return result
 
-    def __nonzero__(self):
+    def __bool__(self):
         log.debug("tests in %s?", id(self))
         if self._precache:
             return True
         if self.test_generator is None:
             return False
         try:
-            test = self.test_generator.next()
+            test = next(self.test_generator)
             if test is not None:
                 self._precache.append(test)
                 return True
@@ -153,7 +151,7 @@ class ContextSuite(LazySuite):
         self.has_run = False
         self.can_split = can_split
         self.error_context = None
-        super(ContextSuite, self).__init__(tests)
+        super().__init__(tests)
 
     def __repr__(self):
         return "<%s context=%s>" % (
@@ -171,7 +169,6 @@ class ContextSuite(LazySuite):
     def __hash__(self):
         return object.__hash__(self)
 
-    # 2.3 compat -- force 2.4 call sequence
     def __call__(self, *arg, **kw):
         return self.run(*arg, **kw)
 
@@ -206,7 +203,7 @@ class ContextSuite(LazySuite):
             self.setUp()
         except KeyboardInterrupt:
             raise
-        except:
+        except Exception:
             self.error_context = 'setup'
             result.addError(self, self._exc_info())
             return
@@ -225,7 +222,7 @@ class ContextSuite(LazySuite):
                 self.tearDown()
             except KeyboardInterrupt:
                 raise
-            except:
+            except Exception:
                 self.error_context = 'teardown'
                 result.addError(self, self._exc_info())
 
@@ -379,7 +376,7 @@ class ContextSuite(LazySuite):
                       "inside of a context wrapper.")
 
 
-class ContextSuiteFactory(object):
+class ContextSuiteFactory:
     """Factory for ContextSuites. Called with a collection of tests,
     the factory decides on a hierarchy of contexts by introspecting
     the collection or the tests themselves to find the objects
@@ -550,7 +547,7 @@ class ContextSuiteFactory(object):
         return wrapped
 
 
-class ContextList(object):
+class ContextList:
     """Not quite a suite -- a group of tests in a context. This is used
     to hint the ContextSuiteFactory about what context the tests
     belong to, in cases where it may be ambiguous or missing.
@@ -572,7 +569,7 @@ class FinalizingSuiteWrapper(unittest.TestSuite):
     """
 
     def __init__(self, suite, finalize):
-        super(FinalizingSuiteWrapper, self).__init__()
+        super().__init__()
         self.suite = suite
         self.finalize = finalize
 

@@ -1,4 +1,5 @@
 """This test will fail if generators bind too early."""
+from six.moves import xrange
 
 from nose.tools import eq_
 

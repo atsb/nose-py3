@@ -1,9 +1,12 @@
-"""Implements an importer that looks only in specific path (ignoring
+"""
+Implements an importer that looks only in specific path (ignoring
 sys.path), and uses a per-path cache in addition to sys.modules. This is
 necessary because test modules in different directories frequently have the
 same names, which means that the first loaded would mask the rest when using
 the builtin importer.
 """
+import importlib.machinery
+import importlib.util
 import logging
 import os
 import sys
@@ -12,6 +15,7 @@ from nose.config import Config
 
 log = logging.getLogger(__name__)
 
+
 try:
     _samefile = os.path.samefile
 except AttributeError:
@@ -19,62 +23,53 @@ except AttributeError:
         return (os.path.normcase(os.path.realpath(src)) ==
                 os.path.normcase(os.path.realpath(dst)))
 
-"""
-Below are the new standalone importlib variant functions
-to replace the deprecated and removed 'imp' import
 
-The names are kept the same for ease of use.
-"""
-
-if sys.version_info < (3, 11):
-    from imp import (
-        find_module, load_module, acquire_lock, release_lock, )
-
-else:
-    # some magic to make importlib.util look a bit like good ol' imp
-
-    from importlib.util import (
-        spec_from_file_location, module_from_spec, )
-    from importlib.machinery import PathFinder
-    from threading import Lock
-
-    _import_lock = Lock()
-    acquire_lock = _import_lock.acquire
-    release_lock = _import_lock.release
+from _imp import acquire_lock, release_lock
 
 
-    def find_module(part, path=None):
-        spec = PathFinder.find_spec(part, path)
-        if spec is None:
-            raise ImportError(f"Error: The Module {part} is not found")
+def find_module(part, path=None):
+    spec = importlib.machinery.PathFinder.find_spec(part, path)
+    if spec is None:
+        raise ImportError(f"Error: The Module {part} is not found")
 
-        filename = spec.origin
-        desc = (".py", "U", 1)
+    filename = spec.origin
+    desc = spec.loader
 
-        fh = open(filename, 'r') if spec.origin else None
+    if filename is None:
+        fh = None
+    else:
+        fh = open(filename, "rb")
 
-        return fh, filename, desc
+    return fh, filename, desc
 
 
-    def load_module(module_name, fh, filename, desc):
-        if fh:
-            fh.close()
+def load_module(module_name, fh, filename, desc):
+    if fh:
+        fh.close()
 
-        spec = spec_from_file_location(module_name, filename)
-        if spec is None:
-            raise ImportError(f"Error: Can not load the module {module_name}")
+    spec = importlib.util.spec_from_file_location(
+        module_name,
+        filename,
+        loader=desc,
+    )
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Error: Can not load the module {module_name}")
 
-        module = module_from_spec(spec)
-        sys.modules[module_name] = module
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    try:
         spec.loader.exec_module(module)
+    except Exception:
+        sys.modules.pop(module_name, None)
+        raise
 
-        return module
+    return module
 
 
-class Importer(object):
+class Importer:
     """An importer class that does only path-specific imports. That
-    is, the given module is not searched for on sys.path, but only at
-    the path or in the directory specified.
+    is, the given module is not searched for on sys.path, but only at the
+    path or in the directory specified.
     """
 
     def __init__(self, config=None):
@@ -130,10 +125,7 @@ class Importer(object):
                 log.debug("find module part %s (%s) in %s",
                           part, part_fqname, path)
 
-                if sys.version_info < (3, 11):
-                    fh, filename, desc = find_module(part, path)
-                else:
-                    fh, filename, desc = find_module(part_fqname, path)
+                fh, filename, desc = find_module(part_fqname, path)
 
                 old = sys.modules.get(part_fqname)
                 if old is not None:
@@ -146,13 +138,14 @@ class Importer(object):
                                 getattr(old, '__path__', None))):
                         mod = old
                     else:
-                        del sys.modules[part_fqname]
+                        sys.modules.pop(part_fqname, None)
                         mod = load_module(part_fqname, fh, filename, desc)
                 else:
                     mod = load_module(part_fqname, fh, filename, desc)
             finally:
                 if fh:
                     fh.close()
+                    fh = None
                 release_lock()
             if parent:
                 setattr(parent, part, mod)

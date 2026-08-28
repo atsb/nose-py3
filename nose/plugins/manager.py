@@ -65,7 +65,7 @@ __all__ = ['DefaultPluginManager', 'PluginManager', 'EntryPointPluginManager',
 log = logging.getLogger(__name__)
 
 
-class PluginProxy(object):
+class PluginProxy:
     """Proxy for plugin calls. Essentially a closure bound to the
     given call and plugin list.
 
@@ -175,7 +175,7 @@ class PluginProxy(object):
         return suite, names
 
 
-class NoPlugins(object):
+class NoPlugins:
     """Null Plugin manager that has no plugins."""
     interface = IPluginInterface
 
@@ -183,7 +183,7 @@ class NoPlugins(object):
         self._plugins = self.plugins = ()
 
     def __iter__(self):
-        return ()
+        return iter(())
 
     def _doNothing(self, *args, **kwds):
         pass
@@ -204,7 +204,7 @@ class NoPlugins(object):
     def addPlugins(self, plugins):
         raise NotImplementedError()
 
-    def configure(self, options, config):
+    def configure(self, options, conf):
         pass
 
     def loadPlugins(self):
@@ -214,7 +214,7 @@ class NoPlugins(object):
         pass
 
 
-class PluginManager(object):
+class PluginManager:
     """Base class for plugin managers. PluginManager is intended to be
     used only with a static list of plugins. The loadPlugins() implementation
     only reloads plugins from _extraplugins to prevent those from being
@@ -265,15 +265,15 @@ class PluginManager(object):
         for plug in iterchain(plugins, extraplugins):
             self.addPlugin(plug)
 
-    def configure(self, options, config):
+    def configure(self, options, conf):
         """Configure the set of plugins with the given options
         and config instance. After configuration, disabled plugins
         are removed from the plugins list.
         """
         log.debug("Configuring plugins")
-        self.config = config
+        self.config = conf
         cfg = PluginProxy('configure', self._plugins)
-        cfg(options, config)
+        cfg(options, conf)
         enabled = [plug for plug in self._plugins if plug.enabled]
         self.plugins = enabled
         self.sort()
@@ -344,10 +344,14 @@ class ZeroNinePlugin:
         return getattr(self.plugin, val)
 
 
-# this API is unstable prior to 3.11, so do not use it
 from importlib.metadata import entry_points as _entry_points
+
+
 def iter_entry_points(group):
-    return _entry_points(group=group)
+    entry_points = _entry_points()
+    if hasattr(entry_points, "select"):
+        return entry_points.select(group=group)
+    return entry_points.get(group, ())
 
 
 class EntryPointPluginManager(PluginManager):
@@ -387,7 +391,7 @@ class EntryPointPluginManager(PluginManager):
                 else:
                     plug = plugcls()
                 self.addPlugin(plug)
-        super(EntryPointPluginManager, self).loadPlugins()
+        super().loadPlugins()
 
 
 class BuiltinPluginManager(PluginManager):
@@ -401,7 +405,7 @@ class BuiltinPluginManager(PluginManager):
         from nose.plugins import builtin
         for plug in builtin.plugins:
             self.addPlugin(plug())
-        super(BuiltinPluginManager, self).loadPlugins()
+        super().loadPlugins()
 
 
 try:

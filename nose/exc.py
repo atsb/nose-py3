@@ -6,5 +6,3 @@ functionality, rather than being provided by plugins. It may be
 removed in a future release.
 """
 
-from nose.plugins.skip import SkipTest
-from nose.plugins.deprecated import DeprecatedTest

@@ -101,11 +101,14 @@ Examples using the ``-A`` and ``--eval-attr`` options:
 
 """
 import logging
-import sys
+from collections.abc import Mapping
+from typing import Any
+
 from nose.plugins.base import Plugin
 from nose.util import tolist
 
-log = logging.getLogger('nose.plugins.attrib')
+
+log = logging.getLogger("nose.plugins.attrib")
 
 
 def attr(*args, **kwargs):
@@ -123,58 +126,76 @@ def attr(*args, **kwargs):
     return wrap_ob
 
 
-def get_method_attr(method, cls, attr_name, default=False):
-    """Look up an attribute on a method/ function.
-    If the attribute isn't found there, looking it up in the
+def get_method_attr(
+    method: Any,
+    cls: Any,
+    attr_name: str,
+    default: object = False,
+) -> object:
+    """Look up an attribute on a method/function.
+
+    If the attribute isn't found there, look it up on the
     method's class, if any.
     """
-    Missing = object()
-    value = getattr(method, attr_name, Missing)
-    if value is Missing and cls is not None:
-        value = getattr(cls, attr_name, Missing)
-    if value is Missing:
+    missing = object()
+    value = getattr(method, attr_name, missing)
+    if value is missing and cls is not None:
+        value = getattr(cls, attr_name, missing)
+    if value is missing:
         return default
     return value
 
 
-class ContextHelper:
-    """Object that can act as context dictionary for eval and looks up
-    names as attributes on a method/ function and its class.
-    """
+class ContextHelper(Mapping[str, object]):
+    """Act as an eval context, resolving names as method/class attributes."""
 
-    def __init__(self, method, cls):
+    def __init__(self, method: Any, cls: Any) -> None:
         self.method = method
         self.cls = cls
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str) -> object:
         return get_method_attr(self.method, self.cls, name)
+
+    def __iter__(self):
+        return iter(())
+
+    def __len__(self) -> int:
+        return 0
 
 
 class AttributeSelector(Plugin):
-    """Selects test cases to be run based on their attributes.
-    """
+    """Select test cases to be run based on their attributes."""
 
     def __init__(self):
-        Plugin.__init__(self)
-        self.attribs = []
+        super().__init__()
+        self.attribs: list[list[tuple[str, object]]] = []
 
     def options(self, parser, env):
-        """Register command line options"""
-        parser.add_option("-a", "--attr",
-                          dest="attr", action="append",
-                          default=env.get('NOSE_ATTR'),
-                          metavar="ATTR",
-                          help="Run only tests that have attributes "
-                               "specified by ATTR [NOSE_ATTR]")
+        """Register command line options."""
+        parser.add_option(
+            "-a",
+            "--attr",
+            dest="attr",
+            action="append",
+            default=env.get("NOSE_ATTR"),
+            metavar="ATTR",
+            help="Run only tests that have attributes "
+            "specified by ATTR [NOSE_ATTR]",
+        )
 
-        parser.add_option("-A", "--eval-attr",
-                              dest="eval_attr", metavar="EXPR", action="append",
-                              default=env.get('NOSE_EVAL_ATTR'),
-                              help="Run only tests for whose attributes "
-                                   "the Python expression EXPR evaluates "
-                                   "to True [NOSE_EVAL_ATTR]")
+        parser.add_option(
+            "-A",
+            "--eval-attr",
+            dest="eval_attr",
+            metavar="EXPR",
+            action="append",
+            default=env.get("NOSE_EVAL_ATTR"),
+            help="Run only tests for whose attributes "
+            "the Python expression EXPR evaluates "
+            "to True [NOSE_EVAL_ATTR]",
+        )
 
-    def configure(self, options, config):
+    def configure(self, options, conf):
         """Configure the plugin and system, based on selected options.
 
         attr and eval_attr may each be lists.
@@ -185,28 +206,29 @@ class AttributeSelector(Plugin):
         """
         self.attribs = []
 
-        # handle python eval-expression parameter
+        # Handle Python eval-expression parameter.
         if options.eval_attr:
             eval_attr = tolist(options.eval_attr)
-            for attr in eval_attr:
+            for expression in eval_attr:
                 # "<python expression>"
                 # -> eval(expr) in attribute context must be True
                 def eval_in_context(expr, obj, cls):
                     return eval(expr, None, ContextHelper(obj, cls))
 
-                self.attribs.append([(attr, eval_in_context)])
+                self.attribs.append([(expression, eval_in_context)])
 
-        # attribute requirements are a comma separated list of
-        # 'key=value' pairs
+        # Attribute requirements are a comma-separated list of
+        # 'key=value' pairs.
         if options.attr:
             std_attr = tolist(options.attr)
-            for attr in std_attr:
-                # all attributes within an attribute group must match
+            for attr_value in std_attr:
+                # All attributes within an attribute group must match.
                 attr_group = []
-                for attrib in attr.strip().split(","):
-                    # don't die on trailing comma
+                for attrib in attr_value.strip().split(","):
+                    # Don't die on trailing comma.
                     if not attrib:
                         continue
+
                     items = attrib.split("=", 1)
                     if len(items) > 1:
                         # "name=value"
@@ -223,65 +245,81 @@ class AttributeSelector(Plugin):
                             # "name"
                             # -> 'bool(obj.name)' must be True
                             value = True
+
                     attr_group.append((key, value))
+
                 self.attribs.append(attr_group)
+
         if self.attribs:
             self.enabled = True
 
     def validateAttrib(self, method, cls=None):
-        """Verify whether a method has the required attributes
+        """Verify whether a method has the required attributes.
+
         The method is considered a match if it matches all attributes
         for any attribute group.
-        ."""
+        """
         # TODO: is there a need for case-sensitive value comparison?
-        any = False
+        matched_any = False
+
         for group in self.attribs:
             match = True
+
             for key, value in group:
-                attr = get_method_attr(method, cls, key)
+                attribute = get_method_attr(method, cls, key)
+
                 if callable(value):
                     if not value(key, method, cls):
                         match = False
                         break
+
                 elif value is True:
-                    # value must exist and be True
-                    if not bool(attr):
+                    # Value must exist and be True.
+                    if not bool(attribute):
                         match = False
                         break
+
                 elif value is False:
-                    # value must not exist or be False
-                    if bool(attr):
+                    # Value must not exist or be False.
+                    if bool(attribute):
                         match = False
                         break
-                elif type(attr) in (list, tuple):
-                    # value must be found in the list attribute
-                    if not str(value).lower() in [str(x).lower()
-                                                  for x in attr]:
+
+                elif type(attribute) in (list, tuple):
+                    # Value must be found in the list attribute.
+                    if str(value).lower() not in [
+                        str(item).lower() for item in attribute
+                    ]:
                         match = False
                         break
+
                 else:
-                    # value must match, convert to string and compare
-                    if (value != attr
-                            and str(value).lower() != str(attr).lower()):
+                    # Value must match, convert to string and compare.
+                    if (
+                        value != attribute
+                        and str(value).lower() != str(attribute).lower()
+                    ):
                         match = False
                         break
-            any = any or match
-        if any:
-            # not True because we don't want to FORCE the selection of the
-            # item, only say that it is acceptable
+
+            matched_any = matched_any or match
+
+        if matched_any:
+            # Not True because we don't want to FORCE the selection of the
+            # item, only say that it is acceptable.
             return None
+
         return False
 
     def wantFunction(self, function):
-        """Accept the function if its attributes match.
-        """
+        """Accept the function if its attributes match."""
         return self.validateAttrib(function)
 
     def wantMethod(self, method):
-        """Accept the method if its attributes match.
-        """
+        """Accept the method if its attributes match."""
         try:
             cls = method.__self__.__class__
         except AttributeError:
             return False
+
         return self.validateAttrib(method, cls)

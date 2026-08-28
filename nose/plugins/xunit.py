@@ -42,7 +42,6 @@ Here is an abbreviated version of what an XML test report might look like::
         </testcase>
     </testsuite>
 """
-import codecs
 import inspect
 import os
 import re
@@ -57,7 +56,7 @@ from nose.plugins.skip import SkipTest
 from nose.pyversion import force_unicode, format_exception
 
 # Invalid XML characters, control characters 0-31 sans \t, \n and \r
-CONTROL_CHARACTERS = re.compile(r"[\000-\010\013\014\016-\037]")
+CONTROL_CHARACTERS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 
 TEST_ID = re.compile(r'^(.*?)(\(.*\))$')
 
@@ -121,7 +120,7 @@ def exc_message(exc_info):
     return xml_safe(result)
 
 
-class Tee(object):
+class Tee:
     def __init__(self, encoding, *args):
         self.encoding = encoding
         self._streams = args
@@ -152,7 +151,7 @@ class Xunit(Plugin):
     error_report_file = None
 
     def __init__(self):
-        super(Xunit, self).__init__()
+        super().__init__()
         self._capture_stack = []
         self._currentStdout = None
         self._currentStderr = None
@@ -203,10 +202,10 @@ class Xunit(Plugin):
             help=("Whether to prefix the class name under test with testsuite name. "
                   "Defaults to false."))
 
-    def configure(self, options, config):
+    def configure(self, options, conf):
         """Configures the xunit plugin."""
-        Plugin.configure(self, options, config)
-        self.config = config
+        super().configure(options, conf)
+        self.config = conf
         if self.enabled:
             self.stats = {'errors': 0,
                           'failures': 0,
@@ -224,20 +223,24 @@ class Xunit(Plugin):
         The file includes a report of test errors and failures.
 
         """
-        self.error_report_file = codecs.open(self.error_report_file_name, 'w',
-                                             self.encoding, 'replace')
+        self.error_report_file = open(
+            self.error_report_file_name,
+            "w",
+            encoding=self.encoding,
+            errors="replace",
+        )
         self.stats['encoding'] = self.encoding
         self.stats['testsuite_name'] = self.xunit_testsuite_name
         self.stats['total'] = (self.stats['errors'] + self.stats['failures']
                                + self.stats['passes'] + self.stats['skipped'])
         self.error_report_file.write(
-            u'<?xml version="1.0" encoding="%(encoding)s"?>'
-            u'<testsuite name="%(testsuite_name)s" tests="%(total)d" '
-            u'errors="%(errors)d" failures="%(failures)d" '
-            u'skip="%(skipped)d">' % self.stats)
-        self.error_report_file.write(u''.join([force_unicode(e)
+            '<?xml version="1.0" encoding="%(encoding)s"?>'
+            '<testsuite name="%(testsuite_name)s" tests="%(total)d" '
+            'errors="%(errors)d" failures="%(failures)d" '
+            'skip="%(skipped)d">' % self.stats)
+        self.error_report_file.write(''.join([force_unicode(e)
                                                for e in self.errorlist]))
-        self.error_report_file.write(u'</testsuite>')
+        self.error_report_file.write('</testsuite>')
         self.error_report_file.close()
         if self.config.verbosity > 1:
             stream.writeln("-" * 70)
@@ -306,9 +309,9 @@ class Xunit(Plugin):
         id = test.id()
 
         self.errorlist.append(
-            u'<testcase classname=%(cls)s name=%(name)s time="%(taken).3f">'
-            u'<%(test_type)s type=%(errtype)s message=%(message)s><![CDATA[%(tb)s]]>'
-            u'</%(test_type)s>%(systemout)s%(systemerr)s</testcase>' %
+            '<testcase classname=%(cls)s name=%(name)s time="%(taken).3f">'
+            '<%(test_type)s type=%(errtype)s message=%(message)s><![CDATA[%(tb)s]]>'
+            '</%(test_type)s>%(systemout)s%(systemerr)s</testcase>' %
             {'cls': self._getCls(id),
              'name': self._quoteattr(id_split(id)[-1]),
              'taken': taken,
@@ -329,9 +332,9 @@ class Xunit(Plugin):
         id = test.id()
 
         self.errorlist.append(
-            u'<testcase classname=%(cls)s name=%(name)s time="%(taken).3f">'
-            u'<failure type=%(errtype)s message=%(message)s><![CDATA[%(tb)s]]>'
-            u'</failure>%(systemout)s%(systemerr)s</testcase>' %
+            '<testcase classname=%(cls)s name=%(name)s time="%(taken).3f">'
+            '<failure type=%(errtype)s message=%(message)s><![CDATA[%(tb)s]]>'
+            '</failure>%(systemout)s%(systemerr)s</testcase>' %
             {'cls': self._getCls(id),
              'name': self._quoteattr(id_split(id)[-1]),
              'taken': taken,

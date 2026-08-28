@@ -20,7 +20,7 @@ __all__ = ['PluginTester', 'run']
 from os import getpid
 
 
-class MultiProcessFile(object):
+class MultiProcessFile:
     """
     helper for testing multiprocessing
 
@@ -98,7 +98,7 @@ except ImportError:
     Buffer = StringIO
 
 
-class PluginTester(object):
+class PluginTester:
     """A mixin for testing nose plugins in their runtime environment.
 
     Subclass this and mix in unittest.TestCase to run integration/functional
@@ -194,7 +194,7 @@ class PluginTester(object):
         self._execPlugin()
 
 
-class AccessDecorator(object):
+class AccessDecorator:
     stream = None
     _buf = None
 
