@@ -131,7 +131,7 @@ def file_like(name):
     identifier.
     """
     return (os.path.exists(name)
-            or os.path.dirname(name)
+            or bool(os.path.dirname(name))
             or name.endswith('.py')
             or not ident_re.match(os.path.splitext(name)[0]))
 
@@ -558,7 +558,7 @@ class odict(dict):
         self._keys = []
 
     def copy(self):
-        d = super(odict, self).copy()
+        d = odict(self)
         d._keys = self._keys[:]
         return d
 
